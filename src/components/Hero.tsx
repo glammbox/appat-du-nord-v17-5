@@ -59,7 +59,7 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
       className="relative overflow-hidden"
       style={{ minHeight: '100svh', background: 'var(--bg)' }}
     >
-      {/* Background gradient */}
+      {/* Background gradient — dark base */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -67,20 +67,44 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
         zIndex: 0,
       }} />
 
-      {/* Subtle teal atmospheric glow */}
+      {/* Hero gradient overlay — dark→teal→red energy sweep */}
       <div style={{
         position: 'absolute',
-        top: '20%',
-        left: '30%',
-        width: '40%',
-        height: '60%',
-        background: 'radial-gradient(ellipse, rgba(0,180,216,0.06) 0%, transparent 70%)',
+        inset: 0,
+        background: 'linear-gradient(135deg, rgba(10,14,26,0.95) 0%, rgba(0,100,130,0.18) 45%, rgba(230,57,70,0.12) 100%)',
         zIndex: 0,
         pointerEvents: 'none',
       }} />
 
-      {/* APPÂT DU NORD — Giant watermark layer (parallax) */}
+      {/* Teal atmospheric glow — left zone */}
+      <div style={{
+        position: 'absolute',
+        top: '10%',
+        left: '-10%',
+        width: '55%',
+        height: '70%',
+        background: 'radial-gradient(ellipse, rgba(0,180,216,0.09) 0%, transparent 65%)',
+        zIndex: 0,
+        pointerEvents: 'none',
+      }} />
+
+      {/* Red energy glow — bottom right corner */}
+      <div style={{
+        position: 'absolute',
+        bottom: '-10%',
+        right: '10%',
+        width: '45%',
+        height: '50%',
+        background: 'radial-gradient(ellipse, rgba(230,57,70,0.10) 0%, transparent 65%)',
+        zIndex: 0,
+        pointerEvents: 'none',
+      }} />
+
+      {/* APPÂT DU NORD — Giant watermark layer (parallax + y-drift animation) */}
       <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
         style={{
           position: 'absolute',
           top: '50%',
@@ -95,11 +119,12 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
         <div style={{
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(6rem, 18vw, 16rem)',
-          color: 'rgba(255,255,255,0.028)',
+          color: 'rgba(255,255,255,0.055)',
           letterSpacing: '0.04em',
           lineHeight: 0.85,
           textTransform: 'uppercase',
           whiteSpace: 'nowrap',
+          WebkitTextStroke: '1px rgba(0,180,216,0.08)',
         }}>
           APPÂT<br />DU<br />NORD
         </div>
@@ -184,14 +209,14 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
             🇨🇦 {locale === 'fr' ? 'Portail de pêche · Québec · Saison 2026' : 'Fishing Portal · Quebec · Season 2026'}
           </motion.p>
 
-          {/* H1 — Bebas Neue, giant */}
+          {/* H1 — Bebas Neue, giant (min 5rem per spec) */}
           <motion.h1
             initial={{ opacity: 0, y: 60, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.84, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 'var(--display)',
+              fontSize: 'clamp(5rem, 9vw, 7rem)',
               color: 'var(--text-primary)',
               letterSpacing: '0.03em',
               lineHeight: 0.9,
@@ -289,7 +314,8 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
                 transition: 'background 0.2s, transform 0.2s',
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.background = 'var(--accent-hover)'
+                /* Red accent on hover — #E63946 per spec */
+                (e.currentTarget as HTMLElement).style.background = '#E63946'
                 ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'
               }}
               onMouseLeave={e => {

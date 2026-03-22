@@ -40,7 +40,7 @@ function getFishingLabel(score: number): 'Poor' | 'Fair' | 'Good' | 'Excellent' 
 }
 
 function getScoreColor(score: number): string {
-  if (score <= 3) return '#D4261C'
+  if (score <= 3) return '#E63946'
   if (score <= 5) return '#C8A84B'
   if (score <= 8) return '#2E7D32'
   return '#C8A84B'
@@ -532,7 +532,7 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
           {/* Legend row */}
           <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
             {[
-              { label: locale === 'fr' ? 'Mauvais' : 'Poor', color: '#D4261C' },
+              { label: locale === 'fr' ? 'Mauvais' : 'Poor', color: '#E63946' },
               { label: locale === 'fr' ? 'Moyen' : 'Fair', color: '#C8A84B' },
               { label: locale === 'fr' ? 'Bon' : 'Good', color: '#2E7D32' },
             ].map(item => (
