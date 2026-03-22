@@ -467,29 +467,47 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
         </div>
       )}
 
-      {/* 30-Day Forecast Grid */}
+      {/* 16-Day Forecast Grid */}
       {forecasts.length > 0 && (
         <div style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: '1.1rem', marginBottom: '0.6rem' }}>
-            {locale === 'fr' ? `PRÉVISIONS ${forecasts.length} JOURS` : `${forecasts.length}-DAY FORECAST`}
-          </h3>
-          {/* Scrollable row of day cards */}
-          <div style={{ display: 'flex', gap: '0.4rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'thin', scrollbarColor: '#C0392B #1a1a1a' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.6rem', flexWrap: 'wrap' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: '1.1rem', margin: 0 }}>
+              {locale === 'fr' ? `PRÉVISIONS ${forecasts.length} JOURS` : `${forecasts.length}-DAY FORECAST`}
+            </h3>
+            <span style={{
+              fontSize: '0.62rem',
+              color: 'var(--text-muted)',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid var(--border)',
+              borderRadius: '3px',
+              padding: '0.15rem 0.45rem',
+              fontFamily: 'var(--font-body)',
+              letterSpacing: '0.04em',
+            }}>
+              {locale === 'fr' ? 'Prévisions 16 jours (limite gratuite)' : '16-day forecast (free tier limit)'}
+            </span>
+          </div>
+          {/* Scrollable row of day cards — bigger, more info */}
+          <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'thin', scrollbarColor: '#C0392B #1a1a1a' }}>
             {forecasts.map((day, i) => {
               const dateObj = new Date(day.date + 'T12:00:00')
               const dayName = dateObj.toLocaleDateString(locale === 'fr' ? 'fr-CA' : 'en-CA', { weekday: 'short' })
               const dayNum = dateObj.getDate()
               const scoreColor = getScoreColor(day.fishingScore)
               const isSelected = selectedDay === i
+              // Per-day solunar best window
+              const daySolunar = getSolunarWindows(dateObj)
+              const bestSolunar = daySolunar.find(w => w.type === 'major') || daySolunar[0]
               return (
                 <button
                   key={day.date}
                   onClick={() => setSelectedDay(i)}
                   style={{
                     flexShrink: 0,
-                    minWidth: '68px',
-                    padding: '0.5rem 0.4rem',
-                    borderRadius: '6px',
+                    minWidth: '105px',
+                    maxWidth: '115px',
+                    padding: '0.65rem 0.5rem',
+                    borderRadius: '8px',
                     background: isSelected ? 'var(--surface)' : 'var(--bg-elevated)',
                     border: isSelected ? `2px solid ${scoreColor}` : '1px solid var(--border)',
                     cursor: 'pointer',
@@ -497,33 +515,58 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
                     transition: 'all 0.15s',
                   }}
                 >
-                  <div style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontFamily: 'var(--font-display)', textTransform: 'uppercase' }}>
+                  {/* Day label */}
+                  <div style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                     {i === 0 ? (locale === 'fr' ? "Auj." : 'Today') : dayName}
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-primary)', fontWeight: 600, marginTop: '0.1rem' }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 700, marginTop: '0.1rem', fontFamily: 'var(--font-display)' }}>
                     {dayNum}
                   </div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-primary)', marginTop: '0.15rem' }}>
-                    {day.tempMaxC}°/{day.tempMinC}°
-                  </div>
-                  {/* Fishing score dot */}
+                  {/* Fishing score dot — colored green/yellow/red */}
                   <div style={{
-                    marginTop: '0.25rem',
-                    width: '24px',
-                    height: '24px',
+                    width: '28px',
+                    height: '28px',
                     borderRadius: '50%',
                     background: scoreColor,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    margin: '0.3rem auto 0',
-                    fontSize: '0.65rem',
+                    margin: '0.3rem auto',
+                    fontSize: '0.68rem',
                     fontWeight: 700,
                     color: 'white',
                     fontFamily: 'var(--font-display)',
                   }}>
                     {day.fishingScore}
                   </div>
+                  {/* Temperature */}
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-primary)', marginBottom: '0.15rem' }}>
+                    🌡 {day.tempMaxC}°/{day.tempMinC}°
+                  </div>
+                  {/* Wind */}
+                  <div style={{ fontSize: '0.65rem', color: day.windSpeedMaxKmh > 30 ? '#E63946' : 'var(--text-secondary)', marginBottom: '0.15rem' }}>
+                    💨 {day.windSpeedMaxKmh} km/h
+                  </div>
+                  {/* Precipitation */}
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>
+                    🌧 {day.precipitationMm} mm
+                  </div>
+                  {/* Solunar best time window */}
+                  {bestSolunar && (
+                    <div style={{
+                      fontSize: '0.58rem',
+                      color: bestSolunar.type === 'major' ? '#E63946' : 'var(--accent)',
+                      fontWeight: 600,
+                      fontFamily: 'var(--font-condensed)',
+                      background: bestSolunar.type === 'major' ? 'rgba(230,57,70,0.1)' : 'rgba(0,180,216,0.08)',
+                      borderRadius: '3px',
+                      padding: '0.1rem 0.25rem',
+                      letterSpacing: '0.05em',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {bestSolunar.type === 'major' ? '🔥' : '✅'} {bestSolunar.start}
+                    </div>
+                  )}
                 </button>
               )
             })}
