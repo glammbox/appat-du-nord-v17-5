@@ -37,16 +37,51 @@ const SPECIES_LOCAL_IMAGES: Record<string, string> = {
 }
 
 const LAKE_TO_WATER_ID: Record<string, string> = {
-  'Lac Saint-Jean': 'lac-saint-jean',
-  'Lac Saint-Pierre': 'lac-saint-pierre',
-  'Réservoir Gouin': 'reservoir-gouin',
-  'Lac Champlain': 'lac-champlain',
-  'Lac Memphrémagog': 'lac-memphremagog',
-  'Lac des Deux Montagnes': 'lac-deux-montagnes',
-  'Lac Maskinongé': 'lac-maskinonge',
-  'Lac Saint-François': 'lac-saint-francois',
-  'Rivière des Outaouais': 'riviere-outaouais',
-  'Fleuve Saint-Laurent': 'st-lawrence-river',
+  // Rivers
+  'Fleuve Saint-Laurent':              'st-lawrence-river',
+  'Rivière des Outaouais':             'riviere-outaouais',
+  'Rivière Richelieu':                 'riviere-richelieu',
+  'Rivière Saint-Maurice':             'riviere-saint-maurice',
+  'Rivière Saguenay':                  'riviere-saguenay',
+  // St. Lawrence fluvial lakes
+  'Lac Saint-Pierre':                  'lac-saint-pierre',
+  'Lac Saint-Louis':                   'lac-saint-louis',
+  'Lac Saint-François':                'lac-saint-francois',
+  'Lac des Deux Montagnes':            'lac-deux-montagnes',
+  'Lac Maskinongé':                    'lac-maskinonge',
+  // Southern Quebec
+  'Lac Champlain':                     'lac-champlain-missisquoi',
+  'Lac Champlain (Missisquoi Bay)':    'lac-champlain-missisquoi',
+  'Lac Memphrémagog':                  'lac-memphremagog',
+  'Lac Memphremagog':                  'lac-memphremagog',
+  'Lac Brome':                         'lac-brome',
+  'Lac Brompton':                      'lac-brompton',
+  'Lac Massawippi':                    'lac-massawippi',
+  'Lac Aylmer':                        'lac-aylmer',
+  'Lac Boivin':                        'lac-boivin',
+  'Lac Nantel':                        'lac-nantel',
+  // Laurentians / Outaouais
+  'Lac Tremblant':                     'lac-tremblant',
+  'Lac Nominingue (Grand)':            'lac-nominingue',
+  'Réservoir Baskatong':               'reservoir-baskatong',
+  'Baskatong Reservoir':               'reservoir-baskatong',
+  'Réservoir Cabonga':                 'reservoir-cabonga',
+  'Cabonga Reservoir':                 'reservoir-cabonga',
+  'Réservoir Dozois':                  'reservoir-dozois',
+  'Dozois Reservoir':                  'reservoir-dozois',
+  'Lac Kipawa':                        'lac-kipawa',
+  'Grand Lac Victoria':                'grand-lac-victoria',
+  // Mauricie / Nord
+  'Réservoir Gouin':                   'reservoir-gouin',
+  'Gouin Reservoir':                   'reservoir-gouin',
+  'Lac Saint-Jean':                    'lac-saint-jean',
+  'Réservoir Manicouagan':             'reservoir-manicouagan',
+  'Lac Pipmuacan':                     'lac-pipmuacan',
+  'Lac Edouard':                       'lac-edouard',
+  // Shield lakes / North
+  'Lac Mistassini':                    'lac-mistassini',
+  'Lac Albanel':                       'lac-albanel',
+  'Lac Waconichi':                     'lac-waconichi',
 }
 
 const monthNamesFr = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc']
@@ -387,7 +422,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   <a
-                    href="https://peche.faune.gouv.qc.ca/"
+                    href="https://www.pechesportive.gouv.qc.ca"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -402,10 +437,10 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                       textDecoration: 'underline',
                     }}
                   >
-                    📋 {locale === 'fr' ? 'Règlements MRNF → peche.faune.gouv.qc.ca' : 'MRNF Regulations → peche.faune.gouv.qc.ca'}
+                    🎫 {locale === 'fr' ? 'Acheter un permis de pêche sportive' : 'Buy a sport fishing licence'}
                   </a>
                   <a
-                    href="https://mondossierchassepeche.gouv.qc.ca/"
+                    href="https://mffp.gouv.qc.ca"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -420,7 +455,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                       textDecoration: 'underline',
                     }}
                   >
-                    🎫 {locale === 'fr' ? 'Acheter un permis de pêche' : 'Buy a fishing permit'}
+                    📋 {locale === 'fr' ? 'Règlements de pêche — MFFP' : 'Fishing Regulations — MFFP'}
                   </a>
                 </div>
               </div>
