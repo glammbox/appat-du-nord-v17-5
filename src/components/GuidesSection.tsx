@@ -1,26 +1,90 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
 
+// Species-based guides (5 species per brief)
 const BOOKS_DATA = [
-  { id: 'automne', titleFr: 'Guide Automne', titleEn: 'Fall Guide', subtitleFr: 'Stratégies de fin de saison', subtitleEn: 'Late-season strategies', emoji: '🍂', file: '/guides/book-muskie.md', coverImage: '/images/guides/guide-automne.png' },
-  { id: 'ete', titleFr: 'Guide Été', titleEn: 'Summer Guide', subtitleFr: 'Pêche en eaux chaudes', subtitleEn: 'Warm water fishing', emoji: '☀️', file: '/guides/book-pike.md', coverImage: '/images/guides/guide-ete.png' },
-  { id: 'hiver', titleFr: 'Guide Hiver', titleEn: 'Winter Guide', subtitleFr: 'Pêche sous la glace', subtitleEn: 'Ice fishing', emoji: '❄️', file: '/guides/book-walleye.md', coverImage: '/images/guides/guide-hiver.png' },
-  { id: 'printemps', titleFr: 'Guide Printemps', titleEn: 'Spring Guide', subtitleFr: 'Débâcle & montaison', subtitleEn: 'Ice-out & spawning', emoji: '🌱', file: '/guides/book-trout.md', coverImage: '/images/guides/guide-printemps.png' },
-  { id: 'techniques', titleFr: 'Techniques Avancées', titleEn: 'Advanced Techniques', subtitleFr: "Maîtriser votre art", subtitleEn: 'Master your craft', emoji: '🎣', file: '/guides/book-bass.md', coverImage: '/images/guides/guide-techniques.png' },
+  {
+    id: 'maskinonge',
+    titleFr: 'Guide du Maskinongé',
+    titleEn: 'Muskellunge Guide',
+    subtitleFr: 'Le roi des eaux québécoises',
+    subtitleEn: 'The king of Quebec waters',
+    emoji: '🦷',
+    file: '/guides/book-muskie.md',
+    coverImage: '/images/guides/guide-maskinonge.png',
+    spineColor: '#D4261C',
+  },
+  {
+    id: 'brochet',
+    titleFr: 'Guide du Grand Brochet',
+    titleEn: 'Northern Pike Guide',
+    subtitleFr: 'Tactiques pour le prédateur vert',
+    subtitleEn: 'Tactics for the green predator',
+    emoji: '⚡',
+    file: '/guides/book-pike.md',
+    coverImage: '/images/guides/guide-brochet.png',
+    spineColor: '#2E7D32',
+  },
+  {
+    id: 'dore',
+    titleFr: 'Guide du Doré Jaune',
+    titleEn: 'Walleye Guide',
+    subtitleFr: 'Maîtrisez le poisson doré du Québec',
+    subtitleEn: 'Master Quebec\'s golden fish',
+    emoji: '🌅',
+    file: '/guides/book-walleye.md',
+    coverImage: '/images/guides/guide-dore.png',
+    spineColor: '#C8A84B',
+  },
+  {
+    id: 'truite',
+    titleFr: 'Guide de la Truite',
+    titleEn: 'Trout Guide',
+    subtitleFr: 'Omble, arc-en-ciel, touladi, saumon',
+    subtitleEn: 'Brook, rainbow, lake, salmon',
+    emoji: '🏔️',
+    file: '/guides/book-trout.md',
+    coverImage: '/images/guides/guide-truite.png',
+    spineColor: '#6A1B9A',
+  },
+  {
+    id: 'achigan',
+    titleFr: 'Guide de l\'Achigan',
+    titleEn: 'Bass Guide',
+    subtitleFr: 'Grande bouche et petite bouche',
+    subtitleEn: 'Largemouth and smallmouth',
+    emoji: '💥',
+    file: '/guides/book-bass.md',
+    coverImage: '/images/guides/guide-achigan.png',
+    spineColor: '#1565C0',
+  },
 ]
 
 interface GuidesSectionProps {
   locale?: 'fr' | 'en'
+  onViewArsenal?: (speciesId: string) => void
 }
 
-export function GuidesSection({ locale = 'fr' }: GuidesSectionProps) {
+const ARSENAL_ID_MAP: Record<string, string> = {
+  maskinonge: 'muskellunge',
+  brochet: 'northern-pike',
+  dore: 'walleye',
+  truite: 'brook-trout',
+  achigan: 'largemouth-bass',
+}
+
+export function GuidesSection({ locale = 'fr', onViewArsenal }: GuidesSectionProps) {
   const [selectedBook, setSelectedBook] = useState<string | null>(null)
   const [bookContent, setBookContent] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const sectionRef = useRef(null)
-  const inView = useInView(sectionRef, { once: true, amount: 0.1 })
+  const inView = useInView(sectionRef, { once: true, amount: 0.05 })
 
-  const books = BOOKS_DATA.map(b => ({ ...b, title: locale === 'fr' ? b.titleFr : b.titleEn, subtitle: locale === 'fr' ? b.subtitleFr : b.subtitleEn }))
+  const books = BOOKS_DATA.map(b => ({
+    ...b,
+    title: locale === 'fr' ? b.titleFr : b.titleEn,
+    subtitle: locale === 'fr' ? b.subtitleFr : b.subtitleEn,
+  }))
 
   useEffect(() => {
     if (!selectedBook) return
@@ -31,12 +95,14 @@ export function GuidesSection({ locale = 'fr' }: GuidesSectionProps) {
     fetch(book.file)
       .then(r => r.text())
       .then(text => { setBookContent(text); setLoading(false) })
-      .catch(() => { setBookContent(locale === 'fr' ? 'Erreur de chargement du guide.' : 'Failed to load guide.'); setLoading(false) })
-  }, [selectedBook, locale, books])
+      .catch(() => {
+        setBookContent(locale === 'fr' ? 'Erreur de chargement du guide.' : 'Failed to load guide.')
+        setLoading(false)
+      })
+  }, [selectedBook]) // eslint-disable-line
 
   const selectedBookData = books.find(b => b.id === selectedBook)
 
-  // Render markdown-ish content (headings, paragraphs)
   function renderContent(md: string) {
     const lines = md.split('\n')
     const elements: React.ReactNode[] = []
@@ -47,13 +113,12 @@ export function GuidesSection({ locale = 'fr' }: GuidesSectionProps) {
         elements.push(
           <h3 key={i} style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '1.2rem',
-            color: '#C0392B',
-            margin: '1.5rem 0 0.5rem',
-            fontWeight: 600,
+            fontSize: '1.3rem',
+            color: selectedBookData?.spineColor || 'var(--accent)',
+            margin: '2rem 0 0.75rem',
             letterSpacing: '0.04em',
-            borderBottom: '1px solid #2a3540',
-            paddingBottom: '0.3rem',
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: '0.4rem',
           }}>
             {line.replace(/^## /, '')}
           </h3>
@@ -62,26 +127,24 @@ export function GuidesSection({ locale = 'fr' }: GuidesSectionProps) {
         elements.push(
           <h2 key={i} style={{
             fontFamily: 'var(--font-display)',
-            fontSize: '1.6rem',
+            fontSize: '1.8rem',
             color: 'var(--text-primary)',
-            margin: '0 0 1rem',
-            fontWeight: 700,
-            letterSpacing: '0.05em',
+            margin: '0 0 1.25rem',
+            letterSpacing: '0.04em',
           }}>
             {line.replace(/^# /, '')}
           </h2>
         )
       } else if (line.trim().startsWith('- ')) {
-        // Collect list items
         const items: string[] = []
         while (i < lines.length && lines[i].trim().startsWith('- ')) {
           items.push(lines[i].trim().replace(/^- /, ''))
           i++
         }
         elements.push(
-          <ul key={`ul-${i}`} style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>
+          <ul key={`ul-${i}`} style={{ paddingLeft: '1.25rem', margin: '0.5rem 0 1rem' }}>
             {items.map((item, j) => (
-              <li key={j} style={{ color: 'var(--text-primary)', fontSize: '0.85rem', lineHeight: 1.7, marginBottom: '0.2rem' }}>
+              <li key={j} style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.75, marginBottom: '0.25rem' }}>
                 {item}
               </li>
             ))}
@@ -91,10 +154,10 @@ export function GuidesSection({ locale = 'fr' }: GuidesSectionProps) {
       } else if (line.trim() !== '') {
         elements.push(
           <p key={i} style={{
-            color: 'var(--text-primary)',
-            fontSize: '0.85rem',
+            color: 'var(--text-secondary)',
+            fontSize: '0.92rem',
             lineHeight: 1.8,
-            margin: '0 0 0.75rem',
+            margin: '0 0 1rem',
           }}>
             {line}
           </p>
@@ -108,179 +171,257 @@ export function GuidesSection({ locale = 'fr' }: GuidesSectionProps) {
   return (
     <motion.div
       ref={sectionRef}
-      id="guides"
-      initial={{ opacity: 0, y: 72, scale: 0.985 }}
-      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      initial={{ opacity: 0, y: 60 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
       style={{
         maxWidth: 'var(--max-width)',
         margin: '0 auto',
-        padding: '3rem 1.5rem',
-        borderTop: '1px solid var(--border)',
+        padding: 'var(--section-pad) 1.5rem',
       }}
     >
       {/* Section Header */}
-      <div style={{ marginBottom: '2.5rem' }}>
-        <p className="eyebrow">
-          {locale === 'fr' ? 'Bibliothèque de pêche' : 'Fishing Library'}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.56, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+        style={{ marginBottom: '2.5rem' }}
+      >
+        <p style={{
+          fontFamily: 'var(--font-condensed)',
+          fontSize: '0.72rem',
+          fontWeight: 600,
+          color: 'var(--amber)',
+          letterSpacing: '0.28em',
+          textTransform: 'uppercase',
+          marginBottom: '0.6rem',
+        }}>
+          {locale === 'fr' ? '📚 Bibliothèque de pêche' : '📚 Fishing Library'}
         </p>
         <h2 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'var(--headline)',
+          fontSize: 'var(--section-display)',
           color: 'var(--text-primary)',
-          margin: '0.5rem 0 0',
-          fontWeight: 600,
-          letterSpacing: '0.05em',
+          letterSpacing: '0.03em',
+          lineHeight: 0.95,
+          marginBottom: '1rem',
         }}>
-          {locale === 'fr' ? 'Guides des Espèces' : 'Species Guides'}
+          {locale === 'fr' ? 'GUIDES DES ESPÈCES' : 'SPECIES GUIDES'}
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: 'var(--small)', marginTop: '0.5rem' }}>
+        <p style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '1rem',
+          color: 'var(--text-secondary)',
+          lineHeight: 1.65,
+          maxWidth: '580px',
+        }}>
           {locale === 'fr'
-            ? '5 guides complets · Comportement · Habitat · Techniques · FR/EN'
-            : '5 complete guides · Behavior · Habitat · Techniques · FR/EN'}
+            ? "Cinq guides complets. Cinq espèces emblématiques du Québec. Comportement, habitat, techniques, équipement — tout ce qu'un pêcheur sérieux doit savoir."
+            : "Five complete guides. Five iconic Quebec species. Behavior, habitat, techniques, gear — everything a serious angler needs to know."}
         </p>
-      </div>
+      </motion.div>
 
       {/* Book Cards Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-        gap: '1rem',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
+        gap: '1.25rem',
         marginBottom: selectedBook ? '2rem' : '0',
       }}>
-        {books.map((book) => {
+        {books.map((book, idx) => {
           const isActive = selectedBook === book.id
           return (
-            <div
+            <motion.div
               key={book.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 + idx * 0.07 }}
               style={{
-                background: isActive ? 'rgba(192,57,43,0.12)' : 'var(--surface)',
-                border: `1px solid ${isActive ? '#C0392B' : 'var(--border)'}`,
-                padding: '1.5rem 1.25rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-                transition: 'all 0.2s ease',
+                background: 'var(--surface)',
+                border: `1px solid ${isActive ? book.spineColor : 'var(--border)'}`,
+                borderRadius: 'var(--radius-sm)',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
+                boxShadow: isActive ? `0 0 0 1px ${book.spineColor}` : 'none',
               }}
+              whileHover={{ y: -6, boxShadow: `0 16px 40px rgba(0,0,0,0.3)` }}
+              onClick={() => setSelectedBook(isActive ? null : book.id)}
             >
-              {/* Book cover image */}
-              <div style={{ width: '100%', height: '120px', overflow: 'hidden', background: '#0a1520', borderRadius: '2px', marginBottom: '0' }}>
+              {/* Book cover — full bleed */}
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                aspectRatio: '3/4',
+                overflow: 'hidden',
+                background: '#0A1020',
+                borderBottom: `3px solid ${book.spineColor}`,
+              }}>
                 <img
                   src={book.coverImage}
                   alt={book.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    display: 'block',
+                    transition: 'transform 0.4s ease',
+                  }}
                   onError={(e) => {
                     const el = e.target as HTMLImageElement
                     el.style.display = 'none'
-                    if (el.parentElement) el.parentElement.innerHTML = `<div style="font-size:2rem;text-align:center;padding:2rem">${book.emoji}</div>`
                   }}
                 />
+                {/* Overlay CTA */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, rgba(10,14,26,0.95) 0%, rgba(10,14,26,0.3) 60%, transparent 100%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  padding: '1rem',
+                }}>
+                  <div style={{
+                    fontFamily: 'var(--font-condensed)',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    color: isActive ? book.spineColor : 'var(--text-muted)',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    transition: 'color 0.2s',
+                  }}>
+                    {isActive
+                      ? (locale === 'fr' ? 'OUVERT ✓' : 'OPEN ✓')
+                      : (locale === 'fr' ? 'LIRE LE GUIDE →' : 'READ GUIDE →')}
+                  </div>
+                </div>
               </div>
-              <div>
+
+              {/* Book info */}
+              <div style={{ padding: '1rem' }}>
                 <div style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: '1.1rem',
+                  fontSize: '1rem',
                   color: 'var(--text-primary)',
-                  fontWeight: 600,
-                  marginBottom: '0.2rem',
+                  letterSpacing: '0.04em',
+                  lineHeight: 1.2,
+                  marginBottom: '0.3rem',
                 }}>
                   {book.title}
                 </div>
                 <div style={{
+                  fontFamily: 'var(--font-body)',
                   fontSize: '0.75rem',
                   color: 'var(--text-muted)',
                   fontStyle: 'italic',
-                  letterSpacing: '0.03em',
+                  lineHeight: 1.4,
                 }}>
                   {book.subtitle}
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedBook(isActive ? null : book.id)}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  background: isActive ? '#C0392B' : 'var(--surface-2)',
-                  color: isActive ? '#fff' : 'var(--accent)',
-                  border: `1px solid ${isActive ? '#C0392B' : 'var(--border)'}`,
-                  fontSize: '0.72rem',
-                  fontFamily: 'var(--font-body)',
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  textAlign: 'left',
-                }}
-              >
-                {isActive
-                  ? (locale === 'fr' ? '✕ Fermer' : '✕ Close')
-                  : (locale === 'fr' ? 'Lire le guide →' : 'Read guide →')}
-              </button>
-            </div>
+            </motion.div>
           )
         })}
       </div>
 
-      {/* Book Content Panel */}
-      {selectedBook && (
-        <div style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderTop: '3px solid #C0392B',
-          padding: '2rem',
-          maxHeight: '70vh',
-          overflowY: 'auto',
-          scrollbarColor: '#C0392B #1a1a1a',
-          scrollbarWidth: 'thin',
-        }}>
-          {/* Panel header */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1.5rem',
-            paddingBottom: '1rem',
-            borderBottom: '1px solid var(--border)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <span style={{ fontSize: '1.75rem' }}>{selectedBookData?.emoji}</span>
-              <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-                  {selectedBookData?.title}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                  {selectedBookData?.subtitle}
+      {/* Guide content panel */}
+      <AnimatePresence>
+        {selectedBook && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: 20, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderTop: `3px solid ${selectedBookData?.spineColor || 'var(--accent)'}`,
+              borderRadius: '0 0 var(--radius-sm) var(--radius-sm)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Panel header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '1.25rem 1.75rem',
+              borderBottom: '1px solid var(--border)',
+              background: 'var(--surface-2)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ fontSize: '1.5rem' }}>{selectedBookData?.emoji}</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: 'var(--text-primary)', letterSpacing: '0.04em' }}>
+                    {selectedBookData?.title}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    {selectedBookData?.subtitle}
+                  </div>
                 </div>
               </div>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                {onViewArsenal && selectedBook && (
+                  <button
+                    onClick={() => onViewArsenal(ARSENAL_ID_MAP[selectedBook] || selectedBook)}
+                    style={{
+                      padding: '0.45rem 1rem',
+                      background: selectedBookData?.spineColor || 'var(--accent)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '5px',
+                      fontFamily: 'var(--font-condensed)',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {locale === 'fr' ? "Voir l'arsenal →" : 'View Arsenal →'}
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelectedBook(null)}
+                  style={{
+                    background: 'none',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-muted)',
+                    padding: '0.4rem 0.85rem',
+                    cursor: 'pointer',
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    fontFamily: 'var(--font-condensed)',
+                    borderRadius: '4px',
+                  }}
+                >
+                  {locale === 'fr' ? 'Fermer ✕' : 'Close ✕'}
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => setSelectedBook(null)}
-              style={{
-                background: 'none',
-                border: '1px solid var(--border)',
-                color: 'var(--text-muted)',
-                padding: '0.35rem 0.75rem',
-                cursor: 'pointer',
-                fontSize: '0.72rem',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                fontFamily: 'var(--font-body)',
-              }}
-            >
-              {locale === 'fr' ? 'Fermer ✕' : 'Close ✕'}
-            </button>
-          </div>
 
-          {/* Content */}
-          {loading ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem', fontFamily: 'var(--font-body)' }}>
-              {locale === 'fr' ? 'Chargement...' : 'Loading...'}
+            {/* Content */}
+            <div style={{
+              padding: '2rem 1.75rem',
+              maxHeight: '65vh',
+              overflowY: 'auto',
+              scrollbarWidth: 'thin',
+              scrollbarColor: `${selectedBookData?.spineColor || 'var(--accent)'} var(--surface)`,
+            }}>
+              {loading ? (
+                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem', fontFamily: 'var(--font-body)' }}>
+                  {locale === 'fr' ? 'Chargement du guide...' : 'Loading guide...'}
+                </div>
+              ) : (
+                <div>{renderContent(bookContent)}</div>
+              )}
             </div>
-          ) : (
-            <div>{renderContent(bookContent)}</div>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

@@ -5,42 +5,24 @@ interface HomeDescriptionProps {
   locale: 'fr' | 'en'
 }
 
-const FEATURES = [
-  {
-    iconFr: '🎣', fr: 'Atlas Complet des Espèces',
-    en: 'Complete Species Atlas',
-    descFr: '21 espèces de poissons du Québec documentées avec fiches encyclopédiques : biologie, habitats, saisonnalité, techniques éprouvées et règlements en vigueur. Du saumon atlantique à l\'esturgeon, chaque poisson a sa page complète FR/EN.',
-    descEn: '21 Quebec fish species documented with full encyclopedia profiles: biology, habitats, seasonality, proven techniques, and current regulations. From Atlantic salmon to lake sturgeon, every fish has its complete FR/EN page.',
-  },
-  {
-    iconFr: '🗺️', fr: '41 Lacs & 5 Rivières Majeures',
-    en: '41 Lakes & 5 Major Rivers',
-    descFr: 'Cartes interactives, coordonnées GPS précises, mises à l\'eau vérifiées, espèces confirmées présentes, conditions saisonnières et météo intégrée par région. Cliquez sur un plan d\'eau — tout y est.',
-    descEn: 'Interactive maps, precise GPS coordinates, verified boat launches, confirmed species present, seasonal conditions, and integrated weather by region. Click a water body — everything is there.',
-  },
-  {
-    iconFr: '⚡', fr: 'Arsenal de 162 Produits',
-    en: 'Arsenal of 162 Products',
-    descFr: 'Bucktails, crankbaits, jigs, topwater, spinners — triés par espèce cible. Chaque produit lié directement aux meilleurs vendeurs sur Amazon.ca. Ajoutez au panier, recevez chez vous.',
-    descEn: 'Bucktails, crankbaits, jigs, topwater, spinners — sorted by target species. Every product linked directly to top sellers on Amazon.ca. Add to cart, delivered to your door.',
-  },
-  {
-    iconFr: '🌤️', fr: 'Météo & Calendrier de Pêche',
-    en: 'Weather & Fishing Calendar',
-    descFr: 'Grille 30 jours par région avec score de pêche quotidien calculé sur la température, le vent et les précipitations. Données Open-Meteo en temps réel. Planifiez votre sortie avec les bonnes données.',
-    descEn: '30-day grid by region with a daily fishing score calculated from temperature, wind, and precipitation. Real-time Open-Meteo data. Plan your outing with accurate information.',
-  },
-  {
-    iconFr: '🔬', fr: 'Identification des Poissons par IA',
-    en: 'AI Fish Identification',
-    descFr: 'Téléchargez une photo de votre prise — notre outil analyse l\'image et identifie l\'espèce parmi les 21 espèces du Québec avec un score de confiance et un lien vers la fiche complète.',
-    descEn: 'Upload a photo of your catch — our tool analyzes the image and identifies the species from Quebec\'s 21 fish species, with a confidence score and a link to the full profile.',
-  },
+const TEXT_FR = [
+  "Appât du Nord est né d'une frustration simple : il n'existait pas de vrai portail québécois pour le pêcheur sérieux. Pas de base de données digne de ce nom sur les espèces locales. Pas de carte qui réunit en un seul endroit les lacs, les rivières et leurs espèces confirmées. Pas d'outil qui croise la météo, les phases lunaires et le comportement des poissons pour vous dire réellement quand partir. Alors on l'a construit.",
+  "Le Québec est une terre de pêche extraordinaire. Quarante-cinq plans d'eau et rivières majeurs cartographiés — du Fleuve Saint-Laurent à l'immensité du Réservoir Gouin, du Lac Saint-Jean aux eaux froides du Lac Memphrémagog. Chaque plan d'eau a sa personnalité, ses espèces, ses saisons. On a documenté tout ça, avec des sources vérifiées, des coordonnées réelles et des descriptions qui vous aident à choisir votre prochain plan d'eau avec confiance.",
+  "Vingt et une espèces documentées — du maskinongé légendaire à l'esturgeon des lacs, en passant par le doré jaune, le grand brochet, l'achigan à grande bouche et toutes les familles de truites québécoises. Pour chaque espèce : identification visuelle, habitat, comportement saisonnier, meilleures techniques, règlements en vigueur, liens gouvernementaux vérifiés. Un vrai dictionnaire de terrain, pas une liste d'espèces Wikipedia.",
+  "La boutique Arsenal propose un équipement rigoureusement sélectionné par espèce cible. Bucktails pour le maskinongé. Crankbaits pour le doré. Jigs et streamers pour la truite. Structure Shopify-ready — ajoutez au panier, recevez chez vous. Le calendrier de pêche combine les données météo Open-Meteo en temps réel sur trente jours avec les fenêtres lunaires solutaires, pour vous donner les meilleures fenêtres de pêche de la journée. Les guides des espèces vous plongent dans la biologie, l'écologie et la culture de pêche de chaque espèce. Et la section Tournois répertorie tous les grands événements compétitifs du Québec — parce que pêcher en compétition, c'est une autre façon de vivre ce sport.",
+]
+
+const TEXT_EN = [
+  "Appât du Nord was born from a simple frustration: there was no real Quebec portal for the serious angler. No worthy database on local species. No map that brought together in one place the lakes, rivers, and their confirmed species. No tool that crossed weather, lunar phases, and fish behavior to tell you when to actually go. So we built it.",
+  "Quebec is an extraordinary fishing territory. Forty-five major water bodies and rivers mapped — from the St. Lawrence River to the immensity of Réservoir Gouin, from Lac Saint-Jean to the cold waters of Lac Memphrémagog. Each body of water has its personality, its species, its seasons. We documented all of it, with verified sources, real GPS coordinates, and descriptions that help you choose your next destination with confidence.",
+  "Twenty-one species documented — from the legendary muskellunge to lake sturgeon, including walleye, northern pike, largemouth bass, and all Quebec trout families. For each species: visual identification, habitat, seasonal behavior, best techniques, current regulations, and verified government links. A real field reference, not a Wikipedia species list.",
+  "The Arsenal shop offers rigorously selected gear by target species. Bucktails for muskie. Crankbaits for walleye. Jigs and streamers for trout. Shopify-ready structure — add to cart, delivered to your door. The fishing calendar combines real-time Open-Meteo weather data over 30 days with solunar lunar windows, giving you the best fishing windows of the day. The species guides take you deep into the biology, ecology, and fishing culture of each species. And the Tournaments section lists all major competitive events in Quebec — because fishing in competition is another way to live this sport.",
 ]
 
 export function HomeDescription({ locale }: HomeDescriptionProps) {
   const ref = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.2 })
+  const inView = useInView(ref, { once: true, amount: 0.1 })
+  const paragraphs = locale === 'fr' ? TEXT_FR : TEXT_EN
 
   return (
     <section
@@ -49,120 +31,113 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
         background: 'var(--bg-raised)',
         borderTop: '1px solid var(--border)',
         borderBottom: '1px solid var(--border)',
-        padding: 'var(--section-pad) 2rem',
+        padding: 'var(--section-pad) 0',
+        overflow: 'hidden',
       }}
     >
-      <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto' }}>
+      <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: '0 2rem' }}>
 
-        {/* Two-column layout: text left, image right */}
-        <div
-          className="home-description-top"
+        {/* Eyebrow */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            display: 'grid',
-            gap: '3rem',
-            alignItems: 'stretch',
-            marginBottom: '3rem',
+            fontFamily: 'var(--font-condensed)',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            color: 'var(--accent)',
+            letterSpacing: '0.28em',
+            textTransform: 'uppercase',
+            marginBottom: '0.75rem',
           }}
         >
-          {/* LEFT — Feature beats */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                fontFamily: 'var(--font-condensed)',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                color: 'var(--accent)',
-                letterSpacing: '0.25em',
-                textTransform: 'uppercase',
-                marginBottom: '1rem',
-              }}
-            >
-              {locale === 'fr' ? 'La ressource de pêche #1 au Canada' : "Canada's #1 Fishing Resource"}
-            </motion.p>
+          {locale === 'fr' ? "À propos de la plateforme" : "About the platform"}
+        </motion.p>
 
-            <motion.h2
-              initial={{ opacity: 0, y: 48, scale: 0.985 }}
-              animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1], delay: 0.06 }}
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(2rem, 4vw, 3.5rem)',
-                color: 'var(--text-primary)',
-                lineHeight: 0.95,
-                marginBottom: '2.5rem',
-                letterSpacing: '0.03em',
-              }}
-            >
-              {locale === 'fr'
-                ? <>Tout ce dont vous avez besoin.<br /><span style={{ color: 'var(--accent)' }}>En un seul endroit.</span></>
-                : <>Everything you need.<br /><span style={{ color: 'var(--accent)' }}>In one place.</span></>
-              }
-            </motion.h2>
+        {/* Heading */}
+        <motion.h2
+          initial={{ opacity: 0, y: 40, scale: 0.985 }}
+          animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+          transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(2rem, 4.5vw, 4rem)',
+            color: 'var(--text-primary)',
+            lineHeight: 0.95,
+            marginBottom: '3rem',
+            letterSpacing: '0.03em',
+            maxWidth: '700px',
+          }}
+        >
+          {locale === 'fr'
+            ? <>LE QUÉBEC SE PÊCHE MIEUX<br /><span style={{ color: 'var(--accent)' }}>QUAND TOUT EST AU MÊME ENDROIT.</span></>
+            : <>QUEBEC FISHES BETTER<br /><span style={{ color: 'var(--accent)' }}>WHEN EVERYTHING IS IN ONE PLACE.</span></>}
+        </motion.h2>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1 }}>
-              {FEATURES.map((feat, i) => (
-                <motion.div
-                  key={feat.en}
-                  initial={{ opacity: 0, y: 32 }}
-                  animate={inView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.56, ease: [0.16, 1, 0.3, 1], delay: 0.12 + i * 0.07 }}
-                  style={{
-                    display: 'flex',
-                    gap: '1rem',
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <div style={{
-                    fontSize: '1.2rem',
-                    flexShrink: 0,
-                    width: '2rem',
-                    textAlign: 'center',
-                    paddingTop: '2px',
-                  }}>
-                    {feat.iconFr}
-                  </div>
-                  <div>
-                    <div style={{
-                      fontFamily: 'var(--font-condensed)',
-                      fontSize: '0.85rem',
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                      marginBottom: '0.3rem',
-                    }}>
-                      {locale === 'fr' ? feat.fr : feat.en}
-                    </div>
-                    <div style={{
-                      fontFamily: 'var(--font-body)',
-                      fontSize: '0.88rem',
-                      color: 'var(--text-secondary)',
-                      lineHeight: 1.6,
-                    }}>
-                      {locale === 'fr' ? feat.descFr : feat.descEn}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+        {/* Two-column layout: text left, photo right */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: '3rem',
+            alignItems: 'stretch',
+          }}
+          className="home-desc-grid"
+        >
+          {/* LEFT — prose */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+            }}
+          >
+            {/* Teal rule */}
+            <div style={{
+              width: '48px',
+              height: '3px',
+              background: 'var(--accent)',
+              marginBottom: '2rem',
+              borderRadius: '2px',
+            }} />
 
-          {/* RIGHT — Tall photo */}
+            {paragraphs.map((para, i) => (
+              <motion.p
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.56, ease: [0.16, 1, 0.3, 1], delay: 0.15 + i * 0.08 }}
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'clamp(1rem, 1.6vw, 1.1rem)',
+                  color: 'var(--text-secondary)',
+                  lineHeight: 1.78,
+                  marginBottom: '1.5rem',
+                  fontWeight: 400,
+                }}
+              >
+                {para}
+              </motion.p>
+            ))}
+          </motion.div>
+
+          {/* RIGHT — tall action photo */}
           <motion.div
             initial={{ opacity: 0, x: 60 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.78, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-            style={{ display: 'flex', flexDirection: 'column' }}
+            transition={{ duration: 0.78, ease: [0.16, 1, 0.3, 1], delay: 0.18 }}
+            style={{ position: 'relative' }}
           >
             <div style={{
-              flex: 1,
-              minHeight: '420px',
               borderRadius: 'var(--radius-card)',
               overflow: 'hidden',
               border: '1px solid var(--border)',
+              height: '100%',
+              minHeight: '420px',
               position: 'relative',
             }}>
               <img
@@ -172,116 +147,53 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  objectPosition: 'center center',
+                  objectPosition: 'center 30%',
                   display: 'block',
                   minHeight: '420px',
                 }}
               />
-              {/* Overlay text */}
+              {/* Bottom overlay */}
               <div style={{
                 position: 'absolute',
                 bottom: 0,
                 left: 0,
                 right: 0,
-                padding: '2rem',
-                background: 'linear-gradient(to top, rgba(10,14,26,0.95) 0%, transparent 100%)',
+                padding: '2rem 1.75rem',
+                background: 'linear-gradient(to top, rgba(10,14,26,0.96) 0%, transparent 100%)',
               }}>
                 <div style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: '1.4rem',
+                  fontSize: '1.5rem',
                   color: 'var(--text-primary)',
-                  letterSpacing: '0.05em',
+                  letterSpacing: '0.06em',
+                  marginBottom: '0.3rem',
                 }}>
                   {locale === 'fr' ? 'Découvrez le Québec' : 'Discover Quebec'}
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.75rem',
+                  fontSize: '0.7rem',
                   fontWeight: 600,
                   color: 'var(--accent)',
-                  letterSpacing: '0.18em',
+                  letterSpacing: '0.2em',
                   textTransform: 'uppercase',
-                  marginTop: '0.25rem',
                 }}>
-                  {locale === 'fr' ? '41 plans d\'eau · 21 espèces · 5 rivières' : '41 water bodies · 21 species · 5 rivers'}
+                  {locale === 'fr' ? "45+ plans d'eau · 21 espèces · FR/EN" : "45+ waters · 21 species · FR/EN"}
                 </div>
               </div>
             </div>
           </motion.div>
         </div>
-
-        {/* Stats bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.56, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '1rem',
-          }}
-        >
-          {[
-            { value: '41', label: locale === 'fr' ? "Plans d'eau" : 'Water Bodies' },
-            { value: '21', label: locale === 'fr' ? 'Espèces' : 'Species' },
-            { value: '162', label: locale === 'fr' ? 'Produits' : 'Products' },
-          ].map(stat => (
-            <div
-              key={stat.label}
-              style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '1.5rem',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '2.5rem',
-                color: 'var(--amber)',
-                lineHeight: 1,
-                letterSpacing: '0.02em',
-              }}>
-                {stat.value}
-              </div>
-              <div style={{
-                fontFamily: 'var(--font-condensed)',
-                fontSize: '0.7rem',
-                fontWeight: 600,
-                color: 'var(--text-muted)',
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                marginTop: '0.5rem',
-              }}>
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </motion.div>
-
-        {/* Compliance note */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 0.7 }}
-          style={{
-            marginTop: '1rem',
-            padding: '0.75rem 1rem',
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: '6px',
-            color: 'var(--text-muted)',
-            fontSize: '0.75rem',
-            fontFamily: 'var(--font-body)',
-            textAlign: 'center',
-          }}
-        >
-          🇨🇦 {locale === 'fr'
-            ? 'Données conformes aux règlements de pêche du Québec · MRNF · Saison 2026'
-            : 'Data compliant with Quebec fishing regulations · MRNF · Season 2026'}
-        </motion.div>
       </div>
+
+      {/* Desktop 2-col */}
+      <style>{`
+        @media (min-width: 900px) {
+          .home-desc-grid {
+            grid-template-columns: 58% 42% !important;
+          }
+        }
+      `}</style>
     </section>
   )
 }

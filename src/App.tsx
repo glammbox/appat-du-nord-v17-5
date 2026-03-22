@@ -1,7 +1,6 @@
-import { useState, useRef, lazy, Suspense } from 'react'
+import { useState, useRef, useEffect, lazy, Suspense } from 'react'
 import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
-import { SectionNav } from './components/SectionNav'
 import { HomeDescription } from './components/HomeDescription'
 import { SiteFooter } from './components/SiteFooter'
 import { useToast } from './components/Toast'
@@ -12,10 +11,8 @@ const WatersMap = lazy(() => import('./components/WatersMap').then(m => ({ defau
 const SpeciesSection = lazy(() => import('./components/SpeciesSection').then(m => ({ default: m.SpeciesSection })))
 const CalendarSection = lazy(() => import('./components/CalendarSection').then(m => ({ default: m.CalendarSection })))
 const GearSection = lazy(() => import('./components/GearSection').then(m => ({ default: m.GearSection })))
-const TipsSection = lazy(() => import('./components/TipsSection').then(m => ({ default: m.TipsSection })))
-const FishIdentifier = lazy(() => import('./components/FishIdentifier').then(m => ({ default: m.FishIdentifier })))
+const TournamentSection = lazy(() => import('./components/TournamentSection').then(m => ({ default: m.TournamentSection })))
 
-type Section = 'eaux' | 'especes' | 'calendrier' | 'arsenal' | 'conseils'
 type Locale = 'fr' | 'en'
 
 interface WeatherRegion {
@@ -30,52 +27,73 @@ const LoadingSection = () => (
   </div>
 )
 
+// Section ids for smooth scrolling
+const SECTION_IDS = {
+  especes: 'section-especes',
+  eaux: 'section-eaux',
+  calendrier: 'section-calendrier',
+  guides: 'section-guides',
+  tournois: 'section-tournois',
+  arsenal: 'section-arsenal',
+}
+
+function scrollToSection(id: string) {
+  setTimeout(() => {
+    const el = document.getElementById(id)
+    if (el) {
+      const offset = 80 // sticky header height
+      const top = el.getBoundingClientRect().top + window.scrollY - offset
+      window.scrollTo({ top, behavior: 'smooth' })
+    }
+  }, 50)
+}
+
 function App() {
-  const [activeSection, setActiveSection] = useState<Section>('especes')
   const [gearSpeciesFilter, setGearSpeciesFilter] = useState<string | undefined>(undefined)
   const [locale, setLocale] = useState<Locale>('fr')
   const [weatherRegion, setWeatherRegion] = useState<WeatherRegion | undefined>(undefined)
   const [cartCount, setCartCount] = useState(0)
   const [activeSpecies, setActiveSpecies] = useState<string | undefined>(undefined)
+  const [activeSection, setActiveSection] = useState<string>('especes')
   const { showToast, ToastComponent } = useToast()
-  const mainRef = useRef<HTMLDivElement>(null)
 
-  const handleSectionSelect = (section: Section) => {
-    setActiveSection(section)
-    setTimeout(() => {
-      mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
+  // Track active section on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const sectionIds = Object.entries(SECTION_IDS)
+      for (const [key, id] of sectionIds.reverse()) {
+        const el = document.getElementById(id)
+        if (el) {
+          const rect = el.getBoundingClientRect()
+          if (rect.top <= 150) {
+            setActiveSection(key)
+            break
+          }
+        }
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const handleSectionSelect = (section: string) => {
+    const id = SECTION_IDS[section as keyof typeof SECTION_IDS]
+    if (id) scrollToSection(id)
   }
 
   const handleScrollToArsenal = (speciesId: string) => {
     setGearSpeciesFilter(speciesId)
-    setActiveSection('arsenal')
-    setTimeout(() => {
-      mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
+    scrollToSection(SECTION_IDS.arsenal)
   }
 
   const handleScrollToWater = (waterId: string) => {
-    // Navigate to Eaux section — WatersMap will need to preselect the water
-    setActiveSection('eaux')
-    // Pass waterId via sessionStorage so WatersMap can pick it up
     sessionStorage.setItem('appat-select-water', waterId)
-    setTimeout(() => {
-      mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
+    scrollToSection(SECTION_IDS.eaux)
   }
 
-  const handleViewGearFromWater = () => {
-    setActiveSection('arsenal')
-  }
-
-  // Lake météo → Calendar preselected to that region
   const handleLakeMeteoCal = (region: WeatherRegion) => {
     setWeatherRegion(region)
-    setActiveSection('calendrier')
-    setTimeout(() => {
-      mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
+    scrollToSection(SECTION_IDS.calendrier)
   }
 
   // Shopify-ready cart with localStorage
@@ -96,90 +114,92 @@ function App() {
     setLocale(l => l === 'fr' ? 'en' : 'fr')
   }
 
-  const handleViewSpeciesFromTips = (id: string) => {
-    setActiveSpecies(id)
-    setActiveSection('especes')
-    setTimeout(() => {
-      mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
-  }
-
-  const handleGuidesSectionScroll = () => {
-    const el = document.getElementById('guides')
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)' }}>
       <SiteHeader
         locale={locale}
         onLocaleToggle={handleLocaleToggle}
         cartCount={cartCount}
-        onScrollToGuides={handleGuidesSectionScroll}
         onSectionSelect={handleSectionSelect}
         activeSection={activeSection}
       />
-      <Hero locale={locale} />
-      <SectionNav active={activeSection} onSelect={handleSectionSelect} locale={locale} />
+      
+      {/* Hero */}
+      <Hero locale={locale} onSectionSelect={handleSectionSelect} />
+      
+      {/* HomeDescription */}
       <HomeDescription locale={locale} />
-      <div ref={mainRef} style={{ paddingTop: '1rem' }}>
-        <Suspense fallback={<LoadingSection />}>
-          {activeSection === 'eaux' && (
-            <WatersMap
-              onViewGear={handleViewGearFromWater}
-              locale={locale}
-              onRegionChange={(region) => {
-                // Update weather region for calendar
-                setWeatherRegion(region)
-              }}
-              onViewSpecies={(id) => { setActiveSpecies(id); handleSectionSelect('especes') }}
-              onViewCalendar={handleLakeMeteoCal}
-            />
-          )}
-          {activeSection === 'especes' && (
-            <SpeciesSection
-              onScrollToArsenal={handleScrollToArsenal}
-              locale={locale}
-              initialSpecies={activeSpecies}
-              onScrollToWater={handleScrollToWater}
-            />
-          )}
-          {activeSection === 'calendrier' && (
-            <CalendarSection locale={locale} weatherRegion={weatherRegion} />
-          )}
-          {activeSection === 'arsenal' && (
-            <GearSection
-              key={gearSpeciesFilter ?? 'all'}
-              initialSpeciesFilter={gearSpeciesFilter}
-              onAddToCart={handleAddToCart}
-              locale={locale}
-            />
-          )}
-          {activeSection === 'conseils' && (
-            <TipsSection
-              locale={locale}
-              onViewSpecies={handleViewSpeciesFromTips}
-            />
-          )}
-        </Suspense>
-      </div>
-      {/* Fish Identifier Section */}
-      <Suspense fallback={<LoadingSection />}>
-        <FishIdentifier
-          locale={locale}
-          onViewSpecies={(id) => { setActiveSpecies(id); handleSectionSelect('especes') }}
-        />
-      </Suspense>
 
-      {/* Guides / Books Section */}
-      <Suspense fallback={<LoadingSection />}>
-        <GuidesSection locale={locale} />
-      </Suspense>
+      {/* Section divider */}
+      <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--border), transparent)', margin: '0 2rem' }} />
+
+      {/* Section 3 — Espèces */}
+      <section id={SECTION_IDS.especes} style={{ scrollMarginTop: '80px' }}>
+        <Suspense fallback={<LoadingSection />}>
+          <SpeciesSection
+            onScrollToArsenal={handleScrollToArsenal}
+            locale={locale}
+            initialSpecies={activeSpecies}
+            onScrollToWater={handleScrollToWater}
+          />
+        </Suspense>
+      </section>
+
+      {/* Section 4 — Eaux */}
+      <section id={SECTION_IDS.eaux} style={{ scrollMarginTop: '80px' }}>
+        <Suspense fallback={<LoadingSection />}>
+          <WatersMap
+            onViewGear={() => scrollToSection(SECTION_IDS.arsenal)}
+            locale={locale}
+            onRegionChange={(region) => setWeatherRegion(region)}
+            onViewSpecies={(id) => {
+              setActiveSpecies(id)
+              scrollToSection(SECTION_IDS.especes)
+            }}
+            onViewCalendar={handleLakeMeteoCal}
+          />
+        </Suspense>
+      </section>
+
+      {/* Section 5 — Calendrier / Prévisions */}
+      <section id={SECTION_IDS.calendrier} style={{ scrollMarginTop: '80px' }}>
+        <Suspense fallback={<LoadingSection />}>
+          <CalendarSection locale={locale} weatherRegion={weatherRegion} />
+        </Suspense>
+      </section>
+
+      {/* Section 6 — Guides des Espèces */}
+      <section id={SECTION_IDS.guides} style={{ scrollMarginTop: '80px' }}>
+        <Suspense fallback={<LoadingSection />}>
+          <GuidesSection locale={locale} onViewArsenal={(id) => handleScrollToArsenal(id)} />
+        </Suspense>
+      </section>
+
+      {/* Section 7 — Tournois */}
+      <section id={SECTION_IDS.tournois} style={{ scrollMarginTop: '80px' }}>
+        <Suspense fallback={<LoadingSection />}>
+          <TournamentSection locale={locale} />
+        </Suspense>
+      </section>
+
+      {/* Section 8 — Arsenal */}
+      <section id={SECTION_IDS.arsenal} style={{ scrollMarginTop: '80px' }}>
+        <Suspense fallback={<LoadingSection />}>
+          <GearSection
+            key={gearSpeciesFilter ?? 'all'}
+            initialSpeciesFilter={gearSpeciesFilter}
+            onAddToCart={handleAddToCart}
+            locale={locale}
+          />
+        </Suspense>
+      </section>
+
+      {/* Footer */}
       <SiteFooter
         locale={locale}
-        onSectionChange={(s) => handleSectionSelect(s as Section)}
-        onScrollToGuides={handleGuidesSectionScroll}
+        onSectionSelect={handleSectionSelect}
       />
+      
       {ToastComponent}
     </div>
   )

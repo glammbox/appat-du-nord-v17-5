@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { speciesData, ActivityLevel } from '../lib/species'
 
@@ -9,29 +9,31 @@ const activityColors: Record<ActivityLevel, string> = {
   CLOSED: '#22304A',
 }
 
-// Manifest-verified local images for all 21 species
+// Manifest-verified local images — v16 media manifest (26 images generated)
+// Primary: new generated images from media manifest
+// Fallback: existing v15 images
 const SPECIES_LOCAL_IMAGES: Record<string, string> = {
-  'atlantic-salmon':  '/images/fish/saumon-atlantique.png',
-  'arctic-char':      '/images/fish/truite-mouchetee.png',
-  'brook-trout':      '/images/fish/truite-mouchetee.png',
-  'brown-trout':      '/images/fish/truite-arc-en-ciel.png',
-  'burbot':           '/images/fish/lotte.png',
-  'carp':             '/images/fish/carpe-commune.png',
-  'catfish':          '/images/fish/barbotte-brune.png',
-  'cisco':            '/images/fish/menomini.png',
-  'lake-sturgeon':    '/images/fish/esturgeon-jaune.png',
-  'lake-trout':       '/images/fish/touladi.png',
-  'largemouth-bass':  '/images/fish/achigan-grande-bouche.png',
-  'muskellunge':      '/images/fish/maskinonge.png',
-  'northern-pike':    '/images/fish/grand-brochet.png',
-  'perch':            '/images/fish/perchaude.png',
-  'rainbow-trout':    '/images/fish/truite-arc-en-ciel.png',
-  'sauger':           '/images/fish/dore-noir.png',
-  'smallmouth-bass':  '/images/fish/achigan-petite-bouche.png',
-  'splake':           '/images/fish/truite-mouchetee.png',
-  'tiger-muskie':     '/images/fish/maskinonge.png',
-  'walleye':          '/images/fish/dore-jaune.png',
-  'whitefish':        '/images/fish/menomini.png',
+  'atlantic-salmon':  '/images/fish/atlantic-salmon.png',
+  'arctic-char':      '/images/fish/arctic-char.png',
+  'brook-trout':      '/images/fish/brook-trout.png',
+  'brown-trout':      '/images/fish/brown-trout.png',
+  'burbot':           '/images/fish/burbot.png',
+  'carp':             '/images/fish/carp.png',
+  'catfish':          '/images/fish/catfish.png',
+  'cisco':            '/images/fish/cisco.png',
+  'lake-sturgeon':    '/images/fish/lake-sturgeon.png',
+  'lake-trout':       '/images/fish/lake-trout.png',
+  'largemouth-bass':  '/images/fish/largemouth-bass.png',
+  'muskellunge':      '/images/fish/muskellunge.png',
+  'northern-pike':    '/images/fish/northern-pike.png',
+  'perch':            '/images/fish/perch.png',
+  'rainbow-trout':    '/images/fish/rainbow-trout.png',
+  'sauger':           '/images/fish/sauger.png',
+  'smallmouth-bass':  '/images/fish/smallmouth-bass.png',
+  'splake':           '/images/fish/splake.png',
+  'tiger-muskie':     '/images/fish/tiger-muskie.png',
+  'walleye':          '/images/fish/walleye.png',
+  'whitefish':        '/images/fish/whitefish.png',
 }
 
 const LAKE_TO_WATER_ID: Record<string, string> = {
@@ -60,7 +62,14 @@ interface SpeciesSectionProps {
 export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onScrollToWater }: SpeciesSectionProps) {
   const [activeSpecies, setActiveSpecies] = useState(initialSpecies || speciesData[0].id)
   const sectionRef = useRef(null)
+  const tabStripRef = useRef<HTMLDivElement>(null)
   const inView = useInView(sectionRef, { once: true, amount: 0.1 })
+
+  const scrollTabs = useCallback((dir: 'left' | 'right') => {
+    if (tabStripRef.current) {
+      tabStripRef.current.scrollBy({ left: dir === 'left' ? -200 : 200, behavior: 'smooth' })
+    }
+  }, [])
 
   // Sync initialSpecies from parent navigation
   useEffect(() => {
@@ -131,19 +140,67 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
         </p>
       </div>
 
-      {/* ── Single Horizontal Scrollable Tab Strip (Fix #1) ────────────── */}
-      <div
-        className="species-tab-strip"
-        style={{
-          background: 'var(--bg-raised)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '0.25rem',
-          marginBottom: '2rem',
-          display: 'flex',
-          gap: '0.2rem',
-        }}
-      >
+      {/* ── Scrollable Tab Strip with Arrows ──────────────────────────── */}
+      <div style={{ position: 'relative', marginBottom: '2rem' }}>
+        {/* Left Arrow */}
+        <button
+          onClick={() => scrollTabs('left')}
+          aria-label="Scroll left"
+          style={{
+            position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+            zIndex: 2, background: 'var(--surface)', border: '1px solid var(--border)',
+            color: 'var(--text-secondary)', borderRadius: '50%',
+            width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', fontSize: '0.8rem', flexShrink: 0,
+            boxShadow: '4px 0 12px rgba(10,14,26,0.6)',
+            transition: 'color 0.15s, border-color 0.15s',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.color = 'var(--accent)'
+            ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
+            ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
+          }}
+        >‹</button>
+        {/* Right Arrow */}
+        <button
+          onClick={() => scrollTabs('right')}
+          aria-label="Scroll right"
+          style={{
+            position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+            zIndex: 2, background: 'var(--surface)', border: '1px solid var(--border)',
+            color: 'var(--text-secondary)', borderRadius: '50%',
+            width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', fontSize: '0.8rem', flexShrink: 0,
+            boxShadow: '-4px 0 12px rgba(10,14,26,0.6)',
+            transition: 'color 0.15s, border-color 0.15s',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.color = 'var(--accent)'
+            ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
+            ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
+          }}
+        >›</button>
+        <div
+          ref={tabStripRef}
+          className="species-tab-strip"
+          style={{
+            background: 'var(--bg-raised)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '0.25rem 2rem',
+            display: 'flex',
+            gap: '0.2rem',
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
         {speciesData.map((sp, idx) => {
           const tabName = locale === 'fr' ? sp.nameFr.split(' / ')[0] : sp.nameEn
           const isActive = activeSpecies === sp.id
@@ -187,6 +244,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
             </motion.button>
           )
         })}
+        </div>
       </div>
 
       {/* ── 2-Column Detail Panel ──────────────────────────────────────── */}
@@ -329,7 +387,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                   <a
-                    href="https://peche.faune.gouv.qc.ca/fr/peche-sportive"
+                    href="https://peche.faune.gouv.qc.ca/"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -347,7 +405,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                     📋 {locale === 'fr' ? 'Règlements MRNF → peche.faune.gouv.qc.ca' : 'MRNF Regulations → peche.faune.gouv.qc.ca'}
                   </a>
                   <a
-                    href="https://www.faune.gouv.qc.ca/peche/permis/"
+                    href="https://mondossierchassepeche.gouv.qc.ca/"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

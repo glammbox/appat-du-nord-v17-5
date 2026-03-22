@@ -27,6 +27,8 @@
   --glow-amber:      0 18px 44px rgba(244,160,28,0.16);
   --success:         #7BE495;
   --danger:          #FF6B57;
+  --red:             #E63946;
+  --red-hover:       #FF4D5A;
 
   /* Legacy aliases */
   --text:            #F7FBFF;

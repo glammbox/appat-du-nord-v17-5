@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 
 interface HeroProps {
   locale: 'fr' | 'en'
+  onSectionSelect?: (s: string) => void
 }
 
 function useCountUp(target: number, duration: number = 1800, started: boolean = false) {
@@ -22,9 +23,16 @@ function useCountUp(target: number, duration: number = 1800, started: boolean = 
   return count
 }
 
-export function Hero({ locale }: HeroProps) {
+export function Hero({ locale, onSectionSelect }: HeroProps) {
   const [statsStarted, setStatsStarted] = useState(false)
   const statsRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const { scrollY } = useScroll()
+  
+  // Parallax — watermark moves slower than content
+  const watermarkY = useTransform(scrollY, [0, 600], [0, 60])
+  const imageY = useTransform(scrollY, [0, 600], [0, 80])
+  const contentY = useTransform(scrollY, [0, 600], [0, 30])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -36,71 +44,116 @@ export function Hero({ locale }: HeroProps) {
   }, [])
 
   const countSpecies  = useCountUp(21,  1400, statsStarted)
-  const countLacs     = useCountUp(41,  1600, statsStarted)
-  const countProduits = useCountUp(162, 1800, statsStarted)
+  const countEaux     = useCountUp(45,  1600, statsStarted)
+  const countJours    = useCountUp(30,  1200, statsStarted)
 
   const stats = [
-    { value: countSpecies,  label: locale === 'fr' ? 'Espèces' : 'Species' },
-    { value: countLacs,     label: locale === 'fr' ? "Plans d'eau" : 'Water Bodies' },
-    { value: countProduits, label: locale === 'fr' ? 'Produits' : 'Products' },
+    { value: `${countSpecies}`, label: locale === 'fr' ? 'Espèces' : 'Species' },
+    { value: `${countEaux}+`, label: locale === 'fr' ? "Plans d'eau" : 'Water Bodies' },
+    { value: `${countJours}j`, label: locale === 'fr' ? 'Prévisions' : 'Forecast' },
   ]
 
   return (
     <div
+      ref={heroRef}
       className="relative overflow-hidden"
       style={{ minHeight: '100svh', background: 'var(--bg)' }}
     >
-      {/* Background gradient layers */}
-      <div
-        style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(180deg, #0F1628 0%, #0A0E1A 58%, #070B14 100%)',
-          zIndex: 0,
-        }}
-      />
+      {/* Background gradient */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(180deg, #0F1628 0%, #0A0E1A 58%, #070B14 100%)',
+        zIndex: 0,
+      }} />
 
-      {/* Hero image — right side, full height */}
+      {/* Subtle teal atmospheric glow */}
+      <div style={{
+        position: 'absolute',
+        top: '20%',
+        left: '30%',
+        width: '40%',
+        height: '60%',
+        background: 'radial-gradient(ellipse, rgba(0,180,216,0.06) 0%, transparent 70%)',
+        zIndex: 0,
+        pointerEvents: 'none',
+      }} />
+
+      {/* APPÂT DU NORD — Giant watermark layer (parallax) */}
       <motion.div
-        initial={{ opacity: 0, x: 96, rotate: 1.5, scale: 0.96 }}
-        animate={{ opacity: 1, x: 0, rotate: 0, scale: 1 }}
-        transition={{ duration: 0.84, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '-5%',
+          transform: 'translateY(-50%)',
+          y: watermarkY,
+          zIndex: 1,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        <div style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 'clamp(6rem, 18vw, 16rem)',
+          color: 'rgba(255,255,255,0.028)',
+          letterSpacing: '0.04em',
+          lineHeight: 0.85,
+          textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
+        }}>
+          APPÂT<br />DU<br />NORD
+        </div>
+      </motion.div>
+
+      {/* Hero image — right side, full height (parallax) */}
+      <motion.div
         style={{
           position: 'absolute',
           top: 0,
           right: 0,
           width: '55%',
           height: '100%',
-          zIndex: 1,
+          zIndex: 2,
+          y: imageY,
         }}
       >
-        <img
-          src="/images/hero/fishing-hero.jpg"
-          alt={locale === 'fr' ? 'Pêche au Québec' : 'Quebec Fishing'}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center center',
-            display: 'block',
-          }}
-        />
-        {/* Left fade */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, #0A0E1A 0%, rgba(10,14,26,0.6) 45%, transparent 100%)',
-        }} />
-        {/* Bottom fade */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, #0A0E1A 0%, transparent 40%)',
-        }} />
+        <motion.div
+          initial={{ opacity: 0, x: 80, scale: 1.04 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <img
+            src="/images/hero/fishing-hero.jpg"
+            alt={locale === 'fr' ? 'Pêche au Québec — maskinongé' : 'Quebec Fishing — muskellunge'}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: '30% center',
+              display: 'block',
+            }}
+          />
+          {/* Left gradient fade */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to right, #0A0E1A 0%, rgba(10,14,26,0.72) 35%, rgba(10,14,26,0.15) 70%, transparent 100%)',
+          }} />
+          {/* Bottom fade */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, #0A0E1A 0%, transparent 35%)',
+          }} />
+        </motion.div>
       </motion.div>
 
-      {/* ── Content ───────────────────────────────────────────── */}
-      <div
+      {/* Content — left side */}
+      <motion.div
         style={{
           position: 'relative',
-          zIndex: 2,
+          zIndex: 3,
           maxWidth: 'var(--max-width)',
           margin: '0 auto',
           padding: '0 2rem',
@@ -108,9 +161,10 @@ export function Hero({ locale }: HeroProps) {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
+          y: contentY,
         }}
       >
-        <div style={{ maxWidth: '640px', paddingTop: '80px', paddingBottom: '80px' }}>
+        <div style={{ maxWidth: '580px', paddingTop: '80px', paddingBottom: '80px' }}>
 
           {/* Eyebrow */}
           <motion.p
@@ -119,68 +173,68 @@ export function Hero({ locale }: HeroProps) {
             transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
             style={{
               fontFamily: 'var(--font-condensed)',
-              fontSize: '0.75rem',
+              fontSize: '0.72rem',
               fontWeight: 600,
               color: 'var(--accent)',
-              letterSpacing: '0.28em',
+              letterSpacing: '0.3em',
               textTransform: 'uppercase',
               marginBottom: '1.5rem',
             }}
           >
-            {locale === 'fr' ? '🇨🇦 Atlas de pêche · Québec · 2026' : '🇨🇦 Fishing Atlas · Quebec · 2026'}
+            🇨🇦 {locale === 'fr' ? 'Portail de pêche · Québec · Saison 2026' : 'Fishing Portal · Quebec · Season 2026'}
           </motion.p>
 
           {/* H1 — Bebas Neue, giant */}
           <motion.h1
-            initial={{ opacity: 0, y: 72, scale: 0.985 }}
+            initial={{ opacity: 0, y: 60, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+            transition={{ duration: 0.84, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
             style={{
               fontFamily: 'var(--font-display)',
               fontSize: 'var(--display)',
               color: 'var(--text-primary)',
               letterSpacing: '0.03em',
-              lineHeight: 0.92,
+              lineHeight: 0.9,
               marginBottom: '1.5rem',
               textTransform: 'uppercase',
             }}
           >
             {locale === 'fr' ? (
-              <>Lisez l'eau.<br /><span style={{ color: 'var(--accent)' }}>Chassez</span><br />les Géants.</>
+              <>PÊCHEZ<br />LE <span style={{ color: 'var(--accent)' }}>NORD.</span><br />MAÎTRISEZ<br />CHAQUE SORTIE.</>
             ) : (
-              <>Read the water.<br /><span style={{ color: 'var(--accent)' }}>Hunt</span><br />the Giants.</>
+              <>FISH<br />THE <span style={{ color: 'var(--accent)' }}>NORTH.</span><br />OWN<br />EVERY OUTING.</>
             )}
           </motion.h1>
 
           {/* Subcopy */}
           <motion.p
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1], delay: 0.22 }}
+            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
             style={{
               fontFamily: 'var(--font-body)',
               fontSize: '1.05rem',
               color: 'var(--text-secondary)',
               fontWeight: 400,
               lineHeight: 1.65,
-              marginBottom: '2.5rem',
-              maxWidth: '520px',
+              marginBottom: '2rem',
+              maxWidth: '500px',
             }}
           >
             {locale === 'fr'
-              ? "La ressource de pêche #1 au Canada. 21 espèces, 41 plans d'eau, 5 rivières majeures, l'arsenal complet, météo en temps réel et identification des poissons — tout en un."
-              : "Canada's #1 fishing resource. 21 species, 41 water bodies, 5 major rivers, the complete arsenal, real-time weather and fish identification — all in one."}
+              ? "La ressource de pêche #1 au Canada. 21 espèces, 45+ plans d'eau, l'arsenal complet, météo & solunar en temps réel — tout en FR et EN."
+              : "Canada's #1 fishing resource. 21 species, 45+ water bodies, the complete arsenal, real-time weather & solunar — fully in FR and EN."}
           </motion.p>
 
           {/* Stats */}
           <motion.div
             ref={statsRef}
-            initial={{ opacity: 0, y: 28, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.36 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
             style={{
               display: 'flex',
-              gap: '2rem',
+              gap: '2.5rem',
               flexWrap: 'wrap',
               marginBottom: '2.5rem',
             }}
@@ -189,7 +243,7 @@ export function Hero({ locale }: HeroProps) {
               <div key={stat.label}>
                 <div style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(2.5rem, 5vw, 5rem)',
+                  fontSize: 'clamp(2.2rem, 5vw, 4.5rem)',
                   color: 'var(--amber)',
                   lineHeight: 0.9,
                   letterSpacing: '0.02em',
@@ -198,10 +252,10 @@ export function Hero({ locale }: HeroProps) {
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.7rem',
+                  fontSize: '0.65rem',
                   fontWeight: 600,
                   color: 'var(--text-muted)',
-                  letterSpacing: '0.18em',
+                  letterSpacing: '0.2em',
                   textTransform: 'uppercase',
                   marginTop: '0.4rem',
                 }}>
@@ -211,46 +265,92 @@ export function Hero({ locale }: HeroProps) {
             ))}
           </motion.div>
 
-          {/* CTA */}
+          {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.48 }}
-            style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.42 }}
+            style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}
           >
-            <div style={{
-              display: 'inline-block',
-              padding: '0.9rem 2rem',
-              background: 'var(--accent)',
-              color: '#0A0E1A',
-              fontFamily: 'var(--font-condensed)',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              cursor: 'default',
-              borderRadius: '6px',
-            }}>
-              {locale === 'fr' ? 'Saison 2026 →' : 'Season 2026 →'}
-            </div>
-            <div style={{
-              display: 'inline-block',
-              padding: '0.9rem 2rem',
-              border: '1px solid var(--border)',
-              color: 'var(--text-secondary)',
-              fontFamily: 'var(--font-condensed)',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              cursor: 'default',
-              borderRadius: '6px',
-            }}>
-              {locale === 'fr' ? 'Explorer les espèces' : 'Explore Species'}
-            </div>
+            <button
+              onClick={() => onSectionSelect?.('especes')}
+              style={{
+                padding: '0.9rem 1.75rem',
+                background: 'var(--accent)',
+                color: '#0A0E1A',
+                fontFamily: 'var(--font-condensed)',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                border: 'none',
+                borderRadius: '6px',
+                transition: 'background 0.2s, transform 0.2s',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--accent-hover)'
+                ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--accent)'
+                ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+              }}
+            >
+              {locale === 'fr' ? 'Explorer les espèces →' : 'Explore Species →'}
+            </button>
+            <button
+              onClick={() => onSectionSelect?.('arsenal')}
+              style={{
+                padding: '0.9rem 1.75rem',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: 'var(--text-secondary)',
+                fontFamily: 'var(--font-condensed)',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                background: 'transparent',
+                borderRadius: '6px',
+                transition: 'border-color 0.2s, color 0.2s, transform 0.2s',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.45)'
+                ;(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
+                ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.2)'
+                ;(e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
+                ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+              }}
+            >
+              {locale === 'fr' ? "Voir l'arsenal" : 'View Arsenal'}
+            </button>
+            <button
+              onClick={() => onSectionSelect?.('calendrier')}
+              style={{
+                padding: '0.9rem 1.75rem',
+                border: 'none',
+                background: 'none',
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-condensed)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--amber)'}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
+            >
+              {locale === 'fr' ? '⚡ Prévisions solunar →' : '⚡ Solunar Forecast →'}
+            </button>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Scroll cue */}
       <motion.div
@@ -258,28 +358,28 @@ export function Hero({ locale }: HeroProps) {
         transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
         style={{
           position: 'absolute',
-          bottom: '2.5rem',
+          bottom: '2rem',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 2,
+          zIndex: 4,
           color: 'var(--text-muted)',
-          fontSize: '0.7rem',
+          fontSize: '0.65rem',
           fontFamily: 'var(--font-condensed)',
-          letterSpacing: '0.2em',
+          letterSpacing: '0.22em',
           textTransform: 'uppercase',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '0.5rem',
+          gap: '0.4rem',
         }}
       >
-        <div>↓</div>
+        <span style={{ opacity: 0.6 }}>↓</span>
       </motion.div>
 
-      {/* Mobile: hide right image via CSS */}
+      {/* Mobile: stack image behind text */}
       <style>{`
         @media (max-width: 768px) {
-          .hero-image-right { display: none !important; }
+          .hero-right { width: 100% !important; opacity: 0.3 !important; }
         }
       `}</style>
     </div>

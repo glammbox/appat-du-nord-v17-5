@@ -136,6 +136,60 @@ function getBestFishingTimes(month: number): { dawn: string; dusk: string } {
   return { dawn: addHour(t.sunrise, 1), dusk: addHour(t.sunset, -1) }
 }
 
+// Solunar window calculation (CIA intel formula)
+// Based on: moon transit (overhead) = major period, moon antitransit (underfoot) = major period
+// Moonrise/moonset = minor periods. Each period ±1h for major, ±45min for minor.
+interface SolunarWindow {
+  start: string
+  end: string
+  type: 'major' | 'minor'
+  label: string
+  labelFr: string
+}
+
+function getSolunarWindows(date: Date): SolunarWindow[] {
+  // Calculate moon age (days since new moon) using simplified formula
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const jd = 367 * year - Math.floor(7 * (year + Math.floor((month + 9) / 12)) / 4) + Math.floor(275 * month / 9) + day + 1721013.5
+  const moonAge = ((jd - 2451549.5) % 29.53058867)
+  const normalizedAge = moonAge < 0 ? moonAge + 29.53058867 : moonAge
+
+  // Moon transit time — varies from ~12:00 (new moon) through the day cycle over 29.5 days
+  // At new moon (age 0): moon transits at ~noon
+  // At full moon (age 14.76): moon transits at ~midnight
+  const transitHour = (12 + (normalizedAge / 29.53058867) * 24) % 24
+  const antitransitHour = (transitHour + 12) % 24
+  
+  // Moonrise/moonset approximation
+  // Moonrise is ~50 min later each day
+  const riseHour = (6 + (normalizedAge / 29.53058867) * 24) % 24
+  const setHour = (riseHour + 12.5) % 24
+
+  function fmt(h: number): string {
+    const hours = Math.floor(h)
+    const minutes = Math.round((h - hours) * 60)
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+  }
+
+  function addMinutes(h: number, min: number): string {
+    const total = h * 60 + min
+    const hours = Math.floor(total / 60) % 24
+    const minutes = total % 60
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+  }
+
+  const windows: SolunarWindow[] = [
+    { start: addMinutes(transitHour, -60), end: addMinutes(transitHour, 60), type: 'major', label: '🔥 PEAK', labelFr: '🔥 PIC' },
+    { start: addMinutes(antitransitHour, -60), end: addMinutes(antitransitHour, 60), type: 'major', label: '🔥 PEAK', labelFr: '🔥 PIC' },
+    { start: addMinutes(riseHour, -45), end: addMinutes(riseHour, 45), type: 'minor', label: '✅ BON', labelFr: '✅ BON' },
+    { start: addMinutes(setHour, -45), end: addMinutes(setHour, 45), type: 'minor', label: '✅ BON', labelFr: '✅ BON' },
+  ]
+  // Sort by start time
+  return windows.sort((a, b) => a.start.localeCompare(b.start))
+}
+
 const activityEmojisFr: Record<ActivityLevel, string> = {
   HOT: '🔴 Pic',
   ACTIVE: '🟠 Actif',
@@ -187,6 +241,8 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
 
   // Fetch 30-day forecast
   useEffect(() => {
+    // Open-Meteo free tier: max 16 days live + can use forecast + historical (past) to simulate 30-day range
+    // We fetch 16 days forward and show 16 cards (best available with free tier)
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant&timezone=America/Toronto&forecast_days=16`
     fetch(url)
       .then(r => r.json())
@@ -222,6 +278,7 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
   const todayMonth = now.getMonth()
   const fishingScore = weather ? getScore(weather.temp, weather.wind, todayMonth) : null
   const bestTimes = getBestFishingTimes(todayMonth)
+  const solunarWindows = getSolunarWindows(now)
   const activityEmojis = locale === 'fr' ? activityEmojisFr : activityEmojisEn
   const month = calendarData[selectedMonth]
   const sectionRef = useRef(null)
@@ -361,6 +418,32 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
             </div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
               {locale === 'fr' ? 'Aube · Crépuscule' : 'Dawn · Dusk'}
+            </div>
+          </div>
+          {/* Solunar windows — full width */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.8rem', gridColumn: 'span 2' }}>
+            <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+              {locale === 'fr' ? 'Fenêtres solunar' : 'Solunar Windows'}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {solunarWindows.map((w, i) => (
+                <div key={i} style={{
+                  padding: '0.3rem 0.65rem',
+                  borderRadius: '4px',
+                  background: w.type === 'major' ? 'rgba(230,57,70,0.15)' : 'rgba(0,180,216,0.10)',
+                  border: `1px solid ${w.type === 'major' ? 'rgba(230,57,70,0.4)' : 'rgba(0,180,216,0.3)'}`,
+                  display: 'flex',
+                  gap: '0.4rem',
+                  alignItems: 'center',
+                }}>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '0.68rem', fontWeight: 700, color: w.type === 'major' ? '#E63946' : 'var(--accent)', letterSpacing: '0.1em' }}>
+                    {locale === 'fr' ? w.labelFr : w.label}
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                    {w.start}–{w.end}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
           {/* Fishing score — full width */}
