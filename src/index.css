@@ -1,0 +1,179 @@
+@import 'leaflet/dist/leaflet.css';
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ── v15 Palette — Red Bull × Quebec Fishing ─────────────────────── */
+  --bg:              #0A0E1A;
+  --bg-raised:       #101728;
+  --surface:         #12182B;
+  --surface-2:       #182238;
+  --surface-3:       #22304A;
+  --accent:          #00B4D8;
+  --accent-hover:    #3BC9EA;
+  --accent-deep:     #007C96;
+  --amber:           #F4A01C;
+  --amber-hover:     #FFB840;
+  --amber-deep:      #BF7600;
+  --text-primary:    #F7FBFF;
+  --text-secondary:  #C8D3E2;
+  --text-muted:      #94A3B8;
+  --border:          rgba(255,255,255,0.10);
+  --border-active:   rgba(0,180,216,0.45);
+  --shadow:          0 24px 80px rgba(0,0,0,0.35);
+  --glow-teal:       0 0 0 1px rgba(0,180,216,0.15), 0 24px 60px rgba(0,180,216,0.10);
+  --glow-amber:      0 18px 44px rgba(244,160,28,0.16);
+  --success:         #7BE495;
+  --danger:          #FF6B57;
+
+  /* Legacy aliases */
+  --text:            #F7FBFF;
+  --muted-text:      #94A3B8;
+  --accent-gold:     #F4A01C;
+  --accent-alt:      #00B4D8;
+  --bg-elevated:     #101728;
+  --water:           #00B4D8;
+  --text-muted:      #94A3B8;
+
+  /* ── Typography ─────────────────────────────────────────────────── */
+  --font-display:    'Bebas Neue', 'Barlow Condensed', Arial Narrow, sans-serif;
+  --font-condensed:  'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+  --font-body:       'Inter', system-ui, sans-serif;
+
+  /* ── Scale ───────────────────────────────────────────────────────── */
+  --display:         clamp(3.4rem, 8vw, 6.5rem);
+  --section-display: clamp(2.5rem, 5.5vw, 4.5rem);
+  --headline:        clamp(1.75rem, 3.2vw, 3.5rem);
+  --subhead:         clamp(1.1rem, 2vw, 2.25rem);
+  --body:            1rem;
+  --small:           0.875rem;
+  --eyebrow:         0.75rem;
+
+  /* ── Spacing & geometry ──────────────────────────────────────────── */
+  --section-pad:     clamp(5rem, 9vw, 7.5rem);
+  --card-pad:        clamp(1rem, 2vw, 2rem);
+  --max-width:       1440px;
+  --radius-hero:     32px;
+  --radius-card:     24px;
+  --radius-sm:       16px;
+  --radius-pill:     999px;
+}
+
+/* ── Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  overflow-x: hidden;
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+}
+
+/* ── Typography defaults ─────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 0.95;
+  margin: 0;
+}
+
+/* ── Leaflet ─────────────────────────────────────────────────────────── */
+.leaflet-container {
+  background: var(--bg) !important;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ── Utility classes ─────────────────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--font-condensed);
+  font-weight: 600;
+  font-size: var(--eyebrow);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.section-pad {
+  padding-top: var(--section-pad);
+  padding-bottom: var(--section-pad);
+}
+
+/* ── Species tab strip ───────────────────────────────────────────────── */
+.species-tab-strip {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.species-tab-strip::-webkit-scrollbar { display: none; }
+
+/* ── Species detail grid ─────────────────────────────────────────────── */
+.species-detail-grid {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .species-detail-grid {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+/* ── Home description responsive ─────────────────────────────────────── */
+.home-description-top {
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 768px) {
+  .home-description-top {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Fish image — always object-contain ──────────────────────────────── */
+.fish-portrait {
+  object-fit: contain;
+  object-position: center center;
+}
+
+/* ── Section entrance animation base ────────────────────────────────── */
+.section-enter {
+  opacity: 0;
+  transform: translateY(48px);
+}
+
+/* ── Glass nav ───────────────────────────────────────────────────────── */
+.nav-glass {
+  background: rgba(10,14,26,0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* ── Mobile responsive helpers ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  :root {
+    --section-pad: 4rem;
+  }
+}
