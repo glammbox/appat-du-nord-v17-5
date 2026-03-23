@@ -48,9 +48,9 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
   const countJours    = useCountUp(30,  1200, statsStarted)
 
   const stats = [
-    { value: `${countSpecies}`, label: locale === 'fr' ? 'Espèces' : 'Species' },
-    { value: `${countEaux}+`, label: locale === 'fr' ? "Plans d'eau" : 'Water Bodies' },
-    { value: `${countJours}j`, label: locale === 'fr' ? 'Prévisions' : 'Forecast' },
+    { value: `${countSpecies}`, label: locale === 'fr' ? 'Espèces' : 'Species', color: '#00B4D8' },
+    { value: `${countEaux}+`, label: locale === 'fr' ? "Plans d'eau" : 'Water Bodies', color: '#F4A01C' },
+    { value: `${countJours}j`, label: locale === 'fr' ? 'Prévisions' : 'Forecast', color: '#E63946' },
   ]
 
   return (
@@ -119,12 +119,12 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
         <div style={{
           fontFamily: 'var(--font-display)',
           fontSize: 'clamp(6rem, 18vw, 16rem)',
-          color: 'rgba(255,255,255,0.055)',
+          color: 'rgba(0,180,216,0.18)',
           letterSpacing: '0.04em',
           lineHeight: 0.85,
           textTransform: 'uppercase',
           whiteSpace: 'nowrap',
-          WebkitTextStroke: '1px rgba(0,180,216,0.08)',
+          WebkitTextStroke: '1px rgba(0,180,216,0.35)',
         }}>
           APPÂT<br />DU<br />NORD
         </div>
@@ -269,7 +269,7 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
                 <div style={{
                   fontFamily: 'var(--font-display)',
                   fontSize: 'clamp(2.2rem, 5vw, 4.5rem)',
-                  color: 'var(--amber)',
+                  color: (stat as any).color || 'var(--amber)',
                   lineHeight: 0.9,
                   letterSpacing: '0.02em',
                 }}>
