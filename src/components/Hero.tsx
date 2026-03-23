@@ -100,33 +100,35 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
         pointerEvents: 'none',
       }} />
 
-      {/* APPÂT DU NORD — Giant watermark layer (parallax + y-drift animation) */}
+      {/* APPÂT DU NORD — subtle full-width background watermark */}
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2, delay: 0.5 }}
         style={{
           position: 'absolute',
-          top: '50%',
-          left: '-5%',
-          transform: 'translateY(-50%)',
+          bottom: '5%',
+          left: 0,
+          right: 0,
+          textAlign: 'center',
           y: watermarkY,
           zIndex: 1,
           pointerEvents: 'none',
           userSelect: 'none',
+          overflow: 'hidden',
         }}
       >
         <div style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(6rem, 18vw, 16rem)',
-          color: 'rgba(0,180,216,0.18)',
-          letterSpacing: '0.04em',
-          lineHeight: 0.85,
+          fontSize: 'clamp(4rem, 12vw, 10rem)',
+          color: 'rgba(0,180,216,0.07)',
+          letterSpacing: '0.25em',
+          lineHeight: 1,
           textTransform: 'uppercase',
           whiteSpace: 'nowrap',
-          WebkitTextStroke: '1px rgba(0,180,216,0.35)',
+          WebkitTextStroke: '1px rgba(0,180,216,0.12)',
         }}>
-          APPÂT<br />DU<br />NORD
+          APPÂT DU NORD
         </div>
       </motion.div>
 
@@ -190,6 +192,24 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
         }}
       >
         <div style={{ maxWidth: '580px', paddingTop: '80px', paddingBottom: '80px' }}>
+
+          {/* BRAND NAME — Large animated, visible above headline */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.0 }}
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+              color: '#00B4D8',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              lineHeight: 1,
+              marginBottom: '1rem',
+            }}
+          >
+            APPÂT DU NORD
+          </motion.div>
 
           {/* Eyebrow */}
           <motion.p
