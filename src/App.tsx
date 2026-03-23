@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
-import { BrandWatermark } from './components/BrandWatermark'
+
 import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
 import { HomeDescription } from './components/HomeDescription'
@@ -142,7 +142,7 @@ function App() {
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)' }}>
-      <BrandWatermark />
+
       <SiteHeader
         locale={locale}
         onLocaleToggle={handleLocaleToggle}
