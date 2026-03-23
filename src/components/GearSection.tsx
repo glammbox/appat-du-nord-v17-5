@@ -79,9 +79,11 @@ interface GearSectionProps {
   initialSpeciesFilter?: string
   onAddToCart: (product: { id: string; name: string; price: number }) => void
   locale: 'fr' | 'en'
+  isBoutiquePage?: boolean
+  onNavigateBoutique?: () => void
 }
 
-export function GearSection({ initialSpeciesFilter, onAddToCart, locale }: GearSectionProps) {
+export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBoutiquePage = false, onNavigateBoutique }: GearSectionProps) {
   const resolvedInitial = initialSpeciesFilter
     ? (SPECIES_ID_TO_TAG[initialSpeciesFilter] || (initialSpeciesFilter as SpeciesTag))
     : null
@@ -152,13 +154,15 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale }: GearS
         </p>
         <h2 style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 'var(--section-display)',
+          fontSize: isBoutiquePage ? 'clamp(4rem, 8vw, 7rem)' : 'var(--section-display)',
           color: 'var(--text-primary)',
           letterSpacing: '0.03em',
           lineHeight: 0.95,
           marginBottom: '1rem',
         }}>
-          {locale === 'fr' ? "L'ARSENAL" : 'THE ARSENAL'}
+          {isBoutiquePage
+            ? (locale === 'fr' ? 'BOUTIQUE' : 'BOUTIQUE')
+            : (locale === 'fr' ? 'BOUTIQUE' : 'BOUTIQUE')}
         </h2>
         <p style={{
           fontFamily: 'var(--font-body)',
@@ -168,9 +172,32 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale }: GearS
           maxWidth: '600px',
         }}>
           {locale === 'fr'
-            ? "Équipement sélectionné par espèce cible. Cliquez sur une espèce pour voir les leurres et l'équipement recommandés. Shopify-ready."
-            : "Gear selected by target species. Click a species to see recommended lures and equipment. Shopify-ready."}
+            ? "Équipement sélectionné par espèce cible. Cliquez sur une espèce pour voir les leurres et l'équipement recommandés. Panier persistant et sélection par espèce."
+            : "Gear selected by target species. Click a species to see recommended lures and equipment. Persistent cart and species-driven selection."}
         </p>
+        {!isBoutiquePage && (
+          <motion.button
+            whileHover={{ y: -4, x: 6 }}
+            transition={{ duration: 0.2 }}
+            onClick={onNavigateBoutique}
+            style={{
+              marginTop: '1.35rem',
+              padding: '0.95rem 1.5rem',
+              background: '#E63946',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontFamily: 'var(--font-condensed)',
+              fontSize: '0.84rem',
+              fontWeight: 700,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            {locale === 'fr' ? 'BOUTIQUE →' : 'BOUTIQUE →'}
+          </motion.button>
+        )}
       </motion.div>
 
       {/* 22 Species Cards Grid */}

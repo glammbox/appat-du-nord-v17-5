@@ -420,57 +420,67 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                     {possessionNote}
                   </p>
                 )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <a
-                    href="https://www.pechesportive.gouv.qc.ca"
+                    href="https://www.quebec.ca/tourisme-loisirs-sport/activites-sportives-et-de-plein-air/peche-sportive/permis"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
-                      color: 'var(--accent)',
+                      justifyContent: 'center',
+                      padding: '0.65rem 0.95rem',
+                      background: '#E63946',
+                      color: '#fff',
+                      border: '1px solid #E63946',
                       fontFamily: 'var(--font-condensed)',
                       fontSize: '0.72rem',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       letterSpacing: '0.1em',
-                      textDecoration: 'underline',
+                      textDecoration: 'none',
+                      borderRadius: '8px',
                     }}
                   >
-                    🎫 {locale === 'fr' ? 'Acheter un permis de pêche sportive' : 'Buy a sport fishing licence'}
+                    {locale === 'fr' ? 'Permis requis' : 'Permit required'}
                   </a>
                   <a
-                    href="https://mffp.gouv.qc.ca"
+                    href="https://peche.faune.gouv.qc.ca/"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.4rem',
-                      color: 'var(--accent)',
+                      justifyContent: 'center',
+                      padding: '0.65rem 0.95rem',
+                      background: 'transparent',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border-active)',
                       fontFamily: 'var(--font-condensed)',
                       fontSize: '0.72rem',
-                      fontWeight: 600,
+                      fontWeight: 700,
                       letterSpacing: '0.1em',
-                      textDecoration: 'underline',
+                      textDecoration: 'none',
+                      borderRadius: '8px',
                     }}
                   >
-                    📋 {locale === 'fr' ? 'Règlements de pêche — MFFP' : 'Fishing Regulations — MFFP'}
+                    {locale === 'fr' ? 'Règlement' : 'Regulations'}
                   </a>
                 </div>
               </div>
             )}
 
-            {/* C&R badge */}
             {species.catchRelease && (
               <div style={{
                 marginTop: '0.75rem',
-                padding: '0.6rem 1rem',
+                padding: '0.7rem 0.9rem',
                 background: 'rgba(123,228,149,0.08)',
                 border: '1px solid rgba(123,228,149,0.3)',
                 borderRadius: '6px',
-                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.55rem',
               }}>
+                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
                 <span style={{
                   fontFamily: 'var(--font-condensed)',
                   fontSize: '0.72rem',
@@ -479,7 +489,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                   letterSpacing: '0.15em',
                   textTransform: 'uppercase',
                 }}>
-                  ♻ {locale === 'fr' ? "Remise à l'eau obligatoire" : 'Catch & Release Required'}
+                  {locale === 'fr' ? "Remise à l'eau obligatoire" : 'Catch & release required'}
                 </span>
               </div>
             )}
@@ -740,7 +750,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                         key={i}
                         onClick={() => waterId && onScrollToWater && onScrollToWater(waterId)}
                         style={{
-                          padding: '0.35rem 0.7rem',
+                          padding: '0.42rem 0.75rem',
                           background: 'rgba(0,180,216,0.08)',
                           border: '1px solid var(--border-active)',
                           color: waterId ? 'var(--accent)' : 'var(--text-secondary)',
@@ -749,7 +759,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                           fontWeight: 600,
                           letterSpacing: '0.08em',
                           cursor: waterId ? 'pointer' : 'default',
-                          borderRadius: '999px',
+                          borderRadius: '8px',
                           transition: 'background 0.18s',
                         }}
                         onMouseEnter={e => {

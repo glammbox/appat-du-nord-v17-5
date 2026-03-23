@@ -1,6 +1,5 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { useState } from 'react'
 import { waters, Water } from '../lib/waters'
 import { WaterDetailPanel } from './WaterDetailPanel'
 
@@ -12,12 +11,9 @@ interface WatersMapProps {
   onViewCalendar?: (region: { lat: number; lon: number; label: string }) => void
 }
 
-// Unique regions from waters data for the dropdown
-const uniqueRegions = ['ALL', ...Array.from(new Set(waters.map(w => w.region))).sort()]
-
 export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, onViewCalendar }: WatersMapProps) {
   const [selectedWater, setSelectedWater] = useState<Water | null>(null)
-  const [selectedRegion, setSelectedRegion] = useState<string>('ALL')
+  const [query, setQuery] = useState('')
   const sectionRef = useRef(null)
   const inView = useInView(sectionRef, { once: true, amount: 0.1 })
 
@@ -35,9 +31,18 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
     }, 100)
   }
 
-  const filteredWaters = selectedRegion === 'ALL'
-    ? waters
-    : waters.filter(w => w.region === selectedRegion)
+  useEffect(() => {
+    const pending = sessionStorage.getItem('appat-select-water')
+    if (!pending) return
+    const match = waters.find(w => w.id === pending)
+    if (match) handleWaterClick(match)
+    sessionStorage.removeItem('appat-select-water')
+  }, [])
+
+  const filteredWaters = waters.filter((water) => {
+    const haystack = `${water.nameFr} ${water.nameEn} ${water.region} ${water.species.join(' ')}`.toLowerCase()
+    return haystack.includes(query.toLowerCase())
+  })
 
   // Build OpenTopoMap URL (terrain tiles) — zooms to selected water or shows all Quebec
   const mapLat = selectedWater ? selectedWater.coords[0] : 52
@@ -57,11 +62,6 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
   }
 
   const mapUrl = buildTerrainUrl()
-
-  const regionLabel = (r: string) => {
-    if (r === 'ALL') return locale === 'fr' ? 'Toutes les régions' : 'All regions'
-    return r
-  }
 
   return (
     <motion.div
@@ -91,57 +91,34 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
           : `${waters.length} water bodies & rivers — select to see details`}
       </p>
 
-      {/* Region Selector Dropdown */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-        <label
-          htmlFor="region-select"
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.4, delay: 0.08 }}
+        style={{ marginBottom: '1.25rem' }}
+      >
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={locale === 'fr' ? "Rechercher un plan d'eau" : 'Search a water body'}
           style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '0.7rem',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          {locale === 'fr' ? 'Région :' : 'Region:'}
-        </label>
-        <select
-          id="region-select"
-          value={selectedRegion}
-          onChange={e => {
-            setSelectedRegion(e.target.value)
-            setSelectedWater(null)
-          }}
-          style={{
+            width: '100%',
             background: 'var(--surface)',
             border: '1px solid var(--border)',
             color: 'var(--text-primary)',
-            padding: '0.45rem 0.85rem',
+            padding: '0.9rem 1rem',
             fontFamily: 'var(--font-body)',
-            fontSize: '0.8rem',
-            borderRadius: '4px',
-            cursor: 'pointer',
+            fontSize: '0.95rem',
+            borderRadius: '10px',
             outline: 'none',
+            boxShadow: '0 0 0 1px rgba(0,180,216,0.05)',
           }}
-        >
-          {uniqueRegions.map(r => (
-            <option key={r} value={r}>{regionLabel(r)}</option>
-          ))}
-        </select>
-        {selectedRegion !== 'ALL' && (
-          <span style={{
-            fontSize: '0.72rem',
-            color: 'var(--text-muted)',
-            fontFamily: 'var(--font-body)',
-          }}>
-            {filteredWaters.length} {locale === 'fr' ? 'plan(s) d\'eau' : 'water body/bodies'}
-          </span>
-        )}
-      </div>
+        />
+      </motion.div>
 
       {/* Terrain Map — OpenStreetMap Cycle/Terrain layer */}
       <div style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
-        {/* Terrain badge */}
+        {/* Terrain label */}
         <div style={{
           background: 'var(--surface)',
           borderBottom: '1px solid var(--border)',
@@ -160,7 +137,7 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
           )}
         </div>
         <iframe
-          key={`${mapLat}-${mapLon}-${selectedRegion}`}
+          key={`${mapLat}-${mapLon}-${query}`}
           src={mapUrl}
           title={locale === 'fr' ? 'Carte terrain du Québec' : 'Quebec Terrain Map'}
           width="100%"
@@ -170,10 +147,13 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
         />
       </div>
 
-      {/* Water selector grid — filtered by region */}
+      {/* Water selector grid — searchable, capped to ~3 rows */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style={{
         gap: '0.5rem',
         marginBottom: '1.5rem',
+        maxHeight: '540px',
+        overflowY: 'auto',
+        paddingRight: '0.25rem',
       }}>
         {filteredWaters.map((water) => (
           <button

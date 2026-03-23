@@ -130,29 +130,15 @@ const EXTENDED_TIPS: Record<string, { fr: string; en: string }[]> = {
   ],
 }
 
-type IdentifierState = 'idle' | 'loading' | 'result' | 'error'
-
-interface FishIDResult {
-  species: string
-  confidence: string
-  description: string
-  speciesId?: string
-}
-
 interface TipsSectionProps {
   locale: 'fr' | 'en'
   onViewSpecies?: (id: string) => void
 }
 
-export function TipsSection({ locale, onViewSpecies }: TipsSectionProps) {
+export function TipsSection({ locale, onViewSpecies: _onViewSpecies }: TipsSectionProps) {
   const [filter, setFilter] = useState<TipSpecies | 'tous'>('maskinonge')
   const sectionRef = useRef(null)
   const inView = useInView(sectionRef, { once: true, amount: 0.05 })
-  const [idState, setIdState] = useState<IdentifierState>('idle')
-  const [idResult, setIdResult] = useState<FishIDResult | null>(null)
-  const [idError, setIdError] = useState('')
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const speciesFilters = locale === 'fr' ? speciesFiltersFr : speciesFiltersEn
 
@@ -166,110 +152,6 @@ export function TipsSection({ locale, onViewSpecies }: TipsSectionProps) {
     ? (EXTENDED_TIPS[filter] || [])
     : []
 
-  const handleFileSelect = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setIdError(locale === 'fr' ? 'Veuillez sélectionner une image.' : 'Please select an image file.')
-      setIdState('error')
-      return
-    }
-
-    // Show preview
-    const reader = new FileReader()
-    reader.onload = (e) => setPreviewUrl(e.target?.result as string)
-    reader.readAsDataURL(file)
-
-    setIdState('loading')
-    setIdResult(null)
-    setIdError('')
-
-    try {
-      // Convert file to base64
-      const b64 = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader()
-        r.onload = () => {
-          const dataUrl = r.result as string
-          resolve(dataUrl.split(',')[1])
-        }
-        r.onerror = reject
-        r.readAsDataURL(file)
-      })
-
-      // Send to OpenAI GPT-4o Vision via a simple proxy approach
-      // Note: In production this would use a backend endpoint; here we use the OPENAI key from env
-      const OPENAI_KEY = (import.meta as unknown as { env: Record<string, string> }).env?.VITE_OPENAI_API_KEY
-
-      if (!OPENAI_KEY) {
-        // Graceful fallback: show sample result
-        setIdResult({
-          species: locale === 'fr' ? 'Identification IA requiert une clé API' : 'AI identification requires API key',
-          confidence: '—',
-          description: locale === 'fr'
-            ? 'Pour activer l\'identification IA des poissons, configurez VITE_OPENAI_API_KEY dans .env. En attendant, consultez notre encyclopédie des 21 espèces ci-dessous.'
-            : 'To enable AI fish identification, configure VITE_OPENAI_API_KEY in .env. In the meantime, see our 21-species encyclopedia below.',
-        })
-        setIdState('result')
-        return
-      }
-
-      const QUEBEC_SPECIES = [
-        'Maskinongé (Muskellunge)', 'Grand Brochet (Northern Pike)', 'Achigan à grande bouche (Largemouth Bass)',
-        'Achigan à petite bouche (Smallmouth Bass)', 'Doré jaune (Walleye)', 'Doré noir (Sauger)',
-        'Truite mouchetée (Brook Trout)', 'Truite arc-en-ciel (Rainbow Trout)', 'Truite brune (Brown Trout)',
-        'Touladi (Lake Trout)', 'Saumon atlantique (Atlantic Salmon)', 'Ouananiche (Landlocked Salmon)',
-        'Omble chevalier (Arctic Char)', 'Maskinongé tigre (Tiger Muskie)', 'Perchaude (Yellow Perch)',
-        'Esturgeon jaune (Lake Sturgeon)', 'Cisco (Lake Cisco/Herring)', 'Corégone (Lake Whitefish)',
-        'Carpe commune (Common Carp)', 'Barbotte brune (Brown Bullhead)', 'Lotte (Burbot)',
-      ]
-
-      const prompt = locale === 'fr'
-        ? `Tu es un expert en ichtyologie québécoise. Identifie le poisson dans cette image parmi ces 21 espèces du Québec: ${QUEBEC_SPECIES.join(', ')}. Réponds en JSON: {"species": "nom FR (nom EN)", "confidence": "XX%", "description": "brève description pour confirmer l'identification", "speciesId": "id-anglais-kebab-case"}`
-        : `You are a Quebec ichthyology expert. Identify the fish in this image from these 21 Quebec species: ${QUEBEC_SPECIES.join(', ')}. Respond in JSON: {"species": "EN name (FR name)", "confidence": "XX%", "description": "brief description confirming identification", "speciesId": "kebab-case-id"}`
-
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: prompt },
-                { type: 'image_url', image_url: { url: `data:${file.type};base64,${b64}`, detail: 'low' } },
-              ],
-            },
-          ],
-          max_tokens: 300,
-        }),
-      })
-
-      if (!response.ok) throw new Error(`API error ${response.status}`)
-
-      const data = await response.json()
-      const content = data.choices?.[0]?.message?.content || ''
-
-      // Parse JSON from response
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
-        setIdResult(parsed)
-        setIdState('result')
-      } else {
-        setIdResult({ species: content, confidence: '—', description: '' })
-        setIdState('result')
-      }
-    } catch (err) {
-      console.error(err)
-      setIdError(locale === 'fr'
-        ? "Erreur lors de l'identification. Vérifiez votre connexion et réessayez."
-        : 'Identification error. Check your connection and try again.')
-      setIdState('error')
-    }
-  }
-
   return (
     <motion.div
       ref={sectionRef}
@@ -282,201 +164,59 @@ export function TipsSection({ locale, onViewSpecies }: TipsSectionProps) {
         {locale === 'fr' ? 'CONSEILS DE PÊCHE' : 'FISHING TIPS'}
       </h2>
 
-      {/* ───── ON-SITE FISH IDENTIFIER ───── */}
-      <div
-        style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: '8px',
-          padding: '1.25rem',
-          marginBottom: '1.5rem',
-        }}
-      >
-        <h3 style={{ fontFamily: 'var(--font-display)', color: 'var(--accent)', fontSize: '1.1rem', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
-          🐟 {locale === 'fr' ? 'Identifier votre prise — IA sur site' : 'Identify Your Catch — On-Site AI'}
-        </h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', lineHeight: 1.6, marginBottom: '1rem' }}>
-          {locale === 'fr'
-            ? 'Téléchargez une photo de votre prise. Notre IA identifie l\'espèce parmi les 21 poissons du Québec et vous redirige vers sa fiche complète.'
-            : 'Upload a photo of your catch. Our AI identifies the species among 21 Quebec fish and links you to its full profile.'}
-        </p>
-
-        {/* Upload zone */}
-        <div
+      {/* External links */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+        <a
+          href="https://www.quebec.ca/loisirs-sport-plein-air/chasse-peche/peche/especes"
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
-            border: `2px dashed var(--border)`,
-            borderRadius: '6px',
-            padding: '1.5rem',
-            textAlign: 'center',
-            cursor: 'pointer',
-            transition: 'border-color 0.2s',
-            background: 'var(--bg)',
-            marginBottom: '1rem',
-          }}
-          onClick={() => fileInputRef.current?.click()}
-          onDragOver={(e) => { e.preventDefault(); (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)' }}
-          onDragLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)' }}
-          onDrop={(e) => {
-            e.preventDefault();
-            (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
-            const file = e.dataTransfer.files[0]
-            if (file) handleFileSelect(file)
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.4rem 0.75rem',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border)',
+            color: 'var(--text)',
+            borderRadius: '3px', fontSize: '0.72rem',
+            textDecoration: 'none', fontFamily: 'var(--font-body)',
+            fontWeight: 500, letterSpacing: '0.05em',
           }}
         >
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="preview"
-              style={{ maxHeight: '180px', maxWidth: '100%', objectFit: 'contain', borderRadius: '4px', marginBottom: '0.5rem' }}
-            />
-          ) : (
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📸</div>
-          )}
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0 }}>
-            {locale === 'fr'
-              ? 'Glissez-déposez une photo ou cliquez pour sélectionner'
-              : 'Drag & drop a photo or click to select'}
-          </p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) handleFileSelect(file)
-            }}
-          />
-        </div>
-
-        {/* Loading state */}
-        {idState === 'loading' && (
-          <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem', animation: 'spin 1s linear infinite', display: 'inline-block' }}>🔄</div>
-            <p>{locale === 'fr' ? 'Analyse en cours...' : 'Analyzing...'}</p>
-          </div>
-        )}
-
-        {/* Error state */}
-        {idState === 'error' && (
-          <div style={{ padding: '0.75rem', background: 'rgba(212,38,28,0.1)', border: '1px solid #D4261C', borderRadius: '4px', color: '#D4261C', fontSize: '0.82rem' }}>
-            ⚠ {idError}
-          </div>
-        )}
-
-        {/* Result */}
-        {idState === 'result' && idResult && (
-          <div style={{ padding: '1rem', background: 'rgba(77,124,138,0.12)', border: '1px solid var(--accent-alt)', borderRadius: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-              <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: 'var(--text)', fontWeight: 600, marginBottom: '0.2rem' }}>
-                  {idResult.species}
-                </div>
-                {idResult.confidence && idResult.confidence !== '—' && (
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                    {locale === 'fr' ? 'Confiance:' : 'Confidence:'} <strong style={{ color: 'var(--accent)' }}>{idResult.confidence}</strong>
-                  </div>
-                )}
-                {idResult.description && (
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: 1.5, margin: 0 }}>
-                    {idResult.description}
-                  </p>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-                {idResult.speciesId && onViewSpecies && (
-                  <button
-                    onClick={() => onViewSpecies(idResult.speciesId!)}
-                    style={{
-                      padding: '0.4rem 0.85rem',
-                      background: 'var(--accent)',
-                      color: '#0D1418',
-                      border: 'none',
-                      borderRadius: '3px',
-                      fontSize: '0.72rem',
-                      fontFamily: 'var(--font-display)',
-                      letterSpacing: '0.08em',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {locale === 'fr' ? 'VOIR LA FICHE →' : 'VIEW PROFILE →'}
-                  </button>
-                )}
-                <button
-                  onClick={() => { setIdState('idle'); setIdResult(null); setPreviewUrl(null); setIdError('') }}
-                  style={{
-                    padding: '0.4rem 0.85rem',
-                    background: 'var(--surface-2)',
-                    color: 'var(--muted-text)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '3px',
-                    fontSize: '0.72rem',
-                    fontFamily: 'var(--font-display)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {locale === 'fr' ? 'Réessayer' : 'Try again'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* External links fallback */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
-          <a
-            href="https://www.quebec.ca/loisirs-sport-plein-air/chasse-peche/peche/especes"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-              color: 'var(--text)',
-              borderRadius: '3px', fontSize: '0.72rem',
-              textDecoration: 'none', fontFamily: 'var(--font-body)',
-              fontWeight: 500, letterSpacing: '0.05em',
-            }}
-          >
-            🇨🇦 {locale === 'fr' ? 'Espèces — Québec.ca' : 'Species — Quebec.ca'}
-          </a>
-          <a
-            href="https://apps.apple.com/ca/app/ip%C3%AAche/id1160834366"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-              color: 'var(--text)',
-              borderRadius: '3px', fontSize: '0.72rem',
-              textDecoration: 'none', fontFamily: 'var(--font-body)',
-              fontWeight: 500, letterSpacing: '0.05em',
-            }}
-          >
-            🍎 iPêche App Store
-          </a>
-          <a
-            href="https://play.google.com/store/apps/details?id=ca.qc.mddefp.ipeche"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-              padding: '0.4rem 0.75rem',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)',
-              color: 'var(--text)',
-              borderRadius: '3px', fontSize: '0.72rem',
-              textDecoration: 'none', fontFamily: 'var(--font-body)',
-              fontWeight: 500, letterSpacing: '0.05em',
-            }}
-          >
-            🤖 iPêche Google Play
-          </a>
-        </div>
+          🇨🇦 {locale === 'fr' ? 'Espèces — Québec.ca' : 'Species — Quebec.ca'}
+        </a>
+        <a
+          href="https://apps.apple.com/ca/app/ip%C3%AAche/id1160834366"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.4rem 0.75rem',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border)',
+            color: 'var(--text)',
+            borderRadius: '3px', fontSize: '0.72rem',
+            textDecoration: 'none', fontFamily: 'var(--font-body)',
+            fontWeight: 500, letterSpacing: '0.05em',
+          }}
+        >
+          🍎 iPêche App Store
+        </a>
+        <a
+          href="https://play.google.com/store/apps/details?id=ca.qc.mddefp.ipeche"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.4rem 0.75rem',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border)',
+            color: 'var(--text)',
+            borderRadius: '3px', fontSize: '0.72rem',
+            textDecoration: 'none', fontFamily: 'var(--font-body)',
+            fontWeight: 500, letterSpacing: '0.05em',
+          }}
+        >
+          🤖 iPêche Google Play
+        </a>
       </div>
 
       {/* Species Filter — scrollable */}
@@ -576,10 +316,6 @@ export function TipsSection({ locale, onViewSpecies }: TipsSectionProps) {
           })}
         </div>
       )}
-
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
     </motion.div>
   )
 }

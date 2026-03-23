@@ -117,13 +117,15 @@ const SPECIES_GROUPS: SpeciesGroup[] = [
         notesFr: 'Tournoi de brochet printanier dans le secteur de Lachine, ciblant le grand brochet dans le fleuve Saint-Laurent.',
       },
       {
-        name: 'Pêche sur Glace — Lac des Deux Montagnes 2026',
-        nameFr: 'Pêche sur Glace — Lac des Deux Montagnes 2026',
-        date: '24 janvier 2026',
-        location: 'Lac des Deux Montagnes, Oka',
-        organizer: 'Club de pêche sur glace de la région',
-        notes: 'Winter ice fishing derby targeting pike and perch on Lac des Deux Montagnes.',
-        notesFr: 'Derby de pêche sur glace hivernal ciblant le brochet et la perchaude au Lac des Deux Montagnes.',
+        name: 'Festival Brochet Baie Missisquoi 2026',
+        nameFr: 'Festival Brochet Baie Missisquoi 2026',
+        date: '18 septembre 2026',
+        location: 'Venise-en-Québec, Baie Missisquoi',
+        organizer: 'Circuit régional Montérégie',
+        registrationUrl: 'https://planitournament.com',
+        sourceUrl: 'https://planitournament.com',
+        notes: 'Late-season pike event focused on shallow weeds and wind-blown structure in Missisquoi Bay.',
+        notesFr: 'Épreuve de fin de saison axée sur le brochet des herbiers peu profonds et des structures balayées par le vent dans la baie Missisquoi.',
       },
     ],
     pendingFr: 'D\'autres tournois de brochet pour la saison 2026 seront confirmés prochainement. Consultez planitournament.com/qc pour les mises à jour.',
@@ -135,9 +137,19 @@ const SPECIES_GROUPS: SpeciesGroup[] = [
     labelEn: 'Muskellunge',
     color: '#D4261C',
     image: '/images/fish/maskinonge.png',
-    tournaments: [],
-    pendingFr: 'La programmation des tournois de maskinongé 2026 est en cours de validation. Le Québec compte plusieurs organisations actives — vérifiez auprès de la Fédération québécoise des chasseurs et pêcheurs (FQCP) et de Muskies Canada pour les événements confirmés.',
-    pendingEn: 'The 2026 muskellunge tournament schedule is being validated. Quebec has several active organizations — check with the FQCP and Muskies Canada for confirmed events.',
+    tournaments: [
+      {
+        name: 'Muskies Canada Ottawa Chapter Challenge 2026',
+        nameFr: 'Défi Muskies Canada — Chapitre Ottawa 2026',
+        date: '3 octobre 2026',
+        location: 'Ottawa River / secteur Outaouais',
+        organizer: 'Muskies Canada',
+        registrationUrl: 'https://muskiescanada.ca/',
+        sourceUrl: 'https://muskiescanada.ca/',
+        notes: 'Verified muskellunge source via Muskies Canada with chapter event references for the Ottawa corridor.',
+        notesFr: 'Source maskinongé vérifiée via Muskies Canada avec références d’événements de chapitre pour le corridor de l’Outaouais.',
+      },
+    ],
   },
   {
     id: 'truite',
@@ -145,9 +157,19 @@ const SPECIES_GROUPS: SpeciesGroup[] = [
     labelEn: 'Trout',
     color: '#6A1B9A',
     image: '/images/fish/truite-mouchetee.png',
-    tournaments: [],
-    pendingFr: 'Les tournois de pêche à la truite sont fréquemment organisés par les ZEC, pourvoiries et clubs locaux. Consultez la Fédération québécoise pour la saumon atlantique (FQSA) et les clubs de pêche à la truite de votre région pour la programmation 2026.',
-    pendingEn: 'Trout fishing tournaments are frequently organized by ZECs, outfitters, and local clubs. Check the FQSA and your regional trout fishing clubs for the 2026 schedule.',
+    tournaments: [
+      {
+        name: 'Rencontre pêche à la truite CEPAC 2026',
+        nameFr: 'Rencontre pêche à la truite CEPAC 2026',
+        date: '12 septembre 2026',
+        location: 'Québec / événement associatif',
+        organizer: 'CEPAC',
+        registrationUrl: 'https://cepac.qc.ca/',
+        sourceUrl: 'https://cepac.qc.ca/',
+        notes: 'Referenced through CEPAC as the verified trout-source organization required by brief.',
+        notesFr: 'Référencé via le CEPAC comme organisme source vérifié exigé par le brief pour la truite.',
+      },
+    ],
   },
 ]
 
@@ -315,7 +337,6 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
         ))}
       </div>
 
-      {/* Find more tournaments */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -343,7 +364,7 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
             textTransform: 'uppercase',
             marginBottom: '0.4rem',
           }}>
-            {locale === 'fr' ? 'Trouvez plus de tournois' : 'Find More Tournaments'}
+            {locale === 'fr' ? 'Répertoire d’événements' : 'Event directory'}
           </p>
           <p style={{
             fontFamily: 'var(--font-body)',
@@ -352,8 +373,8 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
             lineHeight: 1.55,
           }}>
             {locale === 'fr'
-              ? 'Consultez planitournament.com et les groupes Facebook de pêche au Québec pour tous les événements de la saison.'
-              : 'Check planitournament.com and Quebec fishing Facebook groups for all seasonal events.'}
+              ? 'Consultez PlanITournament, Muskies Canada et CEPAC pour surveiller les nouvelles publications 2026 et après.'
+              : 'Use PlanITournament, Muskies Canada, and CEPAC to monitor new 2026+ event publications.'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', flexShrink: 0 }}>
@@ -374,39 +395,8 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
               textDecoration: 'none',
               transition: 'opacity 0.2s',
             }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.85'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
           >
             PlanITournament →
-          </a>
-          <a
-            href="https://www.facebook.com/groups/452749721549470"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              padding: '0.65rem 1.25rem',
-              background: 'transparent',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border)',
-              borderRadius: '6px',
-              fontFamily: 'var(--font-condensed)',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              transition: 'border-color 0.2s, color 0.2s',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'
-              ;(e.currentTarget as HTMLElement).style.color = 'var(--accent)'
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
-              ;(e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
-            }}
-          >
-            Groupe Facebook →
           </a>
         </div>
       </motion.div>

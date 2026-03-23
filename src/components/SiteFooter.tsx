@@ -272,8 +272,12 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
             color: 'var(--text-muted)',
             fontFamily: 'var(--font-body)',
             fontSize: '0.75rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.4rem',
           }}>
-            © 2026 Appât du Nord · {locale === 'fr' ? 'Fait avec ❤️ au Québec' : 'Made with ❤️ in Quebec'} · 🇨🇦
+            <div>© 2026 Appât du Nord · {locale === 'fr' ? 'Fait au Québec' : 'Made in Quebec'} · 🇨🇦</div>
+            <div style={{ color: 'var(--text-secondary)' }}>Produit par GLAMMBOX · Patrick Gervais</div>
           </div>
         </div>
       </div>

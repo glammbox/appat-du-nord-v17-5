@@ -120,7 +120,7 @@ export function WaterDetailPanel({ water, onClose, onViewGear, locale, onViewSpe
       <div className="p-4 grid md:grid-cols-2 gap-4">
         {/* Left */}
         <div className="space-y-4">
-          {/* Species — clickable badges */}
+          {/* Species — clickable links */}
           <div>
             <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--accent-gold)', fontFamily: 'var(--font-display)' }}>
               {locale === 'fr' ? 'ESPÈCES PRÉSENTES' : 'PRESENT SPECIES'}

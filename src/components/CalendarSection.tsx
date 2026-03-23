@@ -239,10 +239,8 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
       .catch(() => setLoading(false))
   }, [region.lat, region.lon, locale])
 
-  // Fetch 30-day forecast
+  // Fetch 16-day forecast (Open-Meteo free tier max)
   useEffect(() => {
-    // Open-Meteo free tier: max 16 days live + can use forecast + historical (past) to simulate 30-day range
-    // We fetch 16 days forward and show 16 cards (best available with free tier)
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant&timezone=America/Toronto&forecast_days=16`
     fetch(url)
       .then(r => r.json())
@@ -314,10 +312,11 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
         }}>
           {locale === 'fr' ? 'CONDITIONS & CALENDRIER' : 'CONDITIONS & CALENDAR'}
         </h2>
-        <div style={{ fontSize: '0.85rem', color: 'var(--accent)', fontFamily: 'var(--font-display)', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
+        <div style={{ fontSize: '0.95rem', color: 'var(--accent)', fontFamily: 'var(--font-display)', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>
+          {locale === 'fr' ? "Aujourd'hui — " : 'Today — '}
           {new Date().toLocaleDateString(locale === 'fr' ? 'fr-CA' : 'en-CA', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-          }).toUpperCase()}
+            year: 'numeric', month: 'long', day: 'numeric'
+          })}
         </div>
 
         {/* Region + Month selectors on ONE line */}
@@ -517,7 +516,7 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
                 >
                   {/* Day label */}
                   <div style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    {i === 0 ? (locale === 'fr' ? "Auj." : 'Today') : dayName}
+                    {i === 0 ? (locale === 'fr' ? "Aujourd'hui" : 'Today') : dayName}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 700, marginTop: '0.1rem', fontFamily: 'var(--font-display)' }}>
                     {dayNum}
@@ -618,7 +617,7 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
           : `CALENDAR — ${monthNamesEn[selectedMonth].toUpperCase()}`}
       </h3>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '1rem' }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '1rem', maxHeight: '200px', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
             {month.iceStatus} · {month.waterTemp}
