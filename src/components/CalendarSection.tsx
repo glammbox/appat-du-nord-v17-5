@@ -46,11 +46,12 @@ function getScoreColor(score: number): string {
   return '#C8A84B'
 }
 
+// Fix 7 — Strict palette: FERMÉ=#E63946 LENT=#F4A01C ACTIF=#00B4D8 HOT=#22D3EE (per brief)
 const activityColors: Record<ActivityLevel, string> = {
-  HOT: '#D4261C',
-  ACTIVE: '#C8A84B',
-  SLOW: '#4A6A82',
-  CLOSED: '#1A2E42',
+  HOT: '#22D3EE',
+  ACTIVE: '#00B4D8',
+  SLOW: '#F4A01C',
+  CLOSED: '#E63946',
 }
 
 interface WeatherRegion {
@@ -419,29 +420,53 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
               {locale === 'fr' ? 'Aube · Crépuscule' : 'Dawn · Dusk'}
             </div>
           </div>
-          {/* Solunar windows — full width */}
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.8rem', gridColumn: 'span 2' }}>
-            <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-              {locale === 'fr' ? 'Fenêtres solunar' : 'Solunar Windows'}
+          {/* Fix 6 — Solunar Windows: 4 equal centered cards */}
+          <div style={{ gridColumn: 'span 2', marginTop: '0.5rem' }}>
+            <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)', marginBottom: '0.75rem', textAlign: 'center', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}>
+              {locale === 'fr' ? '🌙 Fenêtres Solunar' : '🌙 Solunar Windows'}
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.6rem' }}>
               {solunarWindows.map((w, i) => (
-                <div key={i} style={{
-                  padding: '0.3rem 0.65rem',
-                  borderRadius: '4px',
-                  background: w.type === 'major' ? 'rgba(230,57,70,0.15)' : 'rgba(0,180,216,0.10)',
-                  border: `1px solid ${w.type === 'major' ? 'rgba(230,57,70,0.4)' : 'rgba(0,180,216,0.3)'}`,
-                  display: 'flex',
-                  gap: '0.4rem',
-                  alignItems: 'center',
-                }}>
-                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '0.68rem', fontWeight: 700, color: w.type === 'major' ? '#E63946' : 'var(--accent)', letterSpacing: '0.1em' }}>
-                    {locale === 'fr' ? w.labelFr : w.label}
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.1 + i * 0.06 }}
+                  style={{
+                    background: w.type === 'major' ? 'rgba(230,57,70,0.12)' : 'rgba(0,180,216,0.08)',
+                    border: `1px solid ${w.type === 'major' ? 'rgba(230,57,70,0.45)' : 'rgba(0,180,216,0.35)'}`,
+                    borderRadius: '8px',
+                    padding: '0.9rem 0.6rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.4rem',
+                    textAlign: 'center',
+                  }}
+                >
+                  <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>
+                    {w.type === 'major' ? '🔥' : '✅'}
                   </span>
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+                  <span style={{
+                    fontFamily: 'var(--font-condensed)',
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    color: w.type === 'major' ? '#E63946' : '#00B4D8',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                  }}>
+                    {w.type === 'major' ? 'MAJEUR' : 'MINEUR'}
+                  </span>
+                  <span style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '1rem',
+                    color: 'var(--text-primary)',
+                    letterSpacing: '0.05em',
+                  }}>
                     {w.start}–{w.end}
                   </span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

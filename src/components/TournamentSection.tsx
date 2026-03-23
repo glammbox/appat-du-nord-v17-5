@@ -234,108 +234,77 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
         </p>
       </motion.div>
 
-      {/* Species groups */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-        {SPECIES_GROUPS.map((group, groupIdx) => (
-          <motion.div
-            key={group.id}
-            initial={{ opacity: 0, y: 40 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.56, ease: [0.16, 1, 0.3, 1], delay: 0.1 + groupIdx * 0.07 }}
-          >
-            {/* Group header */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              marginBottom: '1.25rem',
-              paddingBottom: '0.75rem',
-              borderBottom: `2px solid ${group.color}`,
-            }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                flexShrink: 0,
-              }}>
-                <img
-                  src={group.image}
-                  alt={group.labelFr}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }}
-                />
-              </div>
-              <div>
-                <h3 style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.6rem',
-                  color: 'var(--text-primary)',
-                  letterSpacing: '0.05em',
-                  lineHeight: 1,
-                }}>
-                  {locale === 'fr' ? group.labelFr : group.labelEn}
-                </h3>
-                <span style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  color: group.color,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                }}>
-                  {group.tournaments.length > 0
-                    ? `${group.tournaments.length} ${locale === 'fr' ? 'tournoi(s) confirmé(s)' : 'confirmed tournament(s)'}`
-                    : (locale === 'fr' ? 'Programmation en validation' : 'Schedule being verified')}
-                </span>
-              </div>
-            </div>
+      {/* Fix 4 — Flat grid, max 6 cards (2 rows × 3 cols), then "Voir tous" link */}
+      {(() => {
+        // Flatten all tournaments into a single list with group metadata
+        const allCards: Array<{ tournament: TournamentEntry; group: typeof SPECIES_GROUPS[0] }> = []
+        SPECIES_GROUPS.forEach(group => {
+          group.tournaments.forEach(t => {
+            allCards.push({ tournament: t, group })
+          })
+        })
+        const visibleCards = allCards.slice(0, 6)
+        const hasMore = allCards.length > 6
 
-            {/* Tournament cards */}
-            {group.tournaments.length > 0 ? (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '1rem',
-              }}>
-                {group.tournaments.map((t, i) => (
-                  <TournamentCard key={i} tournament={t} locale={locale} accentColor={group.color} delay={i * 0.05} inView={inView} />
-                ))}
-              </div>
-            ) : (
-              /* Pending state */
-              <div style={{
-                padding: '1.5rem',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)',
-                borderLeft: `3px solid ${group.color}`,
-              }}>
-                <p style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  color: group.color,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  marginBottom: '0.5rem',
-                }}>
-                  {locale === 'fr' ? '⏳ Programmation en validation' : '⏳ Schedule Being Verified'}
-                </p>
-                <p style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '0.88rem',
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1.65,
-                }}>
-                  {locale === 'fr' ? group.pendingFr : group.pendingEn}
-                </p>
-              </div>
+        return (
+          <>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(1, 1fr)',
+              gap: '1rem',
+            }}
+            className="tournament-grid"
+            >
+              {visibleCards.map(({ tournament, group }, idx) => (
+                <TournamentCard
+                  key={idx}
+                  tournament={tournament}
+                  locale={locale}
+                  accentColor={group.color}
+                  delay={0.1 + idx * 0.05}
+                  inView={inView}
+                />
+              ))}
+            </div>
+            {hasMore && (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+                style={{ marginTop: '1.5rem', textAlign: 'center' }}
+              >
+                <a
+                  href="https://planitournament.com/qc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontFamily: 'var(--font-condensed)',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    color: '#00B4D8',
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    textDecoration: 'none',
+                    borderBottom: '1px solid rgba(0,180,216,0.4)',
+                    paddingBottom: '2px',
+                    transition: 'color 0.2s, border-color 0.2s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.color = '#F4A01C'
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(244,160,28,0.5)'
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.color = '#00B4D8'
+                    ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,180,216,0.4)'
+                  }}
+                >
+                  {locale === 'fr' ? `Voir tous les tournois (${allCards.length}) →` : `See all tournaments (${allCards.length}) →`}
+                </a>
+              </motion.div>
             )}
-          </motion.div>
-        ))}
-      </div>
+          </>
+        )
+      })()}
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -400,6 +369,14 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
           </a>
         </div>
       </motion.div>
+      <style>{`
+        @media (min-width: 768px) {
+          .tournament-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (min-width: 1100px) {
+          .tournament-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+      `}</style>
     </motion.div>
   )
 }
@@ -523,3 +500,22 @@ function TournamentCard({
     </motion.div>
   )
 }
+
+// Responsive tournament grid styles
+const TournamentGridStyle = () => (
+  <style>{`
+    @media (min-width: 768px) {
+      .tournament-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+    @media (min-width: 1100px) {
+      .tournament-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+    }
+  `}</style>
+)
+
+// Export style component (used inline in TournamentSection)
+export { TournamentGridStyle }

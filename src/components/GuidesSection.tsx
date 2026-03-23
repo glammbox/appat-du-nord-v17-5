@@ -175,10 +175,11 @@ export function GuidesSection({ locale = 'fr', onViewArsenal }: GuidesSectionPro
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
       style={{
-        maxWidth: 'var(--max-width)',
+        maxWidth: '1280px',
         margin: '0 auto',
-        padding: 'var(--section-pad) 1.5rem',
+        padding: 'var(--section-pad) clamp(1.25rem, 3vw, 3rem)',
       }}
+      className="guides-section-container"
     >
       {/* Section Header */}
       <motion.div
@@ -221,13 +222,15 @@ export function GuidesSection({ locale = 'fr', onViewArsenal }: GuidesSectionPro
         </p>
       </motion.div>
 
-      {/* Book Cards Grid */}
+      {/* Fix 5 — Book Cards Grid: equal widths, consistent columns, centered */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
+        gridTemplateColumns: 'repeat(2, 1fr)',
         gap: '1.25rem',
         marginBottom: selectedBook ? '2rem' : '0',
-      }}>
+      }}
+      className="guides-grid"
+      >
         {books.map((book, idx) => {
           const isActive = selectedBook === book.id
           return (
