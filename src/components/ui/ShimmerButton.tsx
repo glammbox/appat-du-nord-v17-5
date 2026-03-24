@@ -1,5 +1,4 @@
-// 21st.dev — ShimmerButton (https://21st.dev/community/components/dillionverma/shimmer-button/default)
-// Adapted for Appât du Nord v16.3 palette (teal accent #00B4D8)
+// ShimmerButton — Electric Wilderness palette for Appât du Nord v17.1
 import React, { CSSProperties } from "react";
 
 export interface ShimmerButtonProps
@@ -16,11 +15,11 @@ export interface ShimmerButtonProps
 const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   (
     {
-      shimmerColor = "#00B4D8",
+      shimmerColor = "#00CFFF",
       shimmerSize = "0.05em",
       shimmerDuration = "3s",
       borderRadius = "6px",
-      background = "rgba(0,180,216,0.15)",
+      background = "rgba(0,207,255,0.10)",
       className,
       children,
       style,
@@ -44,11 +43,11 @@ const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
             justifyContent: "center",
             overflow: "hidden",
             whiteSpace: "nowrap",
-            border: "1px solid rgba(0,180,216,0.45)",
+            border: "1px solid rgba(0,207,255,0.35)",
             borderRadius,
             background,
             cursor: "pointer",
-            transition: "transform 0.3s ease-in-out",
+            transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease",
             ...style,
           } as CSSProperties
         }
@@ -56,15 +55,7 @@ const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
         ref={ref}
         {...props}
       >
-        {/* shimmer container */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            overflow: "hidden",
-            zIndex: 0,
-          }}
-        >
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", zIndex: 0 }}>
           <div
             style={{
               position: "absolute",
@@ -84,9 +75,7 @@ const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
             />
           </div>
         </div>
-        {/* content */}
         <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
-        {/* backdrop */}
         <div
           style={{
             position: "absolute",

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion'
+import { FloatingNav } from './ui/floating-navbar'
 
 interface SiteHeaderProps {
   locale: 'fr' | 'en'
@@ -18,6 +19,30 @@ const NAV_LINKS = [
   { key: 'arsenal',    fr: 'Arsenal',    en: 'Arsenal' },
 ]
 
+function ScrollProgress() {
+  const [progress, setProgress] = useState(0)
+  useEffect(() => {
+    const update = () => {
+      const doc = document.documentElement
+      const scrollTop = doc.scrollTop || document.body.scrollTop
+      const scrollHeight = doc.scrollHeight - doc.clientHeight
+      setProgress(scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0)
+    }
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
+  }, [])
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '3px', background: 'rgba(255,255,255,0.06)', zIndex: 200 }}>
+      <div style={{
+        height: '100%',
+        width: `${progress}%`,
+        background: 'linear-gradient(90deg, #00CFFF 0%, #FF2B2B 100%)',
+        transition: 'width 0.1s linear',
+      }} />
+    </div>
+  )
+}
+
 export function SiteHeader({
   locale,
   onLocaleToggle,
@@ -25,29 +50,35 @@ export function SiteHeader({
   onSectionSelect,
   activeSection,
 }: SiteHeaderProps) {
-  const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const { scrollYProgress } = useScroll()
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 48)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  useMotionValueEvent(scrollYProgress, "change", (current) => {
+    setScrolled(current > 0.02)
+  })
 
   const handleNavClick = (key: string) => {
     setMenuOpen(false)
     onSectionSelect?.(key)
   }
 
+  // Floating nav items for Aceternity FloatingNav
+  const floatingNavItems = NAV_LINKS.map(link => ({
+    name: locale === 'fr' ? link.fr : link.en,
+    link: `#section-${link.key}`,
+    onClick: () => handleNavClick(link.key),
+  }))
+
   return (
     <>
-      {/* Scroll progress bar */}
       <ScrollProgress />
-      
+
+      {/* Sticky top header — logo + controls */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
         style={{
           position: 'sticky',
           top: 0,
@@ -57,11 +88,11 @@ export function SiteHeader({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 1.5rem',
-          transition: 'background 0.28s ease, border-bottom 0.28s ease',
-          background: scrolled ? 'rgba(10,14,26,0.96)' : 'rgba(10,14,26,0.70)',
+          background: scrolled ? 'rgba(6,7,10,0.96)' : 'rgba(6,7,10,0.72)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.10)' : '1px solid transparent',
+          borderBottom: scrolled ? '1px solid rgba(0,207,255,0.12)' : '1px solid transparent',
+          transition: 'background 0.3s ease, border-color 0.3s ease',
         }}
       >
         {/* Logo */}
@@ -70,9 +101,10 @@ export function SiteHeader({
           style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
         >
           <div style={{
-            fontFamily: 'var(--font-display)',
+            fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
+            fontWeight: 900,
             fontSize: '1.45rem',
-            color: 'var(--text-primary)',
+            color: '#F5F7FA',
             letterSpacing: '0.08em',
             lineHeight: 1,
             textTransform: 'uppercase',
@@ -80,13 +112,13 @@ export function SiteHeader({
             Appât du Nord
           </div>
           <div style={{
-            fontFamily: 'var(--font-condensed)',
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 500,
             fontSize: '0.58rem',
-            color: 'var(--accent)',
+            color: '#00CFFF',
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
             marginTop: '2px',
-            fontWeight: 600,
           }}>
             {locale === 'fr' ? 'Atlas de pêche — Québec' : 'Quebec Fishing Atlas'}
           </div>
@@ -101,38 +133,29 @@ export function SiteHeader({
             const isActive = link.key === activeSection
             const label = locale === 'fr' ? link.fr : link.en
             return (
-              <button
+              <motion.button
                 key={link.key}
                 onClick={() => handleNavClick(link.key)}
+                whileHover={{ color: '#F5F7FA' }}
                 style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.76rem',
+                  fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 600,
+                  fontSize: '0.76rem',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
-                  color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                  color: isActive ? '#00CFFF' : '#C8D3E2',
                   background: 'transparent',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+                  borderBottom: isActive ? '2px solid #00CFFF' : '2px solid transparent',
                   cursor: 'pointer',
                   padding: '0.5rem 0.7rem',
                   paddingBottom: '0.35rem',
                   transition: 'color 0.18s, border-color 0.18s',
                   whiteSpace: 'nowrap',
                 }}
-                onMouseEnter={e => {
-                  if (!isActive) {
-                    (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!isActive) {
-                    (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
-                  }
-                }}
               >
                 {label}
-              </button>
+              </motion.button>
             )
           })}
         </nav>
@@ -140,15 +163,15 @@ export function SiteHeader({
         {/* Right side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {/* Cart */}
-          <div style={{ position: 'relative', color: 'var(--text-primary)', fontSize: '1.1rem', cursor: 'pointer' }}>
+          <div style={{ position: 'relative', color: '#F5F7FA', fontSize: '1.1rem', cursor: 'pointer' }}>
             🛒
             {cartCount > 0 && (
               <span style={{
                 position: 'absolute', top: '-6px', right: '-8px',
-                background: '#E63946', color: '#fff',
+                background: '#FF2B2B', color: '#fff',
                 borderRadius: '50%', width: '16px', height: '16px',
                 fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 700, fontFamily: 'var(--font-condensed)',
+                fontWeight: 700,
               }}>
                 {cartCount}
               </span>
@@ -156,33 +179,26 @@ export function SiteHeader({
           </div>
 
           {/* Locale Toggle */}
-          <button
+          <motion.button
             onClick={onLocaleToggle}
+            whileHover={{ background: '#00CFFF', color: '#06070A' }}
+            transition={{ duration: 0.18 }}
             style={{
               padding: '0.38rem 0.9rem',
-              background: 'rgba(0,180,216,0.12)',
-              border: '1px solid rgba(0,180,216,0.35)',
-              color: 'var(--accent)',
-              fontFamily: 'var(--font-condensed)',
-              fontSize: '0.72rem',
+              background: 'rgba(0,207,255,0.12)',
+              border: '1px solid rgba(0,207,255,0.35)',
+              color: '#00CFFF',
+              fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 700,
+              fontSize: '0.72rem',
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               cursor: 'pointer',
-              transition: 'all 0.18s ease',
-              borderRadius: '6px',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.background = 'var(--accent)'
-              ;(e.currentTarget as HTMLElement).style.color = '#0A0E1A'
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.background = 'rgba(0,180,216,0.12)'
-              ;(e.currentTarget as HTMLElement).style.color = 'var(--accent)'
+              borderRadius: '4px',
             }}
           >
             {locale === 'fr' ? 'EN' : 'FR'}
-          </button>
+          </motion.button>
 
           {/* Mobile menu button */}
           <button
@@ -191,7 +207,7 @@ export function SiteHeader({
             style={{
               background: 'none',
               border: 'none',
-              color: 'var(--text-primary)',
+              color: '#F5F7FA',
               cursor: 'pointer',
               padding: '0.4rem',
               fontSize: '1.4rem',
@@ -204,6 +220,12 @@ export function SiteHeader({
         </div>
       </motion.header>
 
+      {/* Aceternity FloatingNav — appears after hero on scroll */}
+      <FloatingNav
+        navItems={floatingNavItems as any}
+        className="hidden md:flex"
+      />
+
       {/* Mobile drawer */}
       <AnimatePresence>
         {menuOpen && (
@@ -211,16 +233,16 @@ export function SiteHeader({
             initial={{ x: '100%', opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
             style={{
               position: 'fixed',
               top: '72px',
               right: 0,
               bottom: 0,
               width: '280px',
-              background: 'rgba(10,14,26,0.98)',
+              background: 'rgba(6,7,10,0.98)',
               backdropFilter: 'blur(24px)',
-              borderLeft: '1px solid var(--border)',
+              borderLeft: '1px solid rgba(0,207,255,0.12)',
               zIndex: 99,
               padding: '2rem 1.5rem',
               display: 'flex',
@@ -229,15 +251,15 @@ export function SiteHeader({
               overflowY: 'auto',
             }}
           >
-            {/* APPÂT DU NORD watermark in drawer */}
             <div style={{
               position: 'absolute',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%) rotate(-90deg)',
-              fontFamily: 'var(--font-display)',
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900,
               fontSize: '5rem',
-              color: 'rgba(0,180,216,0.05)',
+              color: 'rgba(0,207,255,0.04)',
               letterSpacing: '0.1em',
               whiteSpace: 'nowrap',
               pointerEvents: 'none',
@@ -255,12 +277,12 @@ export function SiteHeader({
                   transition={{ delay: i * 0.05, duration: 0.3 }}
                   onClick={() => handleNavClick(link.key)}
                   style={{
-                    fontFamily: 'var(--font-condensed)',
-                    fontSize: '1.1rem',
+                    fontFamily: "'Barlow Condensed', sans-serif",
                     fontWeight: 600,
+                    fontSize: '1.1rem',
                     letterSpacing: '0.18em',
                     textTransform: 'uppercase',
-                    color: 'var(--text-secondary)',
+                    color: '#C8D3E2',
                     background: 'none',
                     border: 'none',
                     borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -272,8 +294,6 @@ export function SiteHeader({
                     position: 'relative',
                     zIndex: 1,
                   }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--accent)'}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'}
                 >
                   {label}
                 </motion.button>
@@ -292,37 +312,5 @@ export function SiteHeader({
         }
       `}</style>
     </>
-  )
-}
-
-function ScrollProgress() {
-  const [progress, setProgress] = useState(0)
-  useEffect(() => {
-    const update = () => {
-      const doc = document.documentElement
-      const scrollTop = doc.scrollTop || document.body.scrollTop
-      const scrollHeight = doc.scrollHeight - doc.clientHeight
-      setProgress(scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0)
-    }
-    window.addEventListener('scroll', update, { passive: true })
-    return () => window.removeEventListener('scroll', update)
-  }, [])
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '3px',
-      background: 'rgba(255,255,255,0.06)',
-      zIndex: 200,
-    }}>
-      <div style={{
-        height: '100%',
-        width: `${progress}%`,
-        background: 'linear-gradient(90deg, var(--accent) 0%, #E63946 100%)',
-        transition: 'width 0.1s linear',
-      }} />
-    </div>
   )
 }

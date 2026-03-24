@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { WavyBackground } from './ui/wavy-background'
 
 interface SiteFooterProps {
   onSectionSelect?: (section: string) => void
@@ -6,13 +6,13 @@ interface SiteFooterProps {
 }
 
 const SPONSORS = [
-  { name: 'Mercury',    url: 'https://www.mercurymarine.com' },
-  { name: 'Yamaha',    url: 'https://www.yamahaoutboards.com' },
-  { name: 'Shimano',   url: 'https://www.shimano.com' },
-  { name: 'Rapala',    url: 'https://www.rapala.com' },
-  { name: 'Berkley',   url: 'https://www.berkley-fishing.com' },
-  { name: 'Humminbird',url: 'https://www.humminbird.com' },
-  { name: 'Abu Garcia',url: 'https://www.abugarcia.com' },
+  { name: 'Mercury',     url: 'https://www.mercurymarine.com' },
+  { name: 'Yamaha',      url: 'https://www.yamahaoutboards.com' },
+  { name: 'Shimano',     url: 'https://www.shimano.com' },
+  { name: 'Rapala',      url: 'https://www.rapala.com' },
+  { name: 'Berkley',     url: 'https://www.berkley-fishing.com' },
+  { name: 'Humminbird',  url: 'https://www.humminbird.com' },
+  { name: 'Abu Garcia',  url: 'https://www.abugarcia.com' },
 ]
 
 const NAV_SECTIONS = [
@@ -26,42 +26,25 @@ const NAV_SECTIONS = [
 
 export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
   return (
-    <footer style={{ background: 'var(--bg)', borderTop: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
-      
-      {/* Giant APPÂT DU NORD brand stamp */}
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        fontFamily: 'var(--font-display)',
-        fontSize: 'clamp(5rem, 14vw, 12rem)',
-        color: 'rgba(255,255,255,0.025)',
-        letterSpacing: '0.06em',
-        whiteSpace: 'nowrap',
-        userSelect: 'none',
-        pointerEvents: 'none',
-        textTransform: 'uppercase',
-        lineHeight: 1,
-      }}>
-        APPÂT DU NORD
-      </div>
+    <footer style={{ position: 'relative', overflow: 'hidden', background: '#06070A' }}>
 
       {/* Sponsor strip */}
       <div style={{
-        borderBottom: '1px solid var(--border)',
+        borderBottom: '1px solid rgba(0,207,255,0.1)',
+        borderTop: '1px solid rgba(0,207,255,0.1)',
         padding: '1.5rem 2rem',
-        background: 'rgba(255,255,255,0.02)',
+        background: 'rgba(0,207,255,0.03)',
         position: 'relative',
-        zIndex: 1,
+        zIndex: 2,
       }}>
         <p style={{
           textAlign: 'center',
-          fontFamily: 'var(--font-condensed)',
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 600,
           fontSize: '0.6rem',
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
-          color: 'var(--text-muted)',
+          color: '#94A3B8',
           marginBottom: '1.25rem',
         }}>
           {locale === 'fr' ? 'Partenaires & Commanditaires' : 'Partners & Sponsors'}
@@ -79,16 +62,12 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
               href={sponsor.url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                textDecoration: 'none',
-                opacity: 0.4,
-                transition: 'opacity 0.2s',
-              }}
+              style={{ textDecoration: 'none', opacity: 0.4, transition: 'opacity 0.2s' }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.9'}
               onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '0.4'}
             >
               <svg width="100" height="24" viewBox="0 0 100 24" xmlns="http://www.w3.org/2000/svg" aria-label={sponsor.name}>
-                <text x="50" y="17" textAnchor="middle" fontFamily="var(--font-condensed), sans-serif" fontSize="11" fontWeight="700" letterSpacing="1.8" fill="var(--text-secondary)">
+                <text x="50" y="17" textAnchor="middle" fontFamily="Barlow Condensed, Arial Narrow, sans-serif" fontSize="11" fontWeight="700" letterSpacing="1.8" fill="#C8D3E2">
                   {sponsor.name.toUpperCase()}
                 </text>
               </svg>
@@ -97,17 +76,18 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
         </div>
       </div>
 
-      {/* Main footer */}
-      <div style={{ padding: '3rem 2rem', position: 'relative', zIndex: 1 }}>
-        <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto' }}>
+      {/* Main footer content */}
+      <div style={{ position: 'relative', zIndex: 2, padding: '3rem 2rem' }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2.5rem', marginBottom: '3rem' }}>
-            
+
             {/* Brand column */}
             <div>
               <div style={{
-                fontFamily: 'var(--font-display)',
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
+                fontWeight: 900,
                 fontSize: '1.6rem',
-                color: 'var(--text-primary)',
+                color: '#F5F7FA',
                 letterSpacing: '0.08em',
                 marginBottom: '0.75rem',
                 textTransform: 'uppercase',
@@ -115,9 +95,9 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                 Appât du Nord
               </div>
               <p style={{
-                fontFamily: 'var(--font-body)',
+                fontFamily: "'Inter', sans-serif",
                 fontSize: '0.88rem',
-                color: 'var(--text-muted)',
+                color: '#94A3B8',
                 lineHeight: 1.65,
                 marginBottom: '0.75rem',
               }}>
@@ -126,10 +106,10 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                   : "Canada's #1 fishing portal. Built by passionate Quebec anglers."}
               </p>
               <p style={{
-                fontFamily: 'var(--font-condensed)',
-                fontSize: '0.7rem',
+                fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 600,
-                color: 'var(--text-muted)',
+                fontSize: '0.7rem',
+                color: '#94A3B8',
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
               }}>
@@ -140,15 +120,15 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
             {/* Navigation */}
             <div>
               <h4 style={{
-                fontFamily: 'var(--font-condensed)',
-                fontSize: '0.68rem',
+                fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 700,
-                color: 'var(--text-muted)',
+                fontSize: '0.68rem',
+                color: '#94A3B8',
                 letterSpacing: '0.22em',
                 textTransform: 'uppercase',
                 marginBottom: '1rem',
               }}>
-                {locale === 'fr' ? 'Navigation' : 'Navigation'}
+                Navigation
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {NAV_SECTIONS.map(link => (
@@ -158,16 +138,16 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: 'var(--text-muted)',
+                      color: '#94A3B8',
                       cursor: 'pointer',
-                      fontFamily: 'var(--font-body)',
+                      fontFamily: "'Inter', sans-serif",
                       fontSize: '0.875rem',
                       textAlign: 'left',
                       padding: '0',
                       transition: 'color 0.15s',
                     }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--accent)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#00CFFF'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#94A3B8'}
                   >
                     → {locale === 'fr' ? link.fr : link.en}
                   </button>
@@ -178,10 +158,10 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
             {/* Regulations */}
             <div>
               <h4 style={{
-                fontFamily: 'var(--font-condensed)',
-                fontSize: '0.68rem',
+                fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 700,
-                color: 'var(--text-muted)',
+                fontSize: '0.68rem',
+                color: '#94A3B8',
                 letterSpacing: '0.22em',
                 textTransform: 'uppercase',
                 marginBottom: '1rem',
@@ -189,9 +169,9 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                 {locale === 'fr' ? 'Réglementation' : 'Regulations'}
               </h4>
               <p style={{
-                fontFamily: 'var(--font-body)',
+                fontFamily: "'Inter', sans-serif",
                 fontSize: '0.8rem',
-                color: 'var(--text-muted)',
+                color: '#94A3B8',
                 lineHeight: 1.6,
                 marginBottom: '1rem',
               }}>
@@ -200,86 +180,107 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                   : 'Always check official regulations before fishing. Regulations vary by zone and species.'}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <a
-                  href="https://www.quebec.ca/tourisme-loisirs-sport/activites-sportives-et-de-plein-air/peche-sportive/permis"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-block',
-                    padding: '0.5rem 1rem',
-                    background: 'var(--accent)',
-                    color: '#0A0E1A',
-                    borderRadius: '4px',
-                    fontSize: '0.72rem',
-                    textDecoration: 'none',
-                    fontFamily: 'var(--font-condensed)',
-                    fontWeight: 700,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  📋 {locale === 'fr' ? 'Permis de pêche →' : 'Fishing Licence →'}
-                </a>
-                <a
-                  href="https://peche.faune.gouv.qc.ca/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-block',
-                    padding: '0.5rem 1rem',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-muted)',
-                    borderRadius: '4px',
-                    fontSize: '0.72rem',
-                    textDecoration: 'none',
-                    fontFamily: 'var(--font-condensed)',
-                    fontWeight: 600,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  📊 {locale === 'fr' ? 'Règlements par zone →' : 'Zone Regulations →'}
-                </a>
-                <a
-                  href="https://mondossierchassepeche.gouv.qc.ca/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-block',
-                    padding: '0.5rem 1rem',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-muted)',
-                    borderRadius: '4px',
-                    fontSize: '0.72rem',
-                    textDecoration: 'none',
-                    fontFamily: 'var(--font-condensed)',
-                    fontWeight: 600,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  🎫 {locale === 'fr' ? 'Mon dossier chasse & pêche →' : 'My Hunting & Fishing File →'}
-                </a>
+                {[
+                  { fr: 'Permis de pêche →', en: 'Fishing Licence →', url: 'https://www.quebec.ca/tourisme-loisirs-sport/activites-sportives-et-de-plein-air/peche-sportive/permis', icon: '📋', primary: true },
+                  { fr: 'Règlements par zone →', en: 'Zone Regulations →', url: 'https://peche.faune.gouv.qc.ca/', icon: '📊', primary: false },
+                  { fr: 'Mon dossier chasse & pêche →', en: 'My Hunting & Fishing File →', url: 'https://mondossierchassepeche.gouv.qc.ca/', icon: '🎫', primary: false },
+                ].map(item => (
+                  <a
+                    key={item.url}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block',
+                      padding: '0.5rem 1rem',
+                      background: item.primary ? '#00CFFF' : 'transparent',
+                      border: item.primary ? 'none' : '1px solid rgba(0,207,255,0.15)',
+                      color: item.primary ? '#06070A' : '#94A3B8',
+                      borderRadius: '4px',
+                      fontSize: '0.72rem',
+                      textDecoration: 'none',
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: item.primary ? 700 : 600,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {item.icon} {locale === 'fr' ? item.fr : item.en}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Copyright */}
+          {/* GLAMMBOX signature + copyright */}
           <div style={{
-            borderTop: '1px solid var(--border)',
-            paddingTop: '1.5rem',
-            textAlign: 'center',
-            color: 'var(--text-muted)',
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.75rem',
+            borderTop: '1px solid rgba(0,207,255,0.1)',
+            paddingTop: '2rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.4rem',
+            alignItems: 'center',
+            gap: '0.75rem',
+            textAlign: 'center',
           }}>
-            <div>© 2026 Appât du Nord · {locale === 'fr' ? 'Fait au Québec' : 'Made in Quebec'} · 🇨🇦</div>
-            <div style={{ color: 'var(--text-secondary)' }}>Produit par GLAMMBOX · Patrick Gervais</div>
+            {/* GLAMMBOX signature — required by brief */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 400,
+                fontSize: '0.75rem',
+                color: '#94A3B8',
+              }}>
+                {locale === 'fr' ? 'Propulsé par' : 'Powered by'}
+              </span>
+              <span style={{
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
+                fontWeight: 900,
+                fontSize: '0.95rem',
+                color: '#00CFFF',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+              }}>
+                GLAMMBOX
+              </span>
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 400,
+                fontSize: '0.75rem',
+                color: '#94A3B8',
+              }}>
+                —
+              </span>
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 500,
+                fontSize: '0.75rem',
+                color: '#F5F7FA',
+              }}>
+                Patrick Gervais
+              </span>
+            </div>
+            <div style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: '0.7rem',
+              color: '#94A3B8',
+            }}>
+              © 2026 Appât du Nord · {locale === 'fr' ? 'Fait au Québec' : 'Made in Quebec'} · 🇨🇦
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* WavyBackground — ultra-subtle water current at very low opacity */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 1, opacity: 0.15 }}>
+        <WavyBackground
+          colors={['#00CFFF', '#1D6BFF', '#00CFFF']}
+          waveWidth={60}
+          backgroundFill="#06070A"
+          blur={8}
+          speed="slow"
+          waveOpacity={0.3}
+          className="h-full w-full"
+        />
       </div>
     </footer>
   )

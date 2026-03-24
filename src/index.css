@@ -1,65 +1,90 @@
 @import 'leaflet/dist/leaflet.css';
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ── v17.1 Electric Wilderness Palette ─────────────────────────────── */
 :root {
-  /* ── v15 Palette — Red Bull × Quebec Fishing ─────────────────────── */
-  --bg:              #0A0E1A;
-  --bg-raised:       #101728;
-  --surface:         #12182B;
-  --surface-2:       #182238;
-  --surface-3:       #22304A;
-  --accent:          #00B4D8;
-  --accent-hover:    #3BC9EA;
-  --accent-deep:     #007C96;
-  --amber:           #F4A01C;
-  --amber-hover:     #FFB840;
-  --amber-deep:      #BF7600;
-  --text-primary:    #F7FBFF;
+  --bg:              #06070A;
+  --bg-raised:       #0C1016;
+  --surface:         #0C1016;
+  --surface-2:       #111820;
+  --surface-3:       #182030;
+  --accent:          #00CFFF;
+  --accent-hover:    #33DAFF;
+  --accent-deep:     #0098CC;
+  --red:             #FF2B2B;
+  --red-hover:       #FF4D4D;
+  --blue:            #1D6BFF;
+  --blue-hover:      #3D80FF;
+  --text-primary:    #F5F7FA;
   --text-secondary:  #C8D3E2;
   --text-muted:      #94A3B8;
-  --border:          rgba(255,255,255,0.10);
-  --border-active:   rgba(0,180,216,0.45);
-  --shadow:          0 24px 80px rgba(0,0,0,0.35);
-  --glow-teal:       0 0 0 1px rgba(0,180,216,0.15), 0 24px 60px rgba(0,180,216,0.10);
-  --glow-amber:      0 18px 44px rgba(244,160,28,0.16);
-  --success:         #7BE495;
-  --danger:          #FF6B57;
-  --red:             #E63946;
-  --red-hover:       #FF4D5A;
+  --border:          rgba(0,207,255,0.12);
+  --border-active:   rgba(0,207,255,0.35);
+  --glow-cyan:       0 0 0 1px rgba(0,207,255,0.15), 0 24px 60px rgba(0,207,255,0.10);
+  --glow-red:        0 0 0 1px rgba(255,43,43,0.15), 0 18px 44px rgba(255,43,43,0.12);
+  --shadow:          0 24px 80px rgba(0,0,0,0.45);
 
-  /* Legacy aliases */
-  --text:            #F7FBFF;
+  /* Legacy aliases kept for v16.3 components */
+  --text:            #F5F7FA;
   --muted-text:      #94A3B8;
-  --accent-gold:     #F4A01C;
-  --accent-alt:      #00B4D8;
-  --bg-elevated:     #101728;
-  --water:           #00B4D8;
-  --text-muted:      #94A3B8;
+  --accent-gold:     #00CFFF;
+  --accent-alt:      #00CFFF;
+  --bg-elevated:     #0C1016;
+  --water:           #00CFFF;
+  --amber:           #00CFFF;
+  --amber-hover:     #33DAFF;
+  --amber-deep:      #0098CC;
+  --success:         #7BE495;
+  --danger:          #FF2B2B;
 
   /* ── Typography ─────────────────────────────────────────────────── */
-  --font-display:    'Bebas Neue', 'Barlow Condensed', Arial Narrow, sans-serif;
-  --font-condensed:  'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+  --font-display:    'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-condensed:  'Barlow Condensed', 'Arial Narrow', sans-serif;
   --font-body:       'Inter', system-ui, sans-serif;
 
   /* ── Scale ───────────────────────────────────────────────────────── */
-  --display:         clamp(3.4rem, 8vw, 6.5rem);
-  --section-display: clamp(2.5rem, 5.5vw, 4.5rem);
-  --headline:        clamp(1.75rem, 3.2vw, 3.5rem);
-  --subhead:         clamp(1.1rem, 2vw, 2.25rem);
+  --display:         clamp(3rem, 10vw, 9rem);
+  --section-display: clamp(2.2rem, 5vw, 4.75rem);
+  --headline:        clamp(1.5rem, 3vw, 2.5rem);
+  --subhead:         clamp(1.1rem, 2vw, 1.75rem);
   --body:            1rem;
   --small:           0.875rem;
   --eyebrow:         0.75rem;
 
   /* ── Spacing & geometry ──────────────────────────────────────────── */
-  --section-pad:     clamp(5rem, 9vw, 7.5rem);
+  --section-pad:     clamp(5rem, 8vw, 9rem);
   --card-pad:        clamp(1rem, 2vw, 2rem);
   --max-width:       1440px;
-  --radius-hero:     32px;
-  --radius-card:     24px;
-  --radius-sm:       16px;
+  --radius-hero:     0px;
+  --radius-card:     1rem;
+  --radius-sm:       0.5rem;
+}
+
+/* ── shadcn/ui CSS variables ─────────────────────────────────────── */
+:root {
+  --background: 210 30% 3%;
+  --foreground: 210 20% 96%;
+  --card: 215 25% 7%;
+  --card-foreground: 210 20% 96%;
+  --popover: 215 25% 7%;
+  --popover-foreground: 210 20% 96%;
+  --primary: 194 100% 50%;
+  --primary-foreground: 0 0% 5%;
+  --secondary: 215 20% 12%;
+  --secondary-foreground: 210 20% 96%;
+  --muted: 215 20% 12%;
+  --muted-foreground: 215 16% 57%;
+  --accent: 194 100% 50%;
+  --accent-foreground: 0 0% 5%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 194 100% 50% / 0.12;
+  --input: 215 25% 10%;
+  --ring: 194 100% 50%;
+  --radius: 0.5rem;
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────── */
@@ -69,14 +94,13 @@
 
 html {
   overflow-x: hidden;
-  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text-primary);
-  font-family: var(--font-body);
+  font-family: 'Inter', 'Barlow Condensed', system-ui, sans-serif;
   min-height: 100vh;
   font-weight: 400;
   line-height: 1.7;
@@ -90,159 +114,124 @@ img, video, canvas, svg {
 
 /* ── Typography defaults ─────────────────────────────────────────────── */
 h1, h2, h3, h4 {
-  font-family: var(--font-display);
-  font-weight: 400;
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-weight: 900;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  line-height: 0.95;
+  line-height: 0.92;
   margin: 0;
 }
 
-/* ── Leaflet ─────────────────────────────────────────────────────────── */
-.leaflet-container {
-  background: var(--bg) !important;
-}
+h1 { font-size: var(--display); }
+h2 { font-size: var(--section-display); }
+h3 { font-size: var(--headline); }
 
-/* ── Scrollbar ───────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--surface); }
-::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; }
 
-/* ── Utility classes ─────────────────────────────────────────────────── */
-.eyebrow {
-  font-family: var(--font-condensed);
-  font-weight: 600;
-  font-size: var(--eyebrow);
-  letter-spacing: 0.2em;
+/* ── Barlow Condensed from Google Fonts (moved to top of file) ──────── */
+
+/* ── Scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(0,207,255,0.3); border-radius: 3px; }
+
+/* ── Utility classes ────────────────────────────────────────────────── */
+.font-display {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-weight: 900;
   text-transform: uppercase;
-  color: var(--text-muted);
+  letter-spacing: 0.03em;
 }
 
+.text-accent { color: var(--accent); }
+.text-red { color: var(--red); }
+.text-blue { color: var(--blue); }
+.text-muted { color: var(--text-muted); }
+.bg-surface { background: var(--surface); }
+.border-cyan { border-color: var(--border-active); }
+
+/* ── Glow effects ────────────────────────────────────────────────────── */
+.glow-cyan { box-shadow: var(--glow-cyan); }
+.glow-red { box-shadow: var(--glow-red); }
+
+/* ── Section padding ─────────────────────────────────────────────────── */
 .section-pad {
   padding-top: var(--section-pad);
   padding-bottom: var(--section-pad);
 }
 
-/* ── Species tab strip ───────────────────────────────────────────────── */
-.species-tab-strip {
-  max-width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.species-tab-strip::-webkit-scrollbar { display: none; }
-
-/* ── Species detail grid ─────────────────────────────────────────────── */
-.species-detail-grid {
-  grid-template-columns: 1fr;
-}
-@media (min-width: 768px) {
-  .species-detail-grid {
-    grid-template-columns: 1fr 2fr;
-  }
+/* ── Card base ────────────────────────────────────────────────────────── */
+.card-base {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* ── Home description responsive ─────────────────────────────────────── */
-.home-description-top {
-  grid-template-columns: 1fr 1fr;
-}
-@media (max-width: 768px) {
-  .home-description-top {
-    grid-template-columns: 1fr !important;
-  }
+.card-base:hover {
+  border-color: var(--border-active);
+  box-shadow: var(--glow-cyan);
 }
 
-/* ── Fish image — always object-contain ──────────────────────────────── */
-.fish-portrait {
-  object-fit: contain;
-  object-position: center center;
+/* ── Lenis smooth scroll override ────────────────────────────────────── */
+html.lenis {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
-/* ── Section entrance animation base ────────────────────────────────── */
-.section-enter {
-  opacity: 0;
-  transform: translateY(48px);
+/* ── Leaflet dark mode overrides ────────────────────────────────────── */
+.leaflet-container {
+  background: var(--bg) !important;
+}
+.leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.1);
+}
+.leaflet-control-zoom a {
+  background: var(--surface) !important;
+  color: var(--accent) !important;
+  border-color: var(--border) !important;
 }
 
-/* ── Glass nav ───────────────────────────────────────────────────────── */
-.nav-glass {
-  background: rgba(10,14,26,0.82);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+/* ── Aceternity component overrides ─────────────────────────────────── */
+/* Wobble card dark treatment */
+.wobble-card {
+  background: var(--surface) !important;
 }
 
-/* ── Mobile responsive helpers ───────────────────────────────────────── */
-@media (max-width: 640px) {
-  :root {
-    --section-pad: 4rem;
-  }
+/* Fix aceternity components that use 'use client' directive (Vite compat) */
+[data-aceternity] {
+  position: relative;
 }
 
-/* ── Fix 1 — Brand rail: desktop only ───────────────────────────────── */
+/* ── Animation keyframes ─────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,207,255,0.2); }
+  50% { box-shadow: 0 0 40px rgba(0,207,255,0.4); }
+}
+
+/* ── Brand rail (desktop fixed accent) ──────────────────────────────── */
 .brand-rail-desktop {
   display: none;
 }
-@media (min-width: 768px) {
+@media (min-width: 1280px) {
   .brand-rail-desktop {
     display: block;
-  }
-}
-
-/* ── Fix 8 — No horizontal overflow anywhere ─────────────────────────── */
-* {
-  max-width: 100%;
-}
-img, video, canvas, svg, iframe {
-  max-width: 100%;
-  height: auto;
-}
-section, div {
-  /* prevent any element from overflowing horizontally */
-  overflow-x: clip;
-}
-
-/* ── Fix 5 — Guides section consistent centering ─────────────────────── */
-.guides-section-container {
-  max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: clamp(1.25rem, 3vw, 3rem);
-  padding-right: clamp(1.25rem, 3vw, 3rem);
-}
-
-/* ── Fix 8 — Responsive section containers ───────────────────────────── */
-@media (max-width: 375px) {
-  .hide-mobile { display: none !important; }
-  h1, h2 { font-size: clamp(2.5rem, 8vw, 4rem) !important; }
-}
-
-/* ── Tournament grid responsive ─────────────────────────────────────── */
-.tournament-grid {
-  grid-template-columns: 1fr !important;
-}
-@media (min-width: 768px) {
-  .tournament-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
-@media (min-width: 1100px) {
-  .tournament-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-}
-
-/* ── Fix 5 — Guides grid responsive ─────────────────────────────────── */
-.guides-grid {
-  grid-template-columns: repeat(2, 1fr) !important;
-}
-@media (min-width: 768px) {
-  .guides-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-}
-@media (min-width: 1100px) {
-  .guides-grid {
-    grid-template-columns: repeat(5, 1fr) !important;
   }
 }

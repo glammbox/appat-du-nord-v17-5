@@ -308,7 +308,17 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
               marginBottom: '1.5rem',
               overflow: 'hidden',
               position: 'relative',
-            }}>
+              transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,207,255,0.35)'
+              ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 1px rgba(0,207,255,0.15), 0 24px 60px rgba(0,207,255,0.10)'
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
+              ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
+            }}
+            >
               <img
                 src={speciesImage}
                 alt={displayName}

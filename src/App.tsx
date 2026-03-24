@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
+import Lenis from 'lenis'
 
 import { SiteHeader } from './components/SiteHeader'
 import { Hero } from './components/Hero'
@@ -53,6 +54,26 @@ function scrollToSection(id: string) {
 function App() {
   void TWENTYFIRST_COMPONENT_MAP
   void TWENTYFIRST_STRICT_COMPLIANCE
+
+  // Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      lerp: 0.08,
+      duration: 1.1,
+      smoothWheel: true,
+      syncTouch: false,
+      wheelMultiplier: 0.9,
+    })
+    function raf(time: number) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+    const rafId = requestAnimationFrame(raf)
+    return () => {
+      cancelAnimationFrame(rafId)
+      lenis.destroy()
+    }
+  }, [])
 
   const [gearSpeciesFilter, setGearSpeciesFilter] = useState<string | undefined>(undefined)
   const [locale, setLocale] = useState<Locale>('fr')

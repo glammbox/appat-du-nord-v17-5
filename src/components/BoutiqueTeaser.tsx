@@ -1,10 +1,10 @@
-// Fix 3 — Boutique teaser on main page: ONE CTA only, no product cards
-// 21st.dev: ShimmerButton (https://21st.dev/community/components/dillionverma/shimmer-button/default)
-// Framer Motion: section fade-up, title letter stagger, CTA hover lift+glow
+// BoutiqueTeaser — v17.1 Electric Wilderness
+// TracingBeam draws eye downward + ShimmerButton entry CTA
 
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { ShimmerButton } from './ui/ShimmerButton'
+import { TracingBeam } from './ui/tracing-beam'
 
 interface BoutiqueTeaserProps {
   locale: 'fr' | 'en'
@@ -22,6 +22,7 @@ export function BoutiqueTeaser({ locale, onNavigateBoutique }: BoutiqueTeaserPro
   const ctaLabel = locale === 'fr' ? 'OUVRIR LA BOUTIQUE →' : 'OPEN THE BOUTIQUE →'
 
   return (
+    <TracingBeam className="px-6">
     <motion.section
       ref={sectionRef}
       initial={{ opacity: 0, y: 48 }}
@@ -103,7 +104,7 @@ export function BoutiqueTeaser({ locale, onNavigateBoutique }: BoutiqueTeaserPro
         {descriptor}
       </motion.p>
 
-      {/* ONE CTA button — ShimmerButton from 21st.dev */}
+      {/* ONE CTA button — ShimmerButton electric cyan */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -112,22 +113,23 @@ export function BoutiqueTeaser({ locale, onNavigateBoutique }: BoutiqueTeaserPro
       >
         <ShimmerButton
           onClick={onNavigateBoutique}
-          shimmerColor="#00B4D8"
-          background="rgba(0,180,216,0.15)"
-          borderRadius="6px"
+          shimmerColor="#00CFFF"
+          background="rgba(0,207,255,0.10)"
+          borderRadius="4px"
           style={{
             padding: '1rem 2.5rem',
-            fontFamily: 'var(--font-condensed)',
+            fontFamily: "'Barlow Condensed', sans-serif",
             fontSize: '0.88rem',
             fontWeight: 700,
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
-            color: '#F5F0E8',
+            color: '#F5F7FA',
           }}
         >
           {ctaLabel}
         </ShimmerButton>
       </motion.div>
     </motion.section>
+    </TracingBeam>
   )
 }

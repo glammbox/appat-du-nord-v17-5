@@ -1,44 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform, useMotionValue, useMotionTemplate, animate } from 'framer-motion'
-
-// 21st.dev — FloatingPaths (https://21st.dev/community/components/kokonutd/background-paths/default)
-// Adapted from /tmp/21stdev-hero-variant5.tsx
-function FloatingPaths({ position }: { position: number }) {
-  const paths = Array.from({ length: 36 }, (_, i) => ({
-    id: i,
-    d: `M-${380 - i * 5 * position} -${189 + i * 6}C-${380 - i * 5 * position} -${189 + i * 6} -${312 - i * 5 * position} ${216 - i * 6} ${152 - i * 5 * position} ${343 - i * 6}C${616 - i * 5 * position} ${470 - i * 6} ${684 - i * 5 * position} ${875 - i * 6} ${684 - i * 5 * position} ${875 - i * 6}`,
-  }))
-  return (
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-      <svg
-        style={{ width: '100%', height: '100%', color: 'rgba(0,180,216,0.15)' }}
-        viewBox="0 0 696 316"
-        fill="none"
-      >
-        {paths.map((path) => (
-          <motion.path
-            key={path.id}
-            d={path.d}
-            stroke="currentColor"
-            strokeWidth={0.5 + path.id * 0.03}
-            strokeOpacity={0.1 + path.id * 0.03}
-            initial={{ pathLength: 0.3, opacity: 0.6 }}
-            animate={{
-              pathLength: 1,
-              opacity: [0.3, 0.6, 0.3],
-              pathOffset: [0, 1, 0],
-            }}
-            transition={{
-              duration: 20 + Math.random() * 10,
-              repeat: Infinity,
-              ease: 'linear',
-            }}
-          />
-        ))}
-      </svg>
-    </div>
-  )
-}
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { Spotlight } from './ui/spotlight-new'
+import { BackgroundBeamsWithCollision } from './ui/background-beams-with-collision'
+import { TextGenerateEffect } from './ui/text-generate-effect'
 
 interface HeroProps {
   locale: 'fr' | 'en'
@@ -64,27 +28,13 @@ function useCountUp(target: number, duration: number = 1800, started: boolean = 
 
 export function Hero({ locale, onSectionSelect }: HeroProps) {
   const [statsStarted, setStatsStarted] = useState(false)
+  const [titleReady, setTitleReady] = useState(false)
   const statsRef = useRef<HTMLDivElement>(null)
   const heroRef = useRef<HTMLDivElement>(null)
   const { scrollY } = useScroll()
-  
-  // 21st.dev hero variant5 color cycle: teal → gold → red → teal
-  const accentColor = useMotionValue('#00B4D8')
-  useEffect(() => {
-    const colors = ['#00B4D8', '#F4A01C', '#E63946', '#00B4D8']
-    animate(accentColor, colors, {
-      ease: 'easeInOut',
-      duration: 8,
-      repeat: Infinity,
-      repeatType: 'mirror',
-    })
-  }, [accentColor])
-  const heroGradient = useMotionTemplate`radial-gradient(125% 125% at 50% 0%, #0A0E1A 50%, ${accentColor}22)`
-  
-  // Parallax — watermark moves slower than content
-  const watermarkY = useTransform(scrollY, [0, 600], [0, 60])
-  const imageY = useTransform(scrollY, [0, 600], [0, 80])
   const contentY = useTransform(scrollY, [0, 600], [0, 30])
+  const watermarkY = useTransform(scrollY, [0, 600], [0, 50])
+  const imageY = useTransform(scrollY, [0, 600], [0, 80])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -95,120 +45,81 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
     return () => observer.disconnect()
   }, [])
 
-  const countSpecies  = useCountUp(21,  1400, statsStarted)
-  const countEaux     = useCountUp(45,  1600, statsStarted)
-  const countJours    = useCountUp(30,  1200, statsStarted)
+  // Delay title animate for hero entrance feel
+  useEffect(() => {
+    const t = setTimeout(() => setTitleReady(true), 400)
+    return () => clearTimeout(t)
+  }, [])
+
+  const countSpecies = useCountUp(21, 1400, statsStarted)
+  const countEaux    = useCountUp(45, 1600, statsStarted)
+  const countJours   = useCountUp(30, 1200, statsStarted)
 
   const stats = [
-    { value: `${countSpecies}`, label: locale === 'fr' ? 'Espèces' : 'Species', color: '#00B4D8' },
-    { value: `${countEaux}+`, label: locale === 'fr' ? "Plans d'eau" : 'Water Bodies', color: '#F4A01C' },
-    { value: `${countJours}j`, label: locale === 'fr' ? 'Prévisions' : 'Forecast', color: '#E63946' },
+    { value: `${countSpecies}`, label: locale === 'fr' ? 'Espèces' : 'Species', color: '#00CFFF' },
+    { value: `${countEaux}+`,   label: locale === 'fr' ? "Plans d'eau" : 'Water Bodies', color: '#1D6BFF' },
+    { value: `${countJours}j`,  label: locale === 'fr' ? 'Prévisions' : 'Forecast', color: '#FF2B2B' },
   ]
 
   return (
-    <motion.div
+    <div
       ref={heroRef}
-      className="relative overflow-hidden"
-      style={{ minHeight: '100svh', background: heroGradient }}
+      style={{
+        position: 'relative',
+        minHeight: '100svh',
+        background: '#06070A',
+        overflow: 'hidden',
+      }}
     >
-      {/* 21st.dev — FloatingPaths (background-paths) from variant5.tsx */}
-      <FloatingPaths position={1} />
-      <FloatingPaths position={-1} />
+      {/* BackgroundBeamsWithCollision — full hero backdrop */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+        <BackgroundBeamsWithCollision className="h-full w-full absolute inset-0">
+          <span />
+        </BackgroundBeamsWithCollision>
+      </div>
 
-      {/* Background gradient — dark base */}
+      {/* Spotlight — electric cyan sweep */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 2 }}>
+        <Spotlight
+          gradientFirst="radial-gradient(68.54% 68.72% at 55.02% 31.46%, hsla(194, 100%, 50%, .12) 0, hsla(194, 100%, 50%, .03) 50%, transparent 80%)"
+          gradientSecond="radial-gradient(50% 50% at 50% 50%, hsla(194, 100%, 50%, .08) 0, hsla(194, 100%, 50%, .02) 80%, transparent 100%)"
+          gradientThird="radial-gradient(50% 50% at 50% 50%, hsla(220, 100%, 60%, .05) 0, transparent 100%)"
+          duration={8}
+          xOffset={120}
+        />
+      </div>
+
+      {/* Film grain + vignette */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        background: 'linear-gradient(180deg, #0F1628 0%, #0A0E1A 58%, #070B14 100%)',
-        zIndex: 0,
-      }} />
-
-      {/* Hero gradient overlay — dark→teal→red energy sweep */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(135deg, rgba(10,14,26,0.95) 0%, rgba(0,100,130,0.18) 45%, rgba(230,57,70,0.12) 100%)',
-        zIndex: 0,
+        zIndex: 3,
         pointerEvents: 'none',
+        background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.6) 100%)',
       }} />
 
-      {/* Teal atmospheric glow — left zone */}
-      <div style={{
-        position: 'absolute',
-        top: '10%',
-        left: '-10%',
-        width: '55%',
-        height: '70%',
-        background: 'radial-gradient(ellipse, rgba(0,180,216,0.09) 0%, transparent 65%)',
-        zIndex: 0,
-        pointerEvents: 'none',
-      }} />
-
-      {/* Red energy glow — bottom right corner */}
-      <div style={{
-        position: 'absolute',
-        bottom: '-10%',
-        right: '10%',
-        width: '45%',
-        height: '50%',
-        background: 'radial-gradient(ellipse, rgba(230,57,70,0.10) 0%, transparent 65%)',
-        zIndex: 0,
-        pointerEvents: 'none',
-      }} />
-
-      {/* APPÂT DU NORD — subtle full-width background watermark */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 2, delay: 0.5 }}
-        style={{
-          position: 'absolute',
-          bottom: '5%',
-          left: 0,
-          right: 0,
-          textAlign: 'center',
-          y: watermarkY,
-          zIndex: 1,
-          pointerEvents: 'none',
-          userSelect: 'none',
-          overflow: 'hidden',
-        }}
-      >
-        <div style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(4rem, 12vw, 10rem)',
-          color: 'rgba(0,180,216,0.07)',
-          letterSpacing: '0.25em',
-          lineHeight: 1,
-          textTransform: 'uppercase',
-          whiteSpace: 'nowrap',
-          WebkitTextStroke: '1px rgba(0,180,216,0.12)',
-        }}>
-          APPÂT DU NORD
-        </div>
-      </motion.div>
-
-      {/* Hero image — right side, full height (parallax) */}
+      {/* Hero image — right side parallax */}
       <motion.div
         style={{
           position: 'absolute',
           top: 0,
           right: 0,
-          width: '55%',
+          width: '52%',
           height: '100%',
-          zIndex: 2,
+          zIndex: 4,
           y: imageY,
         }}
+        className="hero-image-panel"
       >
         <motion.div
-          initial={{ opacity: 0, x: 80, scale: 1.04 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          initial={{ opacity: 0, x: 80 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
           style={{ width: '100%', height: '100%' }}
         >
           <img
             src="/images/hero/fishing-hero.jpg"
-            alt={locale === 'fr' ? 'Pêche au Québec — maskinongé' : 'Quebec Fishing — muskellunge'}
+            alt={locale === 'fr' ? 'Pêche au Québec' : 'Quebec Fishing'}
             style={{
               width: '100%',
               height: '100%',
@@ -217,27 +128,58 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
               display: 'block',
             }}
           />
-          {/* Left gradient fade */}
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to right, #0A0E1A 0%, rgba(10,14,26,0.72) 35%, rgba(10,14,26,0.15) 70%, transparent 100%)',
+            background: 'linear-gradient(to right, #06070A 0%, rgba(6,7,10,0.7) 30%, rgba(6,7,10,0.1) 70%, transparent 100%)',
           }} />
-          {/* Bottom fade */}
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(to top, #0A0E1A 0%, transparent 35%)',
+            background: 'linear-gradient(to top, #06070A 0%, transparent 40%)',
           }} />
         </motion.div>
+      </motion.div>
+
+      {/* Background watermark */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2, delay: 0.8 }}
+        style={{
+          position: 'absolute',
+          bottom: '8%',
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          y: watermarkY,
+          zIndex: 5,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{
+          fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
+          fontWeight: 900,
+          fontSize: 'clamp(4rem, 12vw, 11rem)',
+          color: 'rgba(0,207,255,0.05)',
+          letterSpacing: '0.25em',
+          lineHeight: 1,
+          textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
+          WebkitTextStroke: '1px rgba(0,207,255,0.08)',
+        }}>
+          APPÂT DU NORD
+        </div>
       </motion.div>
 
       {/* Content — left side */}
       <motion.div
         style={{
           position: 'relative',
-          zIndex: 3,
-          maxWidth: 'var(--max-width)',
+          zIndex: 6,
+          maxWidth: '1440px',
           margin: '0 auto',
           padding: '0 2rem',
           minHeight: '100svh',
@@ -247,53 +189,55 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
           y: contentY,
         }}
       >
-        <div style={{ maxWidth: '580px', paddingTop: '80px', paddingBottom: '80px' }}>
-
-          {/* BRAND NAME — Large animated, visible above headline */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.0 }}
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              color: '#00B4D8',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              lineHeight: 1,
-              marginBottom: '1rem',
-            }}
-          >
-            APPÂT DU NORD
-          </motion.div>
+        <div style={{ maxWidth: '580px', paddingTop: '96px', paddingBottom: '96px' }}>
 
           {/* Eyebrow */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: 0.1 }}
             style={{
-              fontFamily: 'var(--font-condensed)',
-              fontSize: '0.72rem',
+              fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 600,
-              color: 'var(--accent)',
+              fontSize: '0.72rem',
+              color: '#00CFFF',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
-              marginBottom: '1.5rem',
+              marginBottom: '1rem',
             }}
           >
             🇨🇦 {locale === 'fr' ? 'Portail de pêche · Québec · Saison 2026' : 'Fishing Portal · Quebec · Season 2026'}
           </motion.p>
 
-          {/* H1 — Bebas Neue, giant (min 5rem per spec) */}
-          <motion.h1
-            initial={{ opacity: 0, y: 60, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.84, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+          {/* Brand name */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1], delay: 0.15 }}
             style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(5rem, 9vw, 7rem)',
-              color: 'var(--text-primary)',
+              fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
+              fontWeight: 900,
+              fontSize: 'clamp(1.8rem, 3.5vw, 3rem)',
+              color: '#00CFFF',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              lineHeight: 1,
+              marginBottom: '1.25rem',
+            }}
+          >
+            APPÂT DU NORD
+          </motion.div>
+
+          {/* H1 */}
+          <motion.h1
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.84, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }}
+            style={{
+              fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
+              fontWeight: 900,
+              fontSize: 'clamp(3rem, 10vw, 9rem)',
+              color: '#F5F7FA',
               letterSpacing: '0.03em',
               lineHeight: 0.9,
               marginBottom: '1.5rem',
@@ -301,38 +245,35 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
             }}
           >
             {locale === 'fr' ? (
-              <>PÊCHEZ<br />LE <span style={{ color: 'var(--accent)' }}>NORD.</span><br />MAÎTRISEZ<br />CHAQUE SORTIE.</>
+              <>PÊCHEZ<br />LE <span style={{ color: '#00CFFF' }}>NORD.</span><br />MAÎTRISEZ<br />CHAQUE SORTIE.</>
             ) : (
-              <>FISH<br />THE <span style={{ color: 'var(--accent)' }}>NORTH.</span><br />OWN<br />EVERY OUTING.</>
+              <>FISH<br />THE <span style={{ color: '#00CFFF' }}>NORTH.</span><br />OWN<br />EVERY OUTING.</>
             )}
           </motion.h1>
 
-          {/* Subcopy */}
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-            style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: '1.05rem',
-              color: 'var(--text-secondary)',
-              fontWeight: 400,
-              lineHeight: 1.65,
-              marginBottom: '2rem',
-              maxWidth: '500px',
-            }}
+          {/* Subtitle — TextGenerateEffect */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            style={{ marginBottom: '2rem' }}
           >
-            {locale === 'fr'
-              ? "La ressource de pêche #1 au Canada. 21 espèces, 45+ plans d'eau, l'arsenal complet, météo & solunar en temps réel — tout en FR et EN."
-              : "Canada's #1 fishing resource. 21 species, 45+ water bodies, the complete arsenal, real-time weather & solunar — fully in FR and EN."}
-          </motion.p>
+            {titleReady && (
+              <TextGenerateEffect
+                words={locale === 'fr'
+                  ? "La ressource de pêche #1 au Canada. 21 espèces, 45+ plans d'eau, l'arsenal complet, météo et solunar en temps réel."
+                  : "Canada's #1 fishing resource. 21 species, 45+ water bodies, the complete arsenal, real-time weather and solunar."}
+                className="text-[1.05rem] text-[#C8D3E2] font-normal leading-relaxed"
+              />
+            )}
+          </motion.div>
 
           {/* Stats */}
           <motion.div
             ref={statsRef}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.48, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: 0.6 }}
             style={{
               display: 'flex',
               gap: '2.5rem',
@@ -343,19 +284,20 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
             {stats.map((stat) => (
               <div key={stat.label}>
                 <div style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(2.2rem, 5vw, 4.5rem)',
-                  color: (stat as any).color || 'var(--amber)',
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 900,
+                  fontSize: 'clamp(2rem, 5vw, 4rem)',
+                  color: stat.color,
                   lineHeight: 0.9,
                   letterSpacing: '0.02em',
                 }}>
                   {stat.value}
                 </div>
                 <div style={{
-                  fontFamily: 'var(--font-condensed)',
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 500,
                   fontSize: '0.65rem',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
+                  color: '#94A3B8',
                   letterSpacing: '0.2em',
                   textTransform: 'uppercase',
                   marginTop: '0.4rem',
@@ -370,86 +312,72 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.42 }}
-            style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: 0.75 }}
+            style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap', alignItems: 'center' }}
           >
-            <button
+            <motion.button
               onClick={() => onSectionSelect?.('especes')}
+              whileHover={{ y: -2, boxShadow: '0 0 24px rgba(0,207,255,0.4)' }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.2 }}
               style={{
                 padding: '0.9rem 1.75rem',
-                background: 'var(--accent)',
-                color: '#0A0E1A',
-                fontFamily: 'var(--font-condensed)',
-                fontSize: '0.82rem',
+                background: '#00CFFF',
+                color: '#06070A',
+                fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 700,
+                fontSize: '0.82rem',
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
-                cursor: 'pointer',
                 border: 'none',
-                borderRadius: '6px',
-                transition: 'background 0.2s, transform 0.2s',
-              }}
-              onMouseEnter={e => {
-                /* Red accent on hover — #E63946 per spec */
-                (e.currentTarget as HTMLElement).style.background = '#E63946'
-                ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.background = 'var(--accent)'
-                ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+                borderRadius: '4px',
+                cursor: 'pointer',
               }}
             >
               {locale === 'fr' ? 'Explorer les espèces →' : 'Explore Species →'}
-            </button>
-            <button
+            </motion.button>
+
+            <motion.button
               onClick={() => onSectionSelect?.('arsenal')}
+              whileHover={{ y: -2, borderColor: 'rgba(255,255,255,0.45)', color: '#F5F7FA' }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.2 }}
               style={{
                 padding: '0.9rem 1.75rem',
                 border: '1px solid rgba(255,255,255,0.2)',
-                color: 'var(--text-secondary)',
-                fontFamily: 'var(--font-condensed)',
-                fontSize: '0.82rem',
+                color: '#C8D3E2',
+                fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 600,
+                fontSize: '0.82rem',
                 letterSpacing: '0.18em',
                 textTransform: 'uppercase',
                 cursor: 'pointer',
                 background: 'transparent',
-                borderRadius: '6px',
-                transition: 'border-color 0.2s, color 0.2s, transform 0.2s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.45)'
-                ;(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
-                ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.2)'
-                ;(e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
-                ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+                borderRadius: '4px',
               }}
             >
               {locale === 'fr' ? "Voir l'arsenal" : 'View Arsenal'}
-            </button>
-            <button
+            </motion.button>
+
+            <motion.button
               onClick={() => onSectionSelect?.('calendrier')}
+              whileHover={{ color: '#00CFFF' }}
+              transition={{ duration: 0.2 }}
               style={{
-                padding: '0.9rem 1.75rem',
+                padding: '0.9rem 1rem',
                 border: 'none',
                 background: 'none',
-                color: 'var(--text-muted)',
-                fontFamily: 'var(--font-condensed)',
-                fontSize: '0.75rem',
+                color: '#94A3B8',
+                fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 600,
+                fontSize: '0.75rem',
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
                 cursor: 'pointer',
-                transition: 'color 0.2s',
               }}
-              onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--amber)'}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'}
             >
               {locale === 'fr' ? '⚡ Prévisions solunar →' : '⚡ Solunar Forecast →'}
-            </button>
+            </motion.button>
           </motion.div>
         </div>
       </motion.div>
@@ -463,27 +391,27 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
           bottom: '2rem',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 4,
-          color: 'var(--text-muted)',
+          zIndex: 7,
+          color: '#94A3B8',
           fontSize: '0.65rem',
-          fontFamily: 'var(--font-condensed)',
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 500,
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '0.4rem',
+          opacity: 0.6,
         }}
       >
-        <span style={{ opacity: 0.6 }}>↓</span>
+        ↓
       </motion.div>
 
-      {/* Mobile: stack image behind text */}
       <style>{`
         @media (max-width: 768px) {
-          .hero-right { width: 100% !important; opacity: 0.3 !important; }
+          .hero-image-panel {
+            width: 100% !important;
+            opacity: 0.25 !important;
+          }
         }
       `}</style>
-    </motion.div>
+    </div>
   )
 }

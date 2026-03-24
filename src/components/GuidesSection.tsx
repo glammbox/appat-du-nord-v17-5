@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { MovingBorder } from './ui/moving-border'
 
 // Species-based guides (5 species per brief)
 const BOOKS_DATA = [

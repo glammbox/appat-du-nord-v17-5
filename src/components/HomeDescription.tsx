@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
+import { BackgroundLines } from './ui/background-lines'
+import { BlurFade } from './ui/blur-fade'
 
 interface HomeDescriptionProps {
   locale: 'fr' | 'en'
@@ -33,9 +35,16 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
         borderBottom: '1px solid var(--border)',
         padding: 'var(--section-pad) 0',
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
-      <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: '0 2rem' }}>
+      {/* BackgroundLines — directional energy behind content */}
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.3, pointerEvents: 'none', zIndex: 0 }}>
+        <BackgroundLines className="h-full w-full" svgOptions={{ duration: 10 }}>
+          <span />
+        </BackgroundLines>
+      </div>
+      <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 1 }}>
 
         {/* Eyebrow */}
         <motion.p
@@ -106,22 +115,20 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
             }} />
 
             {paragraphs.map((para, i) => (
-              <motion.p
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.56, ease: [0.16, 1, 0.3, 1], delay: 0.15 + i * 0.08 }}
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 'clamp(1rem, 1.6vw, 1.1rem)',
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1.78,
-                  marginBottom: '1.5rem',
-                  fontWeight: 400,
-                }}
-              >
-                {para}
-              </motion.p>
+              <BlurFade key={i} delay={0.15 + i * 0.1} inView duration={0.5}>
+                <p
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: 'clamp(1rem, 1.6vw, 1.1rem)',
+                    color: '#C8D3E2',
+                    lineHeight: 1.78,
+                    marginBottom: '1.5rem',
+                    fontWeight: 400,
+                  }}
+                >
+                  {para}
+                </p>
+              </BlurFade>
             ))}
           </motion.div>
 
