@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 
 interface TournamentEntry {
@@ -177,9 +177,20 @@ interface TournamentSectionProps {
   locale: 'fr' | 'en'
 }
 
+// Species filter tabs — v17.2
+const SPECIES_FILTERS = [
+  { id: 'all',        labelFr: 'Tous',        labelEn: 'All',       color: '#94A3B8' },
+  { id: 'truite',     labelFr: 'Truite',      labelEn: 'Trout',     color: '#6A1B9A' },
+  { id: 'achigan',    labelFr: 'Achigan',     labelEn: 'Bass',      color: '#1565C0' },
+  { id: 'brochet',    labelFr: 'Brochet',     labelEn: 'Pike',      color: '#2E7D32' },
+  { id: 'maskinonge', labelFr: 'Maskinongé',  labelEn: 'Musky',     color: '#D4261C' },
+  { id: 'dore',       labelFr: 'Doré',        labelEn: 'Walleye',   color: '#C8A84B' },
+]
+
 export function TournamentSection({ locale }: TournamentSectionProps) {
   const sectionRef = useRef(null)
   const inView = useInView(sectionRef, { once: true, amount: 0.05 })
+  const [activeFilter, setActiveFilter] = useState<string>('all')
 
   return (
     <motion.div
@@ -234,75 +245,114 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
         </p>
       </motion.div>
 
-      {/* Fix 4 — Flat grid, max 6 cards (2 rows × 3 cols), then "Voir tous" link */}
+      {/* v17.2 — Species filter tabs: Truite, Achigan, Brochet, Maskinongé, Doré */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+        style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}
+      >
+        {SPECIES_FILTERS.map(f => {
+          const isActive = activeFilter === f.id
+          return (
+            <button
+              key={f.id}
+              onClick={() => setActiveFilter(f.id)}
+              style={{
+                padding: '0.45rem 1rem',
+                background: isActive ? f.color : 'var(--surface)',
+                border: `1px solid ${isActive ? f.color : 'var(--border)'}`,
+                color: isActive ? '#fff' : 'var(--text-muted)',
+                fontFamily: 'var(--font-condensed)',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                borderRadius: '4px',
+                transition: 'all 0.15s',
+              }}
+            >
+              {locale === 'fr' ? f.labelFr : f.labelEn}
+            </button>
+          )
+        })}
+      </motion.div>
+
+      {/* SEPAQ official link — v17.2 */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+        style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}
+      >
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-body)' }}>
+          {locale === 'fr' ? 'Source officielle :' : 'Official source:'}
+        </span>
+        <a
+          href="https://www.sepaq.com/peche/competitions.dot"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            padding: '0.4rem 1rem',
+            background: '#00CFFF',
+            color: '#050810',
+            borderRadius: '4px',
+            fontFamily: 'var(--font-condensed)',
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            textDecoration: 'none',
+            transition: 'opacity 0.2s',
+          }}
+        >
+          SEPAQ — Compétitions →
+        </a>
+      </motion.div>
+
+      {/* Tournament grid — filtered by active species tab */}
       {(() => {
-        // Flatten all tournaments into a single list with group metadata
+        const filteredGroups = activeFilter === 'all'
+          ? SPECIES_GROUPS
+          : SPECIES_GROUPS.filter(g => g.id === activeFilter)
+
         const allCards: Array<{ tournament: TournamentEntry; group: typeof SPECIES_GROUPS[0] }> = []
-        SPECIES_GROUPS.forEach(group => {
+        filteredGroups.forEach(group => {
           group.tournaments.forEach(t => {
             allCards.push({ tournament: t, group })
           })
         })
-        const visibleCards = allCards.slice(0, 6)
-        const hasMore = allCards.length > 6
+
+        if (allCards.length === 0) {
+          return (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-body)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px' }}>
+              {locale === 'fr'
+                ? 'Aucun tournoi vérifié pour cette espèce en 2026. Consultez SEPAQ pour les mises à jour.'
+                : 'No verified tournaments for this species in 2026. Check SEPAQ for updates.'}
+            </div>
+          )
+        }
 
         return (
-          <>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(1, 1fr)',
-              gap: '1rem',
-            }}
-            className="tournament-grid"
-            >
-              {visibleCards.map(({ tournament, group }, idx) => (
-                <TournamentCard
-                  key={idx}
-                  tournament={tournament}
-                  locale={locale}
-                  accentColor={group.color}
-                  delay={0.1 + idx * 0.05}
-                  inView={inView}
-                />
-              ))}
-            </div>
-            {hasMore && (
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-                style={{ marginTop: '1.5rem', textAlign: 'center' }}
-              >
-                <a
-                  href="https://planitournament.com/qc"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontFamily: 'var(--font-condensed)',
-                    fontSize: '0.82rem',
-                    fontWeight: 700,
-                    color: '#00B4D8',
-                    letterSpacing: '0.18em',
-                    textTransform: 'uppercase',
-                    textDecoration: 'none',
-                    borderBottom: '1px solid rgba(0,180,216,0.4)',
-                    paddingBottom: '2px',
-                    transition: 'color 0.2s, border-color 0.2s',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.color = '#F4A01C'
-                    ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(244,160,28,0.5)'
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.color = '#00B4D8'
-                    ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,180,216,0.4)'
-                  }}
-                >
-                  {locale === 'fr' ? `Voir tous les tournois (${allCards.length}) →` : `See all tournaments (${allCards.length}) →`}
-                </a>
-              </motion.div>
-            )}
-          </>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(1, 1fr)',
+            gap: '1rem',
+          }}
+          className="tournament-grid"
+          >
+            {allCards.map(({ tournament, group }, idx) => (
+              <TournamentCard
+                key={`${group.id}-${idx}`}
+                tournament={tournament}
+                locale={locale}
+                accentColor={group.color}
+                delay={0.1 + idx * 0.05}
+                inView={inView}
+              />
+            ))}
+          </div>
         )
       })()}
 

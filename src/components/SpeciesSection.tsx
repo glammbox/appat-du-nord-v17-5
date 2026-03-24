@@ -95,7 +95,8 @@ interface SpeciesSectionProps {
 }
 
 export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onScrollToWater }: SpeciesSectionProps) {
-  const [activeSpecies, setActiveSpecies] = useState(initialSpecies || speciesData[0].id)
+  // v17.2: default state is null — nothing open on load, show intro text until user clicks
+  const [activeSpecies, setActiveSpecies] = useState<string | null>(initialSpecies || null)
   const sectionRef = useRef(null)
   const tabStripRef = useRef<HTMLDivElement>(null)
   const inView = useInView(sectionRef, { once: true, amount: 0.1 })
@@ -283,6 +284,46 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
       </div>
 
       {/* ── 2-Column Detail Panel ──────────────────────────────────────── */}
+      {/* Intro text when no species selected (v17.2: default is null) */}
+      {!activeSpecies && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            padding: '3rem 2rem',
+            textAlign: 'center',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-card)',
+          }}
+        >
+          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎣</div>
+          <p style={{
+            fontFamily: 'var(--font-condensed)',
+            fontSize: 'clamp(1rem, 2vw, 1.3rem)',
+            fontWeight: 600,
+            color: 'var(--accent)',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            marginBottom: '0.5rem',
+          }}>
+            {locale === 'fr'
+              ? 'Cliquez sur une espèce pour voir les détails'
+              : 'Click a species to see details'}
+          </p>
+          <p style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '0.9rem',
+            color: 'var(--text-muted)',
+          }}>
+            {locale === 'fr'
+              ? '21 espèces du Québec — sélectionnez une espèce dans la liste ci-dessus'
+              : '21 Quebec species — select a species from the list above'}
+          </p>
+          {/* Note: fish images should depict fish deep underwater, fully submerged */}
+        </motion.div>
+      )}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeSpecies}
@@ -291,7 +332,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
           className="species-detail-grid"
-          style={{ display: 'grid', gap: '2.5rem', alignItems: 'flex-start' }}
+          style={{ display: activeSpecies ? 'grid' : 'none', gap: '2.5rem', alignItems: 'flex-start' }}
         >
           {/* ── LEFT: Fish portrait + quick stats ─── */}
           <div>

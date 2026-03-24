@@ -326,24 +326,26 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
               }}
             />
 
-            {/* Panel — desktop: right side panel; mobile: bottom sheet */}
+            {/* Panel — centered modal (v17.2) */}
             <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, scale: 0.96, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 20 }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 position: 'fixed',
-                top: 0,
-                right: 0,
-                bottom: 0,
-                width: 'min(100vw, 520px)',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 'min(96vw, 560px)',
+                maxHeight: '88vh',
                 background: 'var(--bg-raised)',
                 zIndex: 201,
                 display: 'flex',
                 flexDirection: 'column',
-                borderLeft: `1px solid var(--border)`,
-                boxShadow: '-20px 0 60px rgba(0,0,0,0.5)',
+                border: `1px solid var(--border)`,
+                borderRadius: '12px',
+                boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
               }}
               className="arsenal-modal-panel"
             >
@@ -452,7 +454,7 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
                 overflowY: 'auto',
                 padding: '1rem 1.5rem',
                 scrollbarWidth: 'thin',
-                scrollbarColor: `${activeCard.color} var(--surface)`,
+                scrollbarColor: `#00CFFF var(--surface)`,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.65rem',
@@ -486,7 +488,7 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
       <style>{`
         @media (max-width: 480px) {
           .arsenal-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .arsenal-modal-panel { width: 100vw !important; top: auto !important; border-left: none !important; border-top: 1px solid var(--border) !important; max-height: 85vh !important; border-radius: 16px 16px 0 0 !important; }
+          .arsenal-modal-panel { width: 98vw !important; max-height: 90vh !important; }
         }
         @media (min-width: 481px) and (max-width: 768px) {
           .arsenal-grid { grid-template-columns: repeat(3, 1fr) !important; }
@@ -494,6 +496,20 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
       `}</style>
     </motion.div>
   )
+}
+
+// Category placeholder images for products with no specific image (v17.2)
+const CATEGORY_PLACEHOLDERS: Record<string, string> = {
+  bucktail:   '/images/lures/bucktail.jpg',
+  crankbait:  '/images/lures/crankbait.jpg',
+  jig:        '/images/lures/jig.jpg',
+  topwater:   '/images/lures/topwater.jpg',
+  spinner:    '/images/lures/spinner.jpg',
+  swimbait:   '/images/lures/swimbait.jpg',
+  'glide-bait': '/images/lures/glide-bait.jpg',
+  softbait:   '/images/lures/softbait.jpg',
+  cuillere:   '/images/lures/cuillere.jpg',
+  equipement: '/images/lures/rod.jpg',
 }
 
 function ProductCard({
@@ -508,12 +524,18 @@ function ProductCard({
   accentColor: string
 }) {
   const [added, setAdded] = useState(false)
+  const [imgError, setImgError] = useState(false)
 
   const handleAdd = () => {
     onAddToCart()
     setAdded(true)
     setTimeout(() => setAdded(false), 1800)
   }
+
+  // If product has no image or image fails to load → use category placeholder
+  const productImgSrc = product.imageFile ? `/images/lures/${product.imageFile}` : null
+  const placeholderSrc = CATEGORY_PLACEHOLDERS[product.type] || '/images/lures/bucktail.jpg'
+  const imgSrc = (!productImgSrc || imgError) ? placeholderSrc : productImgSrc
 
   return (
     <div style={{
@@ -526,6 +548,15 @@ function ProductCard({
       alignItems: 'flex-start',
       transition: 'border-color 0.15s',
     }}>
+      {/* Product thumbnail */}
+      <div style={{ flexShrink: 0, width: '56px', height: '56px', borderRadius: '6px', overflow: 'hidden', background: '#0A1020', border: '1px solid var(--border)' }}>
+        <img
+          src={imgSrc}
+          alt={product.name}
+          onError={() => setImgError(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      </div>
       {/* Product info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{

@@ -148,12 +148,14 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
       </div>
 
       {/* Water selector grid — searchable, capped to ~3 rows */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style={{
+      <div className="waters-scroll-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style={{
         gap: '0.5rem',
         marginBottom: '1.5rem',
         maxHeight: '540px',
         overflowY: 'auto',
         paddingRight: '0.25rem',
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#00CFFF #1a1a1a',
       }}>
         {filteredWaters.map((water) => (
           <button
@@ -194,33 +196,90 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
         ))}
       </div>
 
-      {/* Detail panel */}
-      <div id="water-detail">
-        {selectedWater ? (
-          <WaterDetailPanel
-            water={selectedWater}
-            onViewGear={onViewGear ?? (() => {})}
-            onClose={() => setSelectedWater(null)}
-            locale={locale}
-            onViewSpecies={onViewSpecies}
-            onViewCalendar={onViewCalendar}
+      {/* Default empty state */}
+      {!selectedWater && (
+        <div style={{
+          padding: '2rem',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '8px',
+          fontFamily: 'var(--font-body)',
+        }}>
+          {locale === 'fr'
+            ? "👆 Sélectionnez un lac pour voir les espèces, les mises à l'eau et les conditions idéales"
+            : '👆 Select a lake to see species, launches, and ideal fishing conditions'}
+        </div>
+      )}
+
+      {/* Lake detail — absolute/fixed OVERLAY on top of content (v17.2) */}
+      {selectedWater && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setSelectedWater(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(5,8,16,0.75)',
+              zIndex: 300,
+              backdropFilter: 'blur(4px)',
+            }}
           />
-        ) : (
           <div style={{
-            padding: '2rem',
-            textAlign: 'center',
-            color: 'var(--text-muted)',
-            background: 'var(--surface)',
+            position: 'fixed',
+            top: '5%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 'min(96vw, 780px)',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            zIndex: 301,
+            borderRadius: '12px',
+            background: 'var(--bg-raised)',
             border: '1px solid var(--border)',
-            borderRadius: '8px',
-            fontFamily: 'var(--font-body)',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
           }}>
-            {locale === 'fr'
-              ? "👆 Sélectionnez un lac pour voir les espèces, les mises à l'eau et les conditions idéales"
-              : '👆 Select a lake to see species, launches, and ideal fishing conditions'}
+            {/* Small OpenStreetMap embed per lake detail */}
+            {(() => {
+              const lat = selectedWater.coords[0]
+              const lng = selectedWater.coords[1]
+              const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.05}%2C${lat - 0.05}%2C${lng + 0.05}%2C${lat + 0.05}&layer=cyclemap`
+              return (
+                <div style={{ borderRadius: '12px 12px 0 0', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
+                  <iframe
+                    src={osmUrl}
+                    width="100%"
+                    height="200"
+                    style={{ display: 'block', border: 'none' }}
+                    loading="lazy"
+                    title={`${selectedWater.nameFr ?? selectedWater.name} — OpenStreetMap`}
+                  />
+                </div>
+              )
+            })()}
+            <WaterDetailPanel
+              water={selectedWater}
+              onViewGear={onViewGear ?? (() => {})}
+              onClose={() => setSelectedWater(null)}
+              locale={locale}
+              onViewSpecies={onViewSpecies}
+              onViewCalendar={onViewCalendar}
+            />
           </div>
-        )}
-      </div>
+        </>
+      )}
+      {/* Mobile scrollbar CSS */}
+      <style>{`
+        .waters-scroll-list::-webkit-scrollbar { width: 6px; }
+        .waters-scroll-list::-webkit-scrollbar-track { background: #1a1a1a; min-height: 44px; border-radius: 3px; }
+        .waters-scroll-list::-webkit-scrollbar-thumb { background: #00CFFF; border-radius: 3px; }
+        @media (max-width: 768px) {
+          .waters-scroll-list::-webkit-scrollbar { width: 8px; }
+          .waters-scroll-list::-webkit-scrollbar-track { min-height: 44px; }
+        }
+      `}</style>
     </motion.div>
   )
 }

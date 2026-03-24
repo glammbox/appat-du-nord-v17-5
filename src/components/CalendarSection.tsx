@@ -277,7 +277,11 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
   const todayMonth = now.getMonth()
   const fishingScore = weather ? getScore(weather.temp, weather.wind, todayMonth) : null
   const bestTimes = getBestFishingTimes(todayMonth)
-  const solunarWindows = getSolunarWindows(now)
+  // v17.2: solunar windows update with selectedDay (not always today)
+  const selectedDayDate = forecasts[selectedDay]
+    ? new Date(forecasts[selectedDay].date + 'T12:00:00')
+    : now
+  const solunarWindows = getSolunarWindows(selectedDayDate)
   const activityEmojis = locale === 'fr' ? activityEmojisFr : activityEmojisEn
   const month = calendarData[selectedMonth]
   const sectionRef = useRef(null)
@@ -512,7 +516,7 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
             </span>
           </div>
           {/* Scrollable row of day cards — bigger, more info */}
-          <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'thin', scrollbarColor: '#C0392B #1a1a1a' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'thin', scrollbarColor: '#00CFFF #1a1a1a' }}>
             {forecasts.map((day, i) => {
               const dateObj = new Date(day.date + 'T12:00:00')
               const dayName = dateObj.toLocaleDateString(locale === 'fr' ? 'fr-CA' : 'en-CA', { weekday: 'short' })
@@ -575,6 +579,18 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
                   <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginBottom: '0.2rem' }}>
                     🌧 {day.precipitationMm} mm
                   </div>
+                  {/* Majeur indicator (red dot) + Mineur indicator (blue dot) — v17.2 */}
+                  {(() => {
+                    const dayWins = getSolunarWindows(new Date(day.date + 'T12:00:00'))
+                    const hasMajeur = dayWins.some(w => w.type === 'major')
+                    const hasMineur = dayWins.some(w => w.type === 'minor')
+                    return (
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '3px', marginBottom: '0.2rem' }}>
+                        {hasMajeur && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#E63946', flexShrink: 0 }} title="Majeur" />}
+                        {hasMineur && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00CFFF', flexShrink: 0 }} title="Mineur" />}
+                      </div>
+                    )
+                  })()}
                   {/* Solunar best time window */}
                   {bestSolunar && (
                     <div style={{

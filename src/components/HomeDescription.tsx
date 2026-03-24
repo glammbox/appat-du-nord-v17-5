@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { BackgroundLines } from './ui/background-lines'
 import { BlurFade } from './ui/blur-fade'
 
 interface HomeDescriptionProps {
@@ -10,15 +9,15 @@ interface HomeDescriptionProps {
 const TEXT_FR = [
   "Appât du Nord est né d'une frustration simple : il n'existait pas de vrai portail québécois pour le pêcheur sérieux. Pas de base de données digne de ce nom sur les espèces locales. Pas de carte qui réunit en un seul endroit les lacs, les rivières et leurs espèces confirmées. Pas d'outil qui croise la météo, les phases lunaires et le comportement des poissons pour vous dire réellement quand partir. Alors on l'a construit.",
   "Le Québec est une terre de pêche extraordinaire. Quarante-cinq plans d'eau et rivières majeurs cartographiés — du Fleuve Saint-Laurent à l'immensité du Réservoir Gouin, du Lac Saint-Jean aux eaux froides du Lac Memphrémagog. Chaque plan d'eau a sa personnalité, ses espèces, ses saisons. On a documenté tout ça, avec des sources vérifiées, des coordonnées réelles et des descriptions qui vous aident à choisir votre prochain plan d'eau avec confiance.",
-  "Vingt et une espèces documentées — du maskinongé légendaire à l'esturgeon des lacs, en passant par le doré jaune, le grand brochet, l'achigan à grande bouche et toutes les familles de truites québécoises. Pour chaque espèce : identification visuelle, habitat, comportement saisonnier, meilleures techniques, règlements en vigueur, liens gouvernementaux vérifiés. Un vrai dictionnaire de terrain, pas une liste d'espèces Wikipedia.",
-  "La boutique propose un équipement rigoureusement sélectionné par espèce cible. Bucktails pour le maskinongé. Crankbaits pour le doré. Jigs et streamers pour la truite. Structure prête pour un panier persistant — ajoutez, revenez, continuez. Le calendrier de pêche combine les données météo Open-Meteo en temps réel sur 16 jours avec les fenêtres solunaires, pour vous donner les meilleures fenêtres de pêche de la journée. Les guides des espèces vous plongent dans la biologie, l'écologie et la culture de pêche de chaque espèce. Et la section Tournois répertorie les grands événements compétitifs du Québec — parce que pêcher en compétition, c'est une autre façon de vivre ce sport.",
+  "Vingt et une espèces documentées — du maskinongé légendaire à l'esturgeon des lacs, en passant par le doré jaune, le grand brochet, l'achigan à grande bouche et toutes les familles de truites québécoises. Pour chaque espèce : identification visuelle, habitat, comportement saisonnier, meilleures techniques, règlements en vigueur, liens gouvernementaux vérifiés.",
+  "La boutique propose un équipement rigoureusement sélectionné par espèce cible. Le calendrier combine les données météo Open-Meteo en temps réel sur 16 jours avec les fenêtres solunaires. Les guides des espèces vous plongent dans la biologie, l'écologie et la culture de pêche de chaque espèce.",
 ]
 
 const TEXT_EN = [
   "Appât du Nord was born from a simple frustration: there was no real Quebec portal for the serious angler. No worthy database on local species. No map that brought together in one place the lakes, rivers, and their confirmed species. No tool that crossed weather, lunar phases, and fish behavior to tell you when to actually go. So we built it.",
   "Quebec is an extraordinary fishing territory. Forty-five major water bodies and rivers mapped — from the St. Lawrence River to the immensity of Réservoir Gouin, from Lac Saint-Jean to the cold waters of Lac Memphrémagog. Each body of water has its personality, its species, its seasons. We documented all of it, with verified sources, real GPS coordinates, and descriptions that help you choose your next destination with confidence.",
-  "Twenty-one species documented — from the legendary muskellunge to lake sturgeon, including walleye, northern pike, largemouth bass, and all Quebec trout families. For each species: visual identification, habitat, seasonal behavior, best techniques, current regulations, and verified government links. A real field reference, not a Wikipedia species list.",
-  "The boutique offers rigorously selected gear by target species. Bucktails for muskie. Crankbaits for walleye. Jigs and streamers for trout. The cart persists across visits so you can build an order with intent. The fishing calendar combines real-time Open-Meteo weather data over 16 days with solunar windows, giving you the best fishing windows of the day. The species guides take you deep into the biology, ecology, and fishing culture of each species. And the Tournaments section lists major competitive events in Quebec — because fishing in competition is another way to live this sport.",
+  "Twenty-one species documented — from the legendary muskellunge to lake sturgeon, including walleye, northern pike, largemouth bass, and all Quebec trout families. For each species: visual identification, habitat, seasonal behavior, best techniques, current regulations, and verified government links.",
+  "The boutique offers rigorously selected gear by target species. The fishing calendar combines real-time Open-Meteo weather data over 16 days with solunar windows. The species guides take you deep into the biology, ecology, and fishing culture of each species.",
 ]
 
 export function HomeDescription({ locale }: HomeDescriptionProps) {
@@ -38,12 +37,6 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
         position: 'relative',
       }}
     >
-      {/* BackgroundLines — directional energy behind content */}
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.3, pointerEvents: 'none', zIndex: 0 }}>
-        <BackgroundLines className="h-full w-full" svgOptions={{ duration: 10 }}>
-          <span />
-        </BackgroundLines>
-      </div>
       <div style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: '0 2rem', position: 'relative', zIndex: 1 }}>
 
         {/* Eyebrow */}
@@ -84,17 +77,17 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
             : <>QUEBEC FISHES BETTER<br /><span style={{ color: 'var(--accent)' }}>WHEN EVERYTHING IS IN ONE PLACE.</span></>}
         </motion.h2>
 
-        {/* Two-column layout: text left, photo right */}
+        {/* Two-column layout: text left, photo right — horizontal layout */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr',
             gap: '3rem',
-            alignItems: 'stretch',
+            alignItems: 'center',
           }}
           className="home-desc-grid"
         >
-          {/* LEFT — prose */}
+          {/* LEFT — prose, slim font */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
@@ -119,11 +112,11 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
                 <p
                   style={{
                     fontFamily: "'Inter', sans-serif",
-                    fontSize: 'clamp(1rem, 1.6vw, 1.1rem)',
+                    fontSize: 'clamp(0.88rem, 1.4vw, 0.98rem)',
                     color: '#C8D3E2',
-                    lineHeight: 1.78,
-                    marginBottom: '1.5rem',
-                    fontWeight: 400,
+                    lineHeight: 1.75,
+                    marginBottom: '1.25rem',
+                    fontWeight: 300,
                   }}
                 >
                   {para}
@@ -132,7 +125,7 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
             ))}
           </motion.div>
 
-          {/* RIGHT — tall action photo */}
+          {/* RIGHT — hero-fisherman.jpg horizontal action photo */}
           <motion.div
             initial={{ opacity: 0, x: 60 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
@@ -143,20 +136,18 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
               borderRadius: 'var(--radius-card)',
               overflow: 'hidden',
               border: '1px solid var(--border)',
-              height: '100%',
-              minHeight: '420px',
               position: 'relative',
+              aspectRatio: '16/9',
             }}>
               <img
-                src="/images/hero/fisherman-vertical.jpg"
-                alt={locale === 'fr' ? 'Pêcheur au bord du lac' : 'Angler fishing at the lake'}
+                src="/images/hero-fisherman.jpg"
+                alt={locale === 'fr' ? 'Pêcheur en action sur l\'eau' : 'Angler in action on the water'}
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  objectPosition: 'center 30%',
+                  objectPosition: 'center 40%',
                   display: 'block',
-                  minHeight: '420px',
                 }}
               />
               {/* Bottom overlay */}
@@ -165,21 +156,22 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                padding: '2rem 1.75rem',
-                background: 'linear-gradient(to top, rgba(10,14,26,0.96) 0%, transparent 100%)',
+                padding: '1.5rem 1.75rem',
+                background: 'linear-gradient(to top, rgba(10,14,26,0.92) 0%, transparent 100%)',
               }}>
                 <div style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: '1.5rem',
+                  fontSize: '1.25rem',
                   color: 'var(--text-primary)',
                   letterSpacing: '0.06em',
                   marginBottom: '0.3rem',
+                  fontWeight: 300,
                 }}>
                   {locale === 'fr' ? 'Découvrez le Québec' : 'Discover Quebec'}
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.7rem',
+                  fontSize: '0.68rem',
                   fontWeight: 600,
                   color: 'var(--accent)',
                   letterSpacing: '0.2em',
@@ -197,7 +189,7 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
       <style>{`
         @media (min-width: 900px) {
           .home-desc-grid {
-            grid-template-columns: 58% 42% !important;
+            grid-template-columns: 50% 50% !important;
           }
         }
       `}</style>

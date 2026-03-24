@@ -223,12 +223,13 @@ export function GuidesSection({ locale = 'fr', onViewArsenal }: GuidesSectionPro
         </p>
       </motion.div>
 
-      {/* Fix 5 — Book Cards Grid: equal widths, consistent columns, centered */}
+      {/* v17.2 — Book cards: ~160-180px each, 5 per row */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '1.25rem',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '1rem',
         marginBottom: selectedBook ? '2rem' : '0',
+        justifyContent: 'flex-start',
       }}
       className="guides-grid"
       >
@@ -241,6 +242,8 @@ export function GuidesSection({ locale = 'fr', onViewArsenal }: GuidesSectionPro
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 + idx * 0.07 }}
               style={{
+                width: 'clamp(140px, 18%, 180px)',
+                flexShrink: 0,
                 background: 'var(--surface)',
                 border: `1px solid ${isActive ? book.spineColor : 'var(--border)'}`,
                 borderRadius: 'var(--radius-sm)',
