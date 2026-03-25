@@ -9,9 +9,7 @@ const activityColors: Record<ActivityLevel, string> = {
   CLOSED: '#22304A',
 }
 
-// Manifest-verified local images — v16 media manifest (26 images generated)
-// Primary: new generated images from media manifest
-// Fallback: existing v15 images
+// v17.3 — Fix 16: 6 species replaced with fully-underwater Imagen 4.0 Ultra images
 const SPECIES_LOCAL_IMAGES: Record<string, string> = {
   'atlantic-salmon':  '/images/fish/atlantic-salmon.png',
   'arctic-char':      '/images/fish/arctic-char.png',
@@ -19,21 +17,22 @@ const SPECIES_LOCAL_IMAGES: Record<string, string> = {
   'brown-trout':      '/images/fish/brown-trout.png',
   'burbot':           '/images/fish/burbot.png',
   'carp':             '/images/fish/carp.png',
-  'catfish':          '/images/fish/catfish.png',
+  'catfish':          '/images/fish/barbotte-brune.png',     // Fix 16: fully submerged
   'cisco':            '/images/fish/cisco.png',
   'lake-sturgeon':    '/images/fish/lake-sturgeon.png',
   'lake-trout':       '/images/fish/lake-trout.png',
-  'largemouth-bass':  '/images/fish/largemouth-bass.png',
-  'muskellunge':      '/images/fish/muskellunge.png',
+  'largemouth-bass':  '/images/fish/achigan-grande-bouche.png', // Fix 16: fully submerged
+  'muskellunge':      '/images/fish/muskellunge.png',        // Fix 16: fully submerged
   'northern-pike':    '/images/fish/northern-pike.png',
   'perch':            '/images/fish/perch.png',
   'rainbow-trout':    '/images/fish/rainbow-trout.png',
-  'sauger':           '/images/fish/sauger.png',
-  'smallmouth-bass':  '/images/fish/smallmouth-bass.png',
+  'sauger':           '/images/fish/dore-noir.png',          // Fix 16: fully submerged
+  'smallmouth-bass':  '/images/fish/achigan-petite-bouche.png', // Fix 16: fully submerged
   'splake':           '/images/fish/splake.png',
   'tiger-muskie':     '/images/fish/tiger-muskie.png',
   'walleye':          '/images/fish/walleye.png',
   'whitefish':        '/images/fish/whitefish.png',
+  // carpe-commune also used in GearSection/WaterDetailPanel
 }
 
 const LAKE_TO_WATER_ID: Record<string, string> = {
@@ -284,44 +283,57 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
       </div>
 
       {/* ── 2-Column Detail Panel ──────────────────────────────────────── */}
-      {/* Intro text when no species selected (v17.2: default is null) */}
+      {/* Empty state — Fix 5: background image + prompt text */}
       {!activeSpecies && (
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            padding: '3rem 2rem',
-            textAlign: 'center',
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
+            position: 'relative',
+            minHeight: '320px',
             borderRadius: 'var(--radius-card)',
+            overflow: 'hidden',
+            border: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎣</div>
-          <p style={{
-            fontFamily: 'var(--font-condensed)',
-            fontSize: 'clamp(1rem, 2vw, 1.3rem)',
-            fontWeight: 600,
-            color: 'var(--accent)',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            marginBottom: '0.5rem',
-          }}>
-            {locale === 'fr'
-              ? 'Cliquez sur une espèce pour voir les détails'
-              : 'Click a species to see details'}
-          </p>
-          <p style={{
-            fontFamily: 'var(--font-body)',
-            fontSize: '0.9rem',
-            color: 'var(--text-muted)',
-          }}>
-            {locale === 'fr'
-              ? '21 espèces du Québec — sélectionnez une espèce dans la liste ci-dessus'
-              : '21 Quebec species — select a species from the list above'}
-          </p>
-          {/* Note: fish images should depict fish deep underwater, fully submerged */}
+          {/* Background: muskie hero photo as empty state */}
+          <img
+            src="/images/hero/fishing-hero.jpg"
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: 'absolute', inset: 0,
+              width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'center',
+              opacity: 0.25,
+            }}
+          />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,14,26,0.3) 0%, rgba(10,14,26,0.85) 100%)' }} />
+          <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '3rem 2rem' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🎣</div>
+            <p style={{
+              fontFamily: 'var(--font-condensed)',
+              fontSize: 'clamp(1rem, 2vw, 1.3rem)',
+              fontWeight: 600,
+              color: 'var(--accent)',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              marginBottom: '0.5rem',
+            }}>
+              {locale === 'fr'
+                ? 'Cliquez sur une espèce pour voir les détails'
+                : 'Click a species to see details'}
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              {locale === 'fr'
+                ? '21 espèces du Québec — sélectionnez une espèce dans la liste ci-dessus'
+                : '21 Quebec species — select a species from the list above'}
+            </p>
+          </div>
         </motion.div>
       )}
       <AnimatePresence mode="wait">
@@ -332,8 +344,44 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
           className="species-detail-grid"
-          style={{ display: activeSpecies ? 'grid' : 'none', gap: '2.5rem', alignItems: 'flex-start' }}
+          style={{ display: activeSpecies ? 'grid' : 'none', gap: '2.5rem', alignItems: 'flex-start', position: 'relative' }}
         >
+          {/* Fix 5 — Close button top-right of detail panel */}
+          {activeSpecies && (
+            <button
+              onClick={() => setActiveSpecies(null)}
+              aria-label={locale === 'fr' ? 'Fermer' : 'Close'}
+              style={{
+                position: 'absolute',
+                top: '-0.5rem',
+                right: '-0.5rem',
+                zIndex: 10,
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: 'rgba(5,8,16,0.9)',
+                border: '1px solid rgba(0,207,255,0.35)',
+                color: '#C8D3E2',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1rem',
+                fontWeight: 700,
+                transition: 'background 0.15s, color 0.15s',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.background = '#00CFFF'
+                ;(e.currentTarget as HTMLElement).style.color = '#050810'
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background = 'rgba(5,8,16,0.9)'
+                ;(e.currentTarget as HTMLElement).style.color = '#C8D3E2'
+              }}
+            >
+              ✕
+            </button>
+          )}
           {/* ── LEFT: Fish portrait + quick stats ─── */}
           <div>
             {/* Fish portrait — IMAGE CROPPING LAW: always contain */}

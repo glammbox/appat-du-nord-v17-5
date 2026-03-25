@@ -1,5 +1,4 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
-import { motion } from 'framer-motion'
 import Lenis from 'lenis'
 
 import { SiteHeader } from './components/SiteHeader'
@@ -166,31 +165,7 @@ function App() {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)' }}>
 
-      {/* Fix 1 — Permanent fixed left-side brand rail (desktop only) */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1.5, delay: 0.5 }}
-        className="brand-rail-desktop"
-        style={{
-          position: 'fixed',
-          left: '-2rem',
-          top: '50%',
-          transform: 'translateY(-50%) rotate(-90deg)',
-          zIndex: 50,
-          pointerEvents: 'none',
-          userSelect: 'none',
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-          color: 'rgba(0,180,216,0.25)',
-          letterSpacing: '0.5em',
-          textTransform: 'uppercase',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        APPÂT DU NORD
-      </motion.div>
-
+      {/* Fix 1: Brand left-side logo is in Hero.tsx — only ONE instance */}
       <SiteHeader
         locale={locale}
         onLocaleToggle={handleLocaleToggle}

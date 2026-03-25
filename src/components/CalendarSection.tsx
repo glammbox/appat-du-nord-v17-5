@@ -547,25 +547,26 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
                   <div style={{ fontSize: '0.63rem', color: 'var(--text-muted)', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                     {i === 0 ? (locale === 'fr' ? "Aujourd'hui" : 'Today') : dayName}
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 700, marginTop: '0.1rem', fontFamily: 'var(--font-display)' }}>
+                  {/* Fix 12: bigger day number, smaller score pill */}
+                  <div style={{ fontSize: '1.05rem', color: 'var(--text-primary)', fontWeight: 800, marginTop: '0.1rem', fontFamily: 'var(--font-display)', lineHeight: 1 }}>
                     {dayNum}
                   </div>
-                  {/* Fishing score dot — colored green/yellow/red */}
+                  {/* Score badge — compact pill beside day number */}
                   <div style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    background: scoreColor,
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    margin: '0.3rem auto',
-                    fontSize: '0.68rem',
+                    padding: '1px 6px',
+                    borderRadius: '8px',
+                    background: scoreColor,
+                    margin: '0.2rem auto 0',
+                    fontSize: '0.6rem',
                     fontWeight: 700,
                     color: 'white',
                     fontFamily: 'var(--font-display)',
+                    letterSpacing: '0.04em',
                   }}>
-                    {day.fishingScore}
+                    {day.fishingScore}/10
                   </div>
                   {/* Temperature */}
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-primary)', marginBottom: '0.15rem' }}>
@@ -585,9 +586,9 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
                     const hasMajeur = dayWins.some(w => w.type === 'major')
                     const hasMineur = dayWins.some(w => w.type === 'minor')
                     return (
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '3px', marginBottom: '0.2rem' }}>
-                        {hasMajeur && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#E63946', flexShrink: 0 }} title="Majeur" />}
-                        {hasMineur && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00CFFF', flexShrink: 0 }} title="Mineur" />}
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', marginBottom: '0.15rem' }}>
+                        {hasMajeur && <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#E63946', flexShrink: 0 }} title={locale === 'fr' ? 'Majeur' : 'Major'} />}
+                        {hasMineur && <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#00CFFF', flexShrink: 0 }} title={locale === 'fr' ? 'Mineur' : 'Minor'} />}
                       </div>
                     )
                   })()}
@@ -612,16 +613,22 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
             })}
           </div>
 
-          {/* Legend row */}
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+          {/* Fix 11 + 12: Legend — compact one line with all indicators */}
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)', fontFamily: 'var(--font-condensed)', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600 }}>
+              {locale === 'fr' ? 'Légende:' : 'Legend:'}
+            </span>
             {[
               { label: locale === 'fr' ? 'Mauvais' : 'Poor', color: '#E63946' },
               { label: locale === 'fr' ? 'Moyen' : 'Fair', color: '#C8A84B' },
               { label: locale === 'fr' ? 'Bon' : 'Good', color: '#2E7D32' },
+              { label: locale === 'fr' ? '● Majeur' : '● Major', color: '#E63946', dot: true },
+              { label: locale === 'fr' ? '● Mineur' : '● Minor', color: '#00CFFF', dot: true },
+              { label: locale === 'fr' ? '● Actif' : '● Active', color: '#00B4D8', dot: true },
             ].map(item => (
-              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: item.color }} />
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.65rem' }}>{item.label}</span>
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                {!item.dot && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: item.color }} />}
+                <span style={{ color: item.dot ? item.color : 'var(--text-muted)', fontSize: '0.6rem' }}>{item.label}</span>
               </div>
             ))}
           </div>

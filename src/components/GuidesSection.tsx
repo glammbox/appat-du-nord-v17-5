@@ -223,15 +223,28 @@ export function GuidesSection({ locale = 'fr', onViewArsenal }: GuidesSectionPro
         </p>
       </motion.div>
 
-      {/* v17.2 — Book cards: ~160-180px each, 5 per row */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        marginBottom: selectedBook ? '2rem' : '0',
-        justifyContent: 'flex-start',
-      }}
-      className="guides-grid"
+      {/* Fix 13: horizontal mouse scroll — no scrollbar visible, wheel scroll horizontally */}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          gap: '1rem',
+          marginBottom: selectedBook ? '2rem' : '0',
+          overflowX: 'auto',
+          scrollBehavior: 'smooth',
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: '0.5rem',
+          cursor: 'grab',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+        className="guides-grid guides-horizontal-scroll"
+        onWheel={(e) => {
+          e.preventDefault()
+          const el = e.currentTarget
+          el.scrollLeft += e.deltaY
+        }}
       >
         {books.map((book, idx) => {
           const isActive = selectedBook === book.id
@@ -242,8 +255,9 @@ export function GuidesSection({ locale = 'fr', onViewArsenal }: GuidesSectionPro
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 + idx * 0.07 }}
               style={{
-                width: 'clamp(140px, 18%, 180px)',
+                width: 'clamp(150px, 18vw, 190px)',
                 flexShrink: 0,
+                scrollSnapAlign: 'start',
                 background: 'var(--surface)',
                 border: `1px solid ${isActive ? book.spineColor : 'var(--border)'}`,
                 borderRadius: 'var(--radius-sm)',
@@ -447,6 +461,11 @@ export function GuidesSection({ locale = 'fr', onViewArsenal }: GuidesSectionPro
           </>
         )}
       </AnimatePresence>
+      <style>{`
+        .guides-horizontal-scroll::-webkit-scrollbar { display: none; }
+        .guides-horizontal-scroll { cursor: grab; }
+        .guides-horizontal-scroll:active { cursor: grabbing; }
+      `}</style>
     </motion.div>
   )
 }

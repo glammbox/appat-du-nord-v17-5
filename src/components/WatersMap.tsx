@@ -196,22 +196,7 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
         ))}
       </div>
 
-      {/* Default empty state */}
-      {!selectedWater && (
-        <div style={{
-          padding: '2rem',
-          textAlign: 'center',
-          color: 'var(--text-muted)',
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: '8px',
-          fontFamily: 'var(--font-body)',
-        }}>
-          {locale === 'fr'
-            ? "👆 Sélectionnez un lac pour voir les espèces, les mises à l'eau et les conditions idéales"
-            : '👆 Select a lake to see species, launches, and ideal fishing conditions'}
-        </div>
-      )}
+      {/* Fix 9: "Sélectionnez un lac" bar removed — people know to click */}
 
       {/* Lake detail — absolute/fixed OVERLAY on top of content (v17.2) */}
       {selectedWater && (
@@ -241,20 +226,41 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
             border: '1px solid var(--border)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
           }}>
-            {/* Small OpenStreetMap embed per lake detail */}
+            {/* Fix 8 + Fix 10: Large OpenStreetMap navigation map in EVERY lake detail — 350px+ */}
             {(() => {
               const lat = selectedWater.coords[0]
               const lng = selectedWater.coords[1]
-              const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.05}%2C${lat - 0.05}%2C${lng + 0.05}%2C${lat + 0.05}&layer=cyclemap`
+              // cyclemap layer = navigation/road layer per brief Fix 10
+              const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.12}%2C${lat - 0.08}%2C${lng + 0.12}%2C${lat + 0.08}&layer=cyclemap&marker=${lat}%2C${lng}`
               return (
                 <div style={{ borderRadius: '12px 12px 0 0', overflow: 'hidden', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{
+                    background: 'var(--surface)',
+                    padding: '0.4rem 0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    borderBottom: '1px solid var(--border)',
+                  }}>
+                    <span style={{ fontSize: '0.65rem', fontFamily: 'var(--font-display)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                      🗺 {locale === 'fr' ? 'Carte de navigation' : 'Navigation Map'} — {selectedWater.nameFr ?? selectedWater.name}
+                    </span>
+                    <a
+                      href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=13`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ marginLeft: 'auto', fontSize: '0.62rem', color: 'var(--accent)', textDecoration: 'none' }}
+                    >
+                      {locale === 'fr' ? 'Voir en grand →' : 'Open full map →'}
+                    </a>
+                  </div>
                   <iframe
                     src={osmUrl}
                     width="100%"
-                    height="200"
+                    height="380"
                     style={{ display: 'block', border: 'none' }}
                     loading="lazy"
-                    title={`${selectedWater.nameFr ?? selectedWater.name} — OpenStreetMap`}
+                    title={`${selectedWater.nameFr ?? selectedWater.name} — OpenStreetMap Navigation`}
                   />
                 </div>
               )

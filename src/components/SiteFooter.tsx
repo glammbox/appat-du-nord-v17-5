@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { WavyBackground } from './ui/wavy-background'
 
 interface SiteFooterProps {
@@ -7,118 +5,96 @@ interface SiteFooterProps {
   locale: 'fr' | 'en'
 }
 
+// Fix 17 — Sponsor logos: full color SVG marks
 const SPONSORS = [
-  { name: 'Mercury',     url: 'https://www.mercurymarine.com' },
-  { name: 'Yamaha',      url: 'https://www.yamahaoutboards.com' },
-  { name: 'Shimano',     url: 'https://www.shimano.com' },
-  { name: 'Rapala',      url: 'https://www.rapala.com' },
-  { name: 'Berkley',     url: 'https://www.berkley-fishing.com' },
-  { name: 'Humminbird',  url: 'https://www.humminbird.com' },
-  { name: 'Abu Garcia',  url: 'https://www.abugarcia.com' },
+  {
+    name: 'Mercury',
+    url: 'https://www.mercurymarine.com',
+    color: '#CC0000',
+    svg: (
+      <svg width="110" height="32" viewBox="0 0 110 32" xmlns="http://www.w3.org/2000/svg" aria-label="Mercury Marine">
+        <circle cx="16" cy="16" r="14" fill="#CC0000"/>
+        <text x="16" y="20" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="9" fontWeight="800" fill="white" letterSpacing="0.5">M</text>
+        <text x="35" y="21" textAnchor="start" fontFamily="Arial Narrow, sans-serif" fontSize="12" fontWeight="700" letterSpacing="1.5" fill="#CC0000">MERCURY</text>
+        <text x="35" y="31" textAnchor="start" fontFamily="Arial, sans-serif" fontSize="8" fontWeight="400" letterSpacing="1" fill="#999">MARINE</text>
+      </svg>
+    ),
+  },
+  {
+    name: 'Yamaha',
+    url: 'https://www.yamahaoutboards.com',
+    color: '#003087',
+    svg: (
+      <svg width="110" height="32" viewBox="0 0 110 32" xmlns="http://www.w3.org/2000/svg" aria-label="Yamaha">
+        <rect width="110" height="32" rx="2" fill="#003087"/>
+        <text x="55" y="22" textAnchor="middle" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="14" fontWeight="800" letterSpacing="2" fill="white">YAMAHA</text>
+      </svg>
+    ),
+  },
+  {
+    name: 'Shimano',
+    url: 'https://www.shimano.com',
+    color: '#E8000D',
+    svg: (
+      <svg width="110" height="32" viewBox="0 0 110 32" xmlns="http://www.w3.org/2000/svg" aria-label="Shimano">
+        <text x="55" y="22" textAnchor="middle" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="14" fontWeight="800" letterSpacing="1.5" fill="#E8000D">SHIMANO</text>
+        <line x1="8" y1="26" x2="102" y2="26" stroke="#E8000D" strokeWidth="1.5"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Rapala',
+    url: 'https://www.rapala.com',
+    color: '#1A4E8C',
+    svg: (
+      <svg width="100" height="32" viewBox="0 0 100 32" xmlns="http://www.w3.org/2000/svg" aria-label="Rapala">
+        <text x="50" y="21" textAnchor="middle" fontFamily="Georgia, serif" fontSize="15" fontWeight="700" letterSpacing="1" fill="#1A4E8C">Rapala</text>
+        <path d="M10 25 Q50 29 90 25" stroke="#E8941A" strokeWidth="2" fill="none"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Berkley',
+    url: 'https://www.berkley-fishing.com',
+    color: '#FF6600',
+    svg: (
+      <svg width="100" height="32" viewBox="0 0 100 32" xmlns="http://www.w3.org/2000/svg" aria-label="Berkley">
+        <text x="50" y="22" textAnchor="middle" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="14" fontWeight="900" letterSpacing="1.5" fill="#FF6600">BERKLEY</text>
+        <line x1="10" y1="26" x2="90" y2="26" stroke="#FF6600" strokeWidth="2"/>
+      </svg>
+    ),
+  },
+  {
+    name: 'Humminbird',
+    url: 'https://www.humminbird.com',
+    color: '#0070C0',
+    svg: (
+      <svg width="120" height="32" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg" aria-label="Humminbird">
+        <text x="60" y="19" textAnchor="middle" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="11" fontWeight="800" letterSpacing="1" fill="#0070C0">HUMMINBIRD</text>
+        <text x="60" y="30" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="7" letterSpacing="2" fill="#0070C0">FISH SMARTER</text>
+      </svg>
+    ),
+  },
+  {
+    name: 'Abu Garcia',
+    url: 'https://www.abugarcia.com',
+    color: '#BF0000',
+    svg: (
+      <svg width="110" height="32" viewBox="0 0 110 32" xmlns="http://www.w3.org/2000/svg" aria-label="Abu Garcia">
+        <text x="55" y="16" textAnchor="middle" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="11" fontWeight="800" letterSpacing="1.5" fill="#BF0000">ABU GARCIA</text>
+        <line x1="10" y1="21" x2="100" y2="21" stroke="#BF0000" strokeWidth="1.5"/>
+        <text x="55" y="30" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="7.5" letterSpacing="2" fill="#888">SINCE 1921</text>
+      </svg>
+    ),
+  },
 ]
 
-const NAV_SECTIONS = [
-  { key: 'especes',    fr: 'Espèces',    en: 'Species' },
-  { key: 'eaux',       fr: 'Eaux',       en: 'Waters' },
-  { key: 'calendrier', fr: 'Prévisions', en: 'Forecast' },
-  { key: 'guides',     fr: 'Guides',     en: 'Guides' },
-  { key: 'tournois',   fr: 'Tournois',   en: 'Tournaments' },
-  { key: 'arsenal',    fr: 'Arsenal',    en: 'Arsenal' },
-]
-
-// Floating nav bar — hides on scroll down, reveals on scroll up (Framer Motion)
-function FloatingNavBar({ onSectionSelect, locale }: SiteFooterProps) {
-  const [visible, setVisible] = useState(true)
-  const lastY = useRef(0)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY
-      const isAtBottom = window.innerHeight + currentY >= document.body.scrollHeight - 100
-      if (isAtBottom) {
-        setVisible(true)
-      } else if (currentY > lastY.current && currentY > 80) {
-        setVisible(false)
-      } else {
-        setVisible(true)
-      }
-      lastY.current = currentY
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 80, opacity: 0 }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          style={{
-            position: 'fixed',
-            bottom: '1.25rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 50,
-            display: 'flex',
-            flexDirection: 'row',
-            gap: '0.25rem',
-            background: 'rgba(5,8,16,0.9)',
-            border: '1px solid rgba(0,207,255,0.18)',
-            borderRadius: '999px',
-            padding: '0.45rem 0.75rem',
-            backdropFilter: 'blur(12px)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-          }}
-        >
-          {NAV_SECTIONS.map(link => (
-            <button
-              key={link.key}
-              onClick={() => onSectionSelect?.(link.key)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#94A3B8',
-                cursor: 'pointer',
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                padding: '0.3rem 0.65rem',
-                borderRadius: '999px',
-                transition: 'color 0.15s, background 0.15s',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.color = '#00CFFF'
-                ;(e.currentTarget as HTMLElement).style.background = 'rgba(0,207,255,0.1)'
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.color = '#94A3B8'
-                ;(e.currentTarget as HTMLElement).style.background = 'none'
-              }}
-            >
-              {locale === 'fr' ? link.fr : link.en}
-            </button>
-          ))}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
-}
-
-export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
+export function SiteFooter({ locale }: SiteFooterProps) {
   return (
     <>
-      {/* Floating nav bar — hide on scroll down, reveal on scroll up */}
-      <FloatingNavBar onSectionSelect={onSectionSelect} locale={locale} />
-
       <footer style={{ position: 'relative', overflow: 'hidden', background: '#050810' }}>
 
-        {/* Sponsor strip */}
+        {/* Sponsor strip — Fix 17: real color brand logos */}
         <div style={{
           borderBottom: '1px solid rgba(0,207,255,0.1)',
           borderTop: '1px solid rgba(0,207,255,0.1)',
@@ -144,7 +120,7 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
             alignItems: 'center',
             justifyContent: 'center',
             flexWrap: 'wrap',
-            gap: '0.5rem 2rem',
+            gap: '0.75rem 2rem',
           }}>
             {SPONSORS.map(sponsor => (
               <a
@@ -152,21 +128,23 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                 href={sponsor.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ textDecoration: 'none', opacity: 0.4, transition: 'opacity 0.2s' }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '0.9'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = '0.4'}
+                style={{ textDecoration: 'none', opacity: 0.85, transition: 'opacity 0.2s, transform 0.2s' }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.opacity = '1'
+                  ;(e.currentTarget as HTMLElement).style.transform = 'scale(1.05)'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.opacity = '0.85'
+                  ;(e.currentTarget as HTMLElement).style.transform = 'scale(1)'
+                }}
               >
-                <svg width="100" height="24" viewBox="0 0 100 24" xmlns="http://www.w3.org/2000/svg" aria-label={sponsor.name}>
-                  <text x="50" y="17" textAnchor="middle" fontFamily="Barlow Condensed, Arial Narrow, sans-serif" fontSize="11" fontWeight="700" letterSpacing="1.8" fill="#C8D3E2">
-                    {sponsor.name.toUpperCase()}
-                  </text>
-                </svg>
+                {sponsor.svg}
               </a>
             ))}
           </div>
         </div>
 
-        {/* Main footer content */}
+        {/* Main footer content — Fix 18: NO navigation links, GLAMMBOX + copyright only */}
         <div style={{ position: 'relative', zIndex: 2, padding: '3rem 2rem' }}>
           <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2.5rem', marginBottom: '3rem' }}>
@@ -207,46 +185,6 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                 </p>
               </div>
 
-              {/* Navigation — HORIZONTAL layout (v17.2) */}
-              <div>
-                <h4 style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 700,
-                  fontSize: '0.68rem',
-                  color: '#94A3B8',
-                  letterSpacing: '0.22em',
-                  textTransform: 'uppercase',
-                  marginBottom: '1rem',
-                }}>
-                  Navigation
-                </h4>
-                {/* Horizontal nav links — flex-row with gap */}
-                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '0.4rem 1.25rem' }}>
-                  {NAV_SECTIONS.map(link => (
-                    <button
-                      key={link.key}
-                      onClick={() => onSectionSelect?.(link.key)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#94A3B8',
-                        cursor: 'pointer',
-                        fontFamily: "'Inter', sans-serif",
-                        fontSize: '0.875rem',
-                        textAlign: 'left',
-                        padding: '0',
-                        transition: 'color 0.15s',
-                        whiteSpace: 'nowrap',
-                      }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#00CFFF'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#94A3B8'}
-                    >
-                      {locale === 'fr' ? link.fr : link.en}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Regulations */}
               <div>
                 <h4 style={{
@@ -273,9 +211,9 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {[
-                    { fr: 'Permis de pêche →', en: 'Fishing Licence →', url: 'https://www.quebec.ca/tourisme-loisirs-sport/activites-sportives-et-de-plein-air/peche-sportive/permis', icon: '📋', primary: true },
-                    { fr: 'Règlements par zone →', en: 'Zone Regulations →', url: 'https://peche.faune.gouv.qc.ca/', icon: '📊', primary: false },
-                    { fr: 'Mon dossier chasse & pêche →', en: 'My Hunting & Fishing File →', url: 'https://mondossierchassepeche.gouv.qc.ca/', icon: '🎫', primary: false },
+                    { fr: 'Permis de pêche →', en: 'Fishing Licence →', url: 'https://www.quebec.ca/tourisme-loisirs-sport/activites-sportives-et-de-plein-air/peche-sportive/permis', primary: true },
+                    { fr: 'Règlements par zone →', en: 'Zone Regulations →', url: 'https://peche.faune.gouv.qc.ca/', primary: false },
+                    { fr: 'Mon dossier chasse & pêche →', en: 'My Hunting & Fishing File →', url: 'https://mondossierchassepeche.gouv.qc.ca/', primary: false },
                   ].map(item => (
                     <a
                       key={item.url}
@@ -297,14 +235,14 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                         textTransform: 'uppercase',
                       }}
                     >
-                      {item.icon} {locale === 'fr' ? item.fr : item.en}
+                      {locale === 'fr' ? item.fr : item.en}
                     </a>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* GLAMMBOX signature + copyright — VERIFIED PRESENT */}
+            {/* Fix 18: GLAMMBOX signature + copyright ONLY — NO nav links */}
             <div style={{
               borderTop: '1px solid rgba(0,207,255,0.1)',
               paddingTop: '2rem',
@@ -314,7 +252,6 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
               gap: '0.75rem',
               textAlign: 'center',
             }}>
-              {/* GLAMMBOX signature — required by brief */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <span style={{
                   fontFamily: "'Inter', sans-serif",
@@ -334,35 +271,19 @@ export function SiteFooter({ onSectionSelect, locale }: SiteFooterProps) {
                 }}>
                   GLAMMBOX
                 </span>
-                <span style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 400,
-                  fontSize: '0.75rem',
-                  color: '#94A3B8',
-                }}>
-                  —
-                </span>
-                <span style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 500,
-                  fontSize: '0.75rem',
-                  color: '#F5F7FA',
-                }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: '0.75rem', color: '#94A3B8' }}>—</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '0.75rem', color: '#F5F7FA' }}>
                   Patrick Gervais
                 </span>
               </div>
-              <div style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '0.7rem',
-                color: '#94A3B8',
-              }}>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.7rem', color: '#94A3B8' }}>
                 © 2026 Appât du Nord · {locale === 'fr' ? 'Fait au Québec' : 'Made in Quebec'} · 🇨🇦
               </div>
             </div>
           </div>
         </div>
 
-        {/* WavyBackground — ultra-subtle water current at very low opacity */}
+        {/* WavyBackground — ultra-subtle water current */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 1, opacity: 0.15 }}>
           <WavyBackground
             colors={['#00CFFF', '#1D6BFF', '#00CFFF']}

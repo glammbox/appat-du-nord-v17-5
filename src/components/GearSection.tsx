@@ -14,15 +14,15 @@ const ARSENAL_CARDS: {
   image: string
 }[] = [
   // Row 1 — Big 5
-  { id: 'maskinonge', labelFr: 'Maskinongé', labelEn: 'Muskellunge', color: '#D4261C', image: '/images/fish/muskellunge.png' },
+  { id: 'maskinonge', labelFr: 'Maskinongé', labelEn: 'Muskellunge', color: '#D4261C', image: '/images/fish/muskellunge.png' }, // Fix 16: underwater
   { id: 'brochet',    labelFr: 'Grand Brochet', labelEn: 'Northern Pike', color: '#2E7D32', image: '/images/fish/northern-pike.png' },
-  { id: 'achigan',    labelFr: 'Achigan', labelEn: 'Bass', subFr: 'Grande & Petite Bouche', subEn: 'LM & SM Bass', color: '#1565C0', image: '/images/fish/largemouth-bass.png' },
+  { id: 'achigan',    labelFr: 'Achigan', labelEn: 'Bass', subFr: 'Grande & Petite Bouche', subEn: 'LM & SM Bass', color: '#1565C0', image: '/images/fish/achigan-grande-bouche.png' },
   { id: 'dore',       labelFr: 'Doré Jaune', labelEn: 'Walleye', color: '#C8A84B', image: '/images/fish/walleye.png' },
   { id: 'truite',     labelFr: 'Truite', labelEn: 'Trout', subFr: 'Mouchetée · Arc-en-ciel · Touladi · Brune · Omble', subEn: 'Brook · Rainbow · Lake · Brown · Char', color: '#6A1B9A', image: '/images/fish/brook-trout.png' },
   // Row 2 — Other species
   { id: 'maskinonge', labelFr: 'Maskinongé-Tigrée', labelEn: 'Tiger Muskie', subFr: 'Hybride Maskinongé × Brochet', subEn: 'Muskie × Pike hybrid', color: '#B71C1C', image: '/images/fish/tiger-muskie.png' },
-  { id: 'dore',       labelFr: 'Doré Noir (Sauger)', labelEn: 'Sauger', subFr: 'Cousin du Doré Jaune', subEn: 'Walleye cousin', color: '#A07B20', image: '/images/fish/sauger.png' },
-  { id: 'achigan',    labelFr: 'Achigan Petite Bouche', labelEn: 'Smallmouth Bass', subFr: 'Rivières & lacs rocheux', subEn: 'Rocky rivers & lakes', color: '#0D47A1', image: '/images/fish/smallmouth-bass.png' },
+  { id: 'dore',       labelFr: 'Doré Noir (Sauger)', labelEn: 'Sauger', subFr: 'Cousin du Doré Jaune', subEn: 'Walleye cousin', color: '#A07B20', image: '/images/fish/dore-noir.png' },
+  { id: 'achigan',    labelFr: 'Achigan Petite Bouche', labelEn: 'Smallmouth Bass', subFr: 'Rivières & lacs rocheux', subEn: 'Rocky rivers & lakes', color: '#0D47A1', image: '/images/fish/achigan-petite-bouche.png' },
   { id: 'truite',     labelFr: 'Saumon Atlantique', labelEn: 'Atlantic Salmon', subFr: 'Ouananiche & saumon de mer', subEn: 'Ouananiche & sea-run', color: '#4A1080', image: '/images/fish/atlantic-salmon.png' },
   { id: 'truite',     labelFr: 'Omble Chevalier', labelEn: 'Arctic Char', subFr: 'Eaux froides du nord', subEn: 'Northern cold waters', color: '#512DA8', image: '/images/fish/arctic-char.png' },
   // Row 3 — Secondary species
@@ -30,16 +30,16 @@ const ARSENAL_CARDS: {
   { id: 'dore',       labelFr: 'Perchaude', labelEn: 'Yellow Perch', subFr: 'Pêche blanche & été', subEn: 'Ice fishing & summer', color: '#F57F17', image: '/images/fish/perch.png' },
   { id: 'brochet',    labelFr: 'Cisco / Ménomini', labelEn: 'Cisco / Whitefish', subFr: 'Appât vivant & hameçon', subEn: 'Live bait & hook', color: '#1B5E20', image: '/images/fish/cisco.png' },
   { id: 'brochet',    labelFr: 'Lotte (Burbot)', labelEn: 'Burbot', subFr: 'Prédateur des profondeurs', subEn: 'Deep water predator', color: '#33691E', image: '/images/fish/burbot.png' },
-  { id: 'brochet',    labelFr: 'Carpe Commune', labelEn: 'Common Carp', subFr: 'Pêche à la mouche & feeder', subEn: 'Fly & feeder fishing', color: '#558B2F', image: '/images/fish/carp.png' },
+  { id: 'brochet',    labelFr: 'Carpe Commune', labelEn: 'Common Carp', subFr: 'Pêche à la mouche & feeder', subEn: 'Fly & feeder fishing', color: '#558B2F', image: '/images/fish/carpe-commune.png' },
   // Row 4 — Less common
-  { id: 'brochet',    labelFr: 'Barbotte / Barbue', labelEn: 'Catfish / Bullhead', subFr: 'Pêche de fond', subEn: 'Bottom fishing', color: '#37474F', image: '/images/fish/catfish.png' },
+  { id: 'brochet',    labelFr: 'Barbotte / Barbue', labelEn: 'Catfish / Bullhead', subFr: 'Pêche de fond', subEn: 'Bottom fishing', color: '#37474F', image: '/images/fish/barbotte-brune.png' },
   { id: 'truite',     labelFr: 'Truite Splake', labelEn: 'Splake Trout', subFr: 'Hybride Touladi × Mouchetée', subEn: 'Lake × Brook trout hybrid', color: '#7B1FA2', image: '/images/fish/splake.png' },
   { id: 'dore',       labelFr: 'Grand Corégone', labelEn: 'Lake Whitefish', subFr: 'Pêche hivernale', subEn: 'Winter fishing', color: '#E65100', image: '/images/fish/whitefish.png' },
-  { id: 'achigan',    labelFr: 'Achigan Grande Bouche', labelEn: 'Largemouth Bass', subFr: 'Herbiers & eau chaude', subEn: 'Weeds & warm water', color: '#1A237E', image: '/images/fish/largemouth-bass.png' },
+  { id: 'achigan',    labelFr: 'Achigan Grande Bouche', labelEn: 'Largemouth Bass', subFr: 'Herbiers & eau chaude', subEn: 'Weeds & warm water', color: '#1A237E', image: '/images/fish/achigan-grande-bouche.png' },
   { id: 'truite',     labelFr: 'Truite Arc-en-ciel', labelEn: 'Rainbow Trout', subFr: 'Rivières & réservoirs', subEn: 'Rivers & reservoirs', color: '#9C27B0', image: '/images/fish/rainbow-trout.png' },
   { id: 'truite',     labelFr: 'Truite Mouchetée', labelEn: 'Brook Trout', subFr: "L'espèce emblématique du Québec", subEn: "Quebec's iconic species", color: '#6A1B9A', image: '/images/fish/brook-trout.png' },
-  // Card 22 — Équipement Général
-  { id: 'all',        labelFr: 'Équipement Général', labelEn: 'General Gear', subFr: 'Cannes, lignes, hameçons, waders, filets', subEn: 'Rods, lines, hooks, waders, nets', color: '#455A64', image: '/images/lures/bucktail.jpg' },
+  // Card 22 — Équipement Général (LAST — Fix 15)
+  { id: 'all',        labelFr: 'Équipement Général', labelEn: 'General Gear', subFr: 'Cannes · Moulinets · Lignes · Filets · Boîtes à leurres · Waders · Accessoires', subEn: 'Rods · Reels · Lines · Nets · Tackle Boxes · Waders · Accessories', color: '#455A64', image: '/images/lures/bucktail.jpg' },
 ]
 
 // Lure type tabs
@@ -216,11 +216,12 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
 
           return (
             <motion.button
-              key={card.id}
+              key={card.id + idx}
               initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.08 + idx * 0.04 }}
               onClick={() => openModal(card.id)}
+              className={card.id === 'all' ? 'arsenal-card-equipement-general' : ''}
               style={{
                 position: 'relative',
                 overflow: 'hidden',
@@ -232,7 +233,7 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
                 cursor: 'pointer',
                 textAlign: 'left',
                 display: 'flex',
-                flexDirection: 'column',
+                flexDirection: card.id === 'all' ? 'row' : 'column',
               }}
               whileHover={{
                 y: -4,
@@ -326,26 +327,25 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
               }}
             />
 
-            {/* Panel — centered modal (v17.2) */}
+            {/* Fix 14 — Full-page view for fish species in boutique */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 20 }}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
               transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 'min(96vw, 560px)',
-                maxHeight: '88vh',
-                background: 'var(--bg-raised)',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100vw',
+                height: '100vh',
+                background: 'var(--bg)',
                 zIndex: 201,
                 display: 'flex',
                 flexDirection: 'column',
-                border: `1px solid var(--border)`,
-                borderRadius: '12px',
-                boxShadow: '0 32px 80px rgba(0,0,0,0.6)',
+                overflowY: 'auto',
               }}
               className="arsenal-modal-panel"
             >
@@ -484,14 +484,21 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
         )}
       </AnimatePresence>
 
-      {/* Mobile responsive style */}
+      {/* Mobile responsive style — Fix 15: équipement général card spans 2 columns */}
       <style>{`
         @media (max-width: 480px) {
           .arsenal-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .arsenal-modal-panel { width: 98vw !important; max-height: 90vh !important; }
+          .arsenal-modal-panel { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; }
         }
         @media (min-width: 481px) and (max-width: 768px) {
           .arsenal-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+        .arsenal-card-equipement-general {
+          grid-column: span 2;
+          min-height: 120px;
+        }
+        @media (max-width: 480px) {
+          .arsenal-card-equipement-general { grid-column: span 1; }
         }
       `}</style>
     </motion.div>

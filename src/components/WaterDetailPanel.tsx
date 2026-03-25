@@ -77,14 +77,21 @@ export function WaterDetailPanel({ water, onClose, onViewGear, locale, onViewSpe
       className="rounded-xl overflow-hidden mt-4"
       style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
     >
-      {/* Header */}
+      {/* Header — Fix 6: OSM terrain view for each lake with correct coords */}
       <div className="relative">
-        <img
-          src={`/images/lakes/${water.imageFile}`}
-          alt={water.name}
-          style={{ width: '100%', height: '220px', objectFit: 'cover', display: 'block' }}
-          onError={(e) => { (e.target as HTMLImageElement).src = '/images/lakes/lake-1.jpg' }}
-        />
+        {/* OpenStreetMap terrain embed specific to this lake's coordinates */}
+        {water.coords && water.coords[0] && (
+          <div style={{ width: '100%', height: '220px', overflow: 'hidden', position: 'relative' }}>
+            <iframe
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${water.coords[1] - 0.08}%2C${water.coords[0] - 0.06}%2C${water.coords[1] + 0.08}%2C${water.coords[0] + 0.06}&layer=mapnik&marker=${water.coords[0]}%2C${water.coords[1]}`}
+              width="100%"
+              height="220"
+              style={{ display: 'block', border: 'none' }}
+              loading="lazy"
+              title={`Carte — ${water.nameFr ?? water.name}`}
+            />
+          </div>
+        )}
         <div
           className="absolute inset-0"
           style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(6,14,24,0.95))' }}
@@ -193,12 +200,12 @@ export function WaterDetailPanel({ water, onClose, onViewGear, locale, onViewSpe
                 <li key={launch} style={{ marginBottom: '0.4rem' }}>
                   <span style={{ color: 'var(--text-primary)', fontSize: '0.85rem' }}>📍 {launch}</span>
                   <a
-                    href={`https://www.google.com/maps/search/${encodeURIComponent(launch)}`}
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(launch + ', Québec, Canada')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ marginLeft: '0.5rem', color: 'var(--accent)', fontSize: '0.75rem' }}
+                    style={{ marginLeft: '0.5rem', color: 'var(--accent)', fontSize: '0.75rem', textDecoration: 'none' }}
                   >
-                    Directions →
+                    🧭 {locale === 'fr' ? 'Itinéraire →' : 'Directions →'}
                   </a>
                 </li>
               ))}

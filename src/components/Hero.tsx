@@ -62,11 +62,14 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
 
   return (
     <>
-      {/* Persistent left-side vertical brand mark — fixed, visible across ALL sections */}
-      <div
+      {/* Persistent left-side vertical brand mark — animated, glowing, ONE instance */}
+      <motion.div
+        initial={{ opacity: 0, x: -60 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
         style={{
           position: 'fixed',
-          left: 0,
+          left: '0.75rem',
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 10,
@@ -75,19 +78,20 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
           textOrientation: 'mixed',
           fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
           fontWeight: 900,
-          fontSize: 'clamp(1.2rem, 2.5vw, 2rem)',
+          fontSize: 'clamp(1.6rem, 3vw, 2.6rem)',
           color: '#00CFFF',
-          opacity: 0.08,
-          letterSpacing: '0.2em',
+          letterSpacing: '0.22em',
           textTransform: 'uppercase',
           userSelect: 'none',
           lineHeight: 1,
           padding: '0.5rem 0',
+          textShadow: '0 0 18px rgba(0,207,255,0.85), 0 0 40px rgba(0,207,255,0.45), 0 0 80px rgba(0,207,255,0.2)',
         }}
+        className="brand-left-logo"
         aria-hidden="true"
       >
         APPÂT DU NORD
-      </div>
+      </motion.div>
 
       <div
         ref={heroRef}
@@ -138,8 +142,8 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
             style={{ width: '100%', height: '100%' }}
           >
             <img
-              src="/images/hero-fisherman.jpg"
-              alt={locale === 'fr' ? 'Pêche au Québec' : 'Quebec Fishing'}
+              src="/images/hero/fishing-hero.jpg"
+              alt={locale === 'fr' ? 'Pêcheur tenant un maskinongé géant' : 'Angler holding a giant muskie'}
               style={{
                 width: '100%',
                 height: '100%',
