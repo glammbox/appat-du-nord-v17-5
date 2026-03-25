@@ -116,6 +116,7 @@ function App() {
   }, [])
 
   const goToRoute = (next: 'home' | 'boutique') => {
+    if (next === 'boutique') setGearSpeciesFilter(undefined)  // always clear filter on direct boutique nav
     const path = next === 'boutique' ? '/boutique' : '/'
     window.history.pushState({}, '', path)
     setRoute(next)
