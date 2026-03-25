@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface SiteHeaderProps {
   locale: 'fr' | 'en'
@@ -8,6 +8,8 @@ interface SiteHeaderProps {
   onCartClick?: () => void
   onSectionSelect?: (s: string) => void
   activeSection?: string
+  onBoutiqueClick?: () => void
+  currentRoute?: 'home' | 'boutique'
 }
 
 const NAV_LINKS = [
@@ -52,24 +54,43 @@ export function SiteHeader({
   onCartClick,
   onSectionSelect,
   activeSection,
+  onBoutiqueClick,
+  currentRoute = 'home',
 }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [visible, setVisible] = useState(false)
-  const { scrollYProgress } = useScroll()
+  // START VISIBLE — nav is always shown at page top, hides on scroll down, shows on scroll up
+  const [visible, setVisible] = useState(true)
+  const lastScrollY = useRef(0)
+  const ticking = useRef(false)
 
-  // FIX 1: Show floating nav after a small scroll; hide on scroll down, show on scroll up
-  useMotionValueEvent(scrollYProgress, 'change', (current) => {
-    const direction = current - (scrollYProgress.getPrevious() ?? 0)
-    if (scrollYProgress.get() < 0.04) {
-      setVisible(false)
-    } else if (direction < 0) {
-      // scrolling up — show
-      setVisible(true)
-    } else {
-      // scrolling down — hide
-      setVisible(false)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (ticking.current) return
+      ticking.current = true
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY
+        const delta = currentY - lastScrollY.current
+
+        if (currentY < 60) {
+          // Always show at the very top of the page
+          setVisible(true)
+        } else if (delta > 4) {
+          // Scrolling down — hide nav
+          setVisible(false)
+          setMenuOpen(false)
+        } else if (delta < -4) {
+          // Scrolling up — show nav
+          setVisible(true)
+        }
+
+        lastScrollY.current = currentY
+        ticking.current = false
+      })
     }
-  })
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleNavClick = (key: string) => {
     setMenuOpen(false)
@@ -80,10 +101,11 @@ export function SiteHeader({
     <>
       <ScrollProgressBar />
 
-      {/* FIX 1: ONE floating nav — no solid sticky header */}
+      {/* Floating pill nav — visible from page load */}
       <AnimatePresence>
         {visible && (
           <motion.div
+            key="floating-nav"
             initial={{ opacity: 0, y: -80 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -80 }}
@@ -109,7 +131,7 @@ export function SiteHeader({
               width: 'auto',
             }}
           >
-            {/* Logo in floating nav */}
+            {/* Logo */}
             <button
               onClick={() => { setMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
               style={{
@@ -174,9 +196,41 @@ export function SiteHeader({
                   </button>
                 )
               })}
+
+              {/* Boutique button */}
+              {onBoutiqueClick && (
+                <button
+                  onClick={() => { setMenuOpen(false); onBoutiqueClick() }}
+                  style={{
+                    padding: '0.45rem 0.95rem',
+                    borderRadius: '9999px',
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 700,
+                    fontSize: '0.78rem',
+                    letterSpacing: '0.13em',
+                    textTransform: 'uppercase',
+                    color: currentRoute === 'boutique' ? '#00CFFF' : '#C8D3E2',
+                    background: currentRoute === 'boutique' ? 'rgba(0,207,255,0.12)' : 'rgba(255,43,43,0.10)',
+                    border: '1px solid ' + (currentRoute === 'boutique' ? 'rgba(0,207,255,0.35)' : 'rgba(255,43,43,0.30)'),
+                    cursor: 'pointer',
+                    transition: 'all 0.18s ease',
+                    whiteSpace: 'nowrap',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.color = '#F5F7FA'
+                    ;(e.currentTarget as HTMLElement).style.background = 'rgba(255,43,43,0.20)'
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.color = currentRoute === 'boutique' ? '#00CFFF' : '#C8D3E2'
+                    ;(e.currentTarget as HTMLElement).style.background = currentRoute === 'boutique' ? 'rgba(0,207,255,0.12)' : 'rgba(255,43,43,0.10)'
+                  }}
+                >
+                  {locale === 'fr' ? 'Boutique' : 'Shop'}
+                </button>
+              )}
             </nav>
 
-            {/* Right controls */}
+            {/* Right controls: cart + locale + hamburger */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.5rem', flexShrink: 0 }}>
               {/* Cart */}
               <button
@@ -243,12 +297,12 @@ export function SiteHeader({
                 {locale === 'fr' ? 'EN' : 'FR'}
               </button>
 
-              {/* Mobile hamburger */}
+              {/* Mobile hamburger — shown via CSS on ≤768px */}
               <button
                 className="floating-nav-hamburger"
                 onClick={() => setMenuOpen(o => !o)}
                 style={{
-                  background: 'none',
+                  background: menuOpen ? 'rgba(0,207,255,0.15)' : 'none',
                   border: '1px solid rgba(0,207,255,0.25)',
                   color: '#F5F7FA',
                   cursor: 'pointer',
@@ -256,9 +310,10 @@ export function SiteHeader({
                   fontSize: '1rem',
                   lineHeight: 1,
                   borderRadius: '8px',
-                  display: 'none',
+                  display: 'none', // overridden by CSS media query below
                 }}
-                aria-label="Menu"
+                aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+                aria-expanded={menuOpen}
               >
                 {menuOpen ? '✕' : '☰'}
               </button>
@@ -267,77 +322,181 @@ export function SiteHeader({
         )}
       </AnimatePresence>
 
-      {/* Mobile drawer */}
+      {/* Mobile slide-out drawer */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
-            initial={{ x: '100%', opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: '100%', opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: '280px',
-              background: 'rgba(6,7,10,0.98)',
-              backdropFilter: 'blur(24px)',
-              borderLeft: '1px solid rgba(0,207,255,0.12)',
-              zIndex: 4999,
-              padding: '5rem 1.5rem 2rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.25rem',
-              overflowY: 'auto',
-            }}
-          >
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%) rotate(-90deg)',
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900,
-              fontSize: '4rem',
-              color: 'rgba(0,207,255,0.04)',
-              letterSpacing: '0.1em',
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-              userSelect: 'none',
-            }}>
-              APPÂT DU NORD
-            </div>
-            {NAV_LINKS.map((link, i) => (
-              <motion.button
-                key={link.key}
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: i * 0.05, duration: 0.3 }}
-                onClick={() => handleNavClick(link.key)}
-                style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 600,
-                  fontSize: '1.1rem',
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: '#C8D3E2',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom: '1px solid rgba(255,255,255,0.06)',
-                  cursor: 'pointer',
-                  padding: '0.9rem 0',
-                  textAlign: 'left',
-                  transition: 'color 0.18s',
-                  width: '100%',
-                  position: 'relative',
-                  zIndex: 1,
-                }}
-              >
-                {locale === 'fr' ? link.fr : link.en}
-              </motion.button>
-            ))}
-          </motion.div>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="menu-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMenuOpen(false)}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.55)',
+                zIndex: 4998,
+              }}
+            />
+
+            {/* Drawer */}
+            <motion.div
+              key="menu-drawer"
+              initial={{ x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: '280px',
+                background: 'rgba(6,7,10,0.98)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                borderLeft: '1px solid rgba(0,207,255,0.12)',
+                zIndex: 4999,
+                padding: '5rem 1.5rem 2rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.25rem',
+                overflowY: 'auto',
+              }}
+            >
+              {/* Watermark */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%) rotate(-90deg)',
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 900,
+                fontSize: '4rem',
+                color: 'rgba(0,207,255,0.04)',
+                letterSpacing: '0.1em',
+                whiteSpace: 'nowrap',
+                pointerEvents: 'none',
+                userSelect: 'none',
+              }}>
+                APPÂT DU NORD
+              </div>
+
+              {/* Nav links */}
+              {NAV_LINKS.map((link, i) => (
+                <motion.button
+                  key={link.key}
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: i * 0.05, duration: 0.3 }}
+                  onClick={() => handleNavClick(link.key)}
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: activeSection === link.key ? '#00CFFF' : '#C8D3E2',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    cursor: 'pointer',
+                    padding: '0.9rem 0',
+                    textAlign: 'left',
+                    transition: 'color 0.18s',
+                    width: '100%',
+                    position: 'relative',
+                    zIndex: 1,
+                  }}
+                >
+                  {locale === 'fr' ? link.fr : link.en}
+                </motion.button>
+              ))}
+
+              {/* Boutique link in drawer */}
+              {onBoutiqueClick && (
+                <motion.button
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: NAV_LINKS.length * 0.05, duration: 0.3 }}
+                  onClick={() => { setMenuOpen(false); onBoutiqueClick() }}
+                  style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: currentRoute === 'boutique' ? '#00CFFF' : '#FF2B2B',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: '1px solid rgba(255,43,43,0.15)',
+                    cursor: 'pointer',
+                    padding: '0.9rem 0',
+                    textAlign: 'left',
+                    transition: 'color 0.18s',
+                    width: '100%',
+                    position: 'relative',
+                    zIndex: 1,
+                  }}
+                >
+                  {locale === 'fr' ? '🛍 Boutique' : '🛍 Shop'}
+                </motion.button>
+              )}
+
+              {/* Cart + locale in drawer for mobile convenience */}
+              <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+                <button
+                  onClick={() => { setMenuOpen(false); onCartClick?.() }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '0.4rem',
+                    padding: '0.5rem 1rem',
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '8px',
+                    color: '#F5F7FA',
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontSize: '0.9rem',
+                    letterSpacing: '0.1em',
+                    cursor: 'pointer',
+                  }}
+                >
+                  🛒 {locale === 'fr' ? 'Panier' : 'Cart'}
+                  {cartCount > 0 && (
+                    <span style={{
+                      background: '#FF2B2B', color: '#fff',
+                      borderRadius: '10px', padding: '0 5px',
+                      fontSize: '9px', fontWeight: 700, lineHeight: '15px',
+                      display: 'inline-block', minWidth: '15px', textAlign: 'center',
+                    }}>
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => { onLocaleToggle(); setMenuOpen(false) }}
+                  style={{
+                    padding: '0.5rem 1.2rem',
+                    background: 'rgba(0,207,255,0.12)',
+                    border: '1px solid rgba(0,207,255,0.35)',
+                    color: '#00CFFF',
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    borderRadius: '9999px',
+                  }}
+                >
+                  {locale === 'fr' ? 'EN' : 'FR'}
+                </button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
@@ -345,6 +504,9 @@ export function SiteHeader({
         @media (max-width: 768px) {
           .floating-nav-links { display: none !important; }
           .floating-nav-hamburger { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .floating-nav-hamburger { display: none !important; }
         }
       `}</style>
     </>

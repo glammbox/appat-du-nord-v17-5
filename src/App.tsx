@@ -206,6 +206,8 @@ function App() {
         onCartClick={() => setCartOpen(true)}
         onSectionSelect={handleSectionSelect}
         activeSection={activeSection}
+        onBoutiqueClick={() => goToRoute(route === 'boutique' ? 'home' : 'boutique')}
+        currentRoute={route}
       />
 
       {route === 'home' ? (
