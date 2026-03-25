@@ -391,7 +391,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
           {/* FIX 3: COMPACT TOP ROW — 200x200 image LEFT + name/info RIGHT */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '200px 1fr',
+            gridTemplateColumns: '1fr 1fr',
             gap: '1.5rem',
             alignItems: 'flex-start',
             background: 'var(--surface)',
@@ -933,6 +933,10 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
       </AnimatePresence>
       <style>{`
         @media (max-width: 640px) {
+            .species-top-row { grid-template-columns: 1fr !important; }
+            .species-top-row > div:first-child { width: 100% !important; height: 220px !important; aspect-ratio: unset !important; }
+          }
+          @media (max-width: 640px) {
           .species-top-row {
             grid-template-columns: 1fr !important;
           }
