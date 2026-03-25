@@ -291,7 +291,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           style={{
             position: 'relative',
-            minHeight: '320px',
+            minHeight: '520px',
             borderRadius: 'var(--radius-card)',
             overflow: 'hidden',
             border: '1px solid var(--border)',
@@ -314,8 +314,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,14,26,0.3) 0%, rgba(10,14,26,0.85) 100%)' }} />
           <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '3rem 2rem' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🎣</div>
-            <p style={{
+                        <p style={{
               fontFamily: 'var(--font-condensed)',
               fontSize: 'clamp(1rem, 2vw, 1.3rem)',
               fontWeight: 600,
