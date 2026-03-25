@@ -104,7 +104,7 @@ export function GearSection({
 
   const activeSpeciesTab = SPECIES_TABS.find(t => t.id === speciesFilter) || SPECIES_TABS[0]
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = !speciesFilter ? [] : products.filter(p => {
     const matchSpecies = speciesFilter === 'all' ? true : p.species.includes(speciesFilter as SpeciesTag)
     const matchLure = lureFilter === 'tous' ? true : p.type === lureFilter
     return matchSpecies && matchLure
