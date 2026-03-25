@@ -454,10 +454,11 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
                 overflowY: 'auto',
                 padding: '1rem 1.5rem',
                 scrollbarWidth: 'thin',
-                scrollbarColor: `#00CFFF var(--surface)`,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.65rem',
+                scrollbarColor: '#00CFFF var(--surface)',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: '0.75rem',
+                alignContent: 'start',
               }}>
                 {filteredProducts.length === 0 ? (
                   <div style={{

@@ -157,28 +157,8 @@ export function HomeDescription({ locale }: HomeDescriptionProps) {
                 left: 0,
                 right: 0,
                 padding: '1.5rem 1.75rem',
-                background: 'linear-gradient(to top, rgba(10,14,26,0.92) 0%, transparent 100%)',
+                background: 'transparent',
               }}>
-                <div style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.25rem',
-                  color: 'var(--text-primary)',
-                  letterSpacing: '0.06em',
-                  marginBottom: '0.3rem',
-                  fontWeight: 300,
-                }}>
-                  {locale === 'fr' ? 'Découvrez le Québec' : 'Discover Quebec'}
-                </div>
-                <div style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.68rem',
-                  fontWeight: 600,
-                  color: 'var(--accent)',
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                }}>
-                  {locale === 'fr' ? "45+ plans d'eau · 21 espèces · FR/EN" : "45+ waters · 21 species · FR/EN"}
-                </div>
               </div>
             </div>
           </motion.div>
