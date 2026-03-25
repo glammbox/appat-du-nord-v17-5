@@ -62,36 +62,6 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
 
   return (
     <>
-      {/* Persistent left-side vertical brand mark — animated, glowing, ONE instance */}
-      <motion.div
-        initial={{ opacity: 0, x: -60 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-        style={{
-          position: 'fixed',
-          left: '0.75rem',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 10,
-          pointerEvents: 'none',
-          writingMode: 'vertical-rl',
-          textOrientation: 'mixed',
-          fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
-          fontWeight: 900,
-          fontSize: 'clamp(1.6rem, 3vw, 2.6rem)',
-          color: '#00CFFF',
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          userSelect: 'none',
-          lineHeight: 1,
-          padding: '0.5rem 0',
-          textShadow: '0 0 18px rgba(0,207,255,0.85), 0 0 40px rgba(0,207,255,0.45), 0 0 80px rgba(0,207,255,0.2)',
-        }}
-        className="brand-left-logo"
-        aria-hidden="true"
-      >
-        APPÂT DU NORD
-      </motion.div>
 
       <div
         ref={heroRef}
@@ -163,38 +133,6 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
               background: 'linear-gradient(to top, #050810 0%, transparent 40%)',
             }} />
           </motion.div>
-        </motion.div>
-
-        {/* DOMINANT hero element — APPÂT DU NORD full-width horizontal */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-          style={{
-            position: 'absolute',
-            bottom: '18%',
-            left: 0,
-            right: 0,
-            textAlign: 'center',
-            y: watermarkY,
-            zIndex: 4,
-            pointerEvents: 'none',
-            userSelect: 'none',
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{
-            fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
-            fontWeight: 900,
-            fontSize: 'clamp(4rem, 12vw, 10rem)',
-            color: '#00CFFF',
-            letterSpacing: '0.12em',
-            lineHeight: 1,
-            textTransform: 'uppercase',
-            whiteSpace: 'nowrap',
-          }}>
-            APPÂT DU NORD
-          </div>
         </motion.div>
 
         {/* Content — left side */}
