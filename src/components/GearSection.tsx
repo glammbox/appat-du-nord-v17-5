@@ -91,8 +91,8 @@ export function GearSection({
     ? (SPECIES_ID_TO_TAG[initialSpeciesFilter] || (initialSpeciesFilter as SpeciesTag))
     : 'all'
 
-  const [speciesFilter, setSpeciesFilter] = useState<SpeciesTag | 'all'>(
-    (resolvedInitial as SpeciesTag | 'all') || 'all'
+  const [speciesFilter, setSpeciesFilter] = useState<SpeciesTag | 'all' | null>(
+    (resolvedInitial as SpeciesTag | 'all') || null as any
   )
   const [lureFilter, setLureFilter] = useState<LureType | 'tous'>('tous')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
@@ -221,9 +221,88 @@ export function GearSection({
         transition={{ duration: 0.45, delay: 0.12 }}
         style={{ marginBottom: '1.25rem' }}
       >
-        <BoutiqueTabs
+
+      {/* BOUTIQUE LANDING — Show species selector when no species chosen */}
+      {!speciesFilter && (
+        <div style={{ padding: '2rem 0' }}>
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '2.5rem',
+          }}>
+            <div style={{
+              fontFamily: 'var(--font-condensed)',
+              fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+              fontWeight: 900,
+              color: 'var(--text-primary)',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              marginBottom: '0.75rem',
+            }}>
+              {locale === 'fr' ? 'Choisissez votre espèce' : 'Choose your species'}
+            </div>
+            <p style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.95rem',
+              color: 'var(--text-muted)',
+              maxWidth: '500px',
+              margin: '0 auto',
+            }}>
+              {locale === 'fr'
+                ? "Trouvez l'équipement parfait pour chaque espèce — leurres, appâts et matériel sélectionnés par nos experts."
+                : 'Find the perfect gear for each species — lures, baits and equipment selected by our experts.'}
+            </p>
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(150px, 100%), 1fr))',
+            gap: '0.75rem',
+          }}>
+            {SPECIES_TABS.filter(t => t.id !== 'all').map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setSpeciesFilter(tab.id as SpeciesTag)}
+                style={{
+                  background: 'var(--surface)',
+                  border: `2px solid ${tab.color}40`,
+                  borderRadius: '12px',
+                  padding: '1rem 0.75rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = tab.color
+                  ;(e.currentTarget as HTMLElement).style.background = `${tab.color}15`
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = `${tab.color}40`
+                  ;(e.currentTarget as HTMLElement).style.background = 'var(--surface)'
+                }}
+              >
+
+                <span style={{
+                  fontFamily: 'var(--font-condensed)',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  color: tab.color,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  textAlign: 'center',
+                  lineHeight: 1.2,
+                }}>
+                  {locale === 'fr' ? tab.labelFr : tab.labelEn}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+          <BoutiqueTabs
           tabs={speciesTabItems}
-          activeId={speciesFilter}
+          activeId={speciesFilter || 'all'}
           onChange={(id) => {
             setSpeciesFilter(id as SpeciesTag | 'all')
             setLureFilter('tous')
