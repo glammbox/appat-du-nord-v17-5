@@ -87,6 +87,28 @@ const SPONSORS = [
       </svg>
     ),
   },
+  {
+    name: 'Prince Craft',
+    url: 'https://www.princecraft.com',
+    color: '#003087',
+    svg: (
+      <svg width="120" height="32" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg" aria-label="Prince Craft">
+        <rect x="2" y="8" width="116" height="18" rx="3" fill="#003087" opacity="0.12"/>
+        <text x="60" y="22" textAnchor="middle" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="12" fontWeight="800" letterSpacing="1.5" fill="#003087">PRINCE CRAFT</text>
+      </svg>
+    ),
+  },
+  {
+    name: 'Thomas Marine',
+    url: 'https://www.thomasmarine.ca',
+    color: '#0066CC',
+    svg: (
+      <svg width="130" height="32" viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-label="Thomas Marine">
+        <text x="65" y="15" textAnchor="middle" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="11" fontWeight="800" letterSpacing="1" fill="#0066CC">THOMAS</text>
+        <text x="65" y="28" textAnchor="middle" fontFamily="Arial Narrow, Arial, sans-serif" fontSize="9" fontWeight="600" letterSpacing="2" fill="#0066CC">MARINE</text>
+      </svg>
+    ),
+  },
 ]
 
 export function SiteFooter({ locale }: SiteFooterProps) {

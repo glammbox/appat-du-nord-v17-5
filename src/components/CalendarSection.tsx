@@ -587,8 +587,8 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
                     const hasMineur = dayWins.some(w => w.type === 'minor')
                     return (
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '2px', marginBottom: '0.15rem' }}>
-                        {hasMajeur && <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#E63946', flexShrink: 0 }} title={locale === 'fr' ? 'Majeur' : 'Major'} />}
-                        {hasMineur && <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#00CFFF', flexShrink: 0 }} title={locale === 'fr' ? 'Mineur' : 'Minor'} />}
+                        {hasMajeur && <span style={{ fontSize: '8px', color: '#E63946', fontWeight: 900, lineHeight: 1 }} title={locale === 'fr' ? 'Majeur ↑' : 'Major ↑'}>↑</span>}
+                        {hasMineur && <span style={{ fontSize: '8px', color: '#00CFFF', fontWeight: 900, lineHeight: 1 }} title={locale === 'fr' ? 'Mineur ↓' : 'Minor ↓'}>↓</span>}
                       </div>
                     )
                   })()}
@@ -622,8 +622,8 @@ export function CalendarSection({ locale, weatherRegion }: CalendarSectionProps)
               { label: locale === 'fr' ? 'Mauvais' : 'Poor', color: '#E63946' },
               { label: locale === 'fr' ? 'Moyen' : 'Fair', color: '#C8A84B' },
               { label: locale === 'fr' ? 'Bon' : 'Good', color: '#2E7D32' },
-              { label: locale === 'fr' ? '● Majeur' : '● Major', color: '#E63946', dot: true },
-              { label: locale === 'fr' ? '● Mineur' : '● Minor', color: '#00CFFF', dot: true },
+              { label: locale === 'fr' ? '↑ Majeur' : '↑ Major', color: '#E63946', dot: true },
+              { label: locale === 'fr' ? '↓ Mineur' : '↓ Minor', color: '#00CFFF', dot: true },
               { label: locale === 'fr' ? '● Actif' : '● Active', color: '#00B4D8', dot: true },
             ].map(item => (
               <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>

@@ -52,10 +52,22 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { scrollYProgress } = useScroll()
+  const [hidden, setHidden] = useState(false)
+  const { scrollYProgress, scrollY } = useScroll()
+  const lastScrollY = useState(0)
 
   useMotionValueEvent(scrollYProgress, "change", (current) => {
     setScrolled(current > 0.02)
+  })
+
+  useMotionValueEvent(scrollY, "change", (current) => {
+    const prev = lastScrollY[0]
+    if (current > prev && current > 80) {
+      setHidden(true)  // scrolling down — hide
+    } else {
+      setHidden(false) // scrolling up — show
+    }
+    lastScrollY[0] = current
   })
 
   const handleNavClick = (key: string) => {
@@ -80,8 +92,12 @@ export function SiteHeader({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
         style={{
-          position: 'sticky',
+          position: 'fixed',
           top: 0,
+          left: 0,
+          right: 0,
+          transform: hidden ? 'translateY(-100%)' : 'translateY(0)',
+          transition: 'transform 0.3s ease, background 0.3s ease, border-color 0.3s ease',
           zIndex: 100,
           height: '72px',
           display: 'flex',
@@ -92,7 +108,7 @@ export function SiteHeader({
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           borderBottom: scrolled ? '1px solid rgba(0,207,255,0.12)' : '1px solid transparent',
-          transition: 'background 0.3s ease, border-color 0.3s ease',
+          
         }}
       >
         {/* Logo */}

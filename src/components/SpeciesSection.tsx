@@ -248,7 +248,11 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
               transition={{ duration: 0.4, delay: 0.04 + idx * 0.015, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 flexShrink: 0,
-                padding: '0.55rem 0.9rem',
+                padding: '0.4rem 0.7rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.25rem',
                 cursor: 'pointer',
                 background: isActive ? 'rgba(0,180,216,0.15)' : 'transparent',
                 border: '1px solid ' + (isActive ? 'var(--border-active)' : 'transparent'),
