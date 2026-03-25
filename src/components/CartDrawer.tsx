@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { products } from '../lib/products'
 
@@ -50,6 +50,16 @@ function saveCartItems(items: CartItem[]) {
 
 export function CartDrawer({ open, onClose, locale, onCartChange }: CartDrawerProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
+  const [items, setItems] = useState<CartItem[]>([])
+
+  // Sync items from localStorage whenever drawer opens or cart changes
+  const syncItems = useCallback(() => {
+    setItems(getCartItems())
+  }, [])
+
+  useEffect(() => {
+    if (open) syncItems()
+  }, [open, syncItems])
 
   useEffect(() => {
     if (!open) return
@@ -60,7 +70,6 @@ export function CartDrawer({ open, onClose, locale, onCartChange }: CartDrawerPr
     return () => window.removeEventListener('keydown', handleKey)
   }, [open, onClose])
 
-  const items = getCartItems()
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0)
 
   const updateQty = (id: string, delta: number) => {
@@ -70,12 +79,14 @@ export function CartDrawer({ open, onClose, locale, onCartChange }: CartDrawerPr
     item.qty += delta
     const filtered = cart.filter(i => i.qty > 0)
     saveCartItems(filtered)
+    syncItems()
     onCartChange()
   }
 
   const removeItem = (id: string) => {
     const cart = getCartItems().filter(i => i.id !== id)
     saveCartItems(cart)
+    syncItems()
     onCartChange()
   }
 

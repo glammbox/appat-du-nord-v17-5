@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import Lenis from 'lenis'
 
 import { SiteHeader } from './components/SiteHeader'
@@ -55,7 +55,14 @@ function App() {
   void TWENTYFIRST_COMPONENT_MAP
   void TWENTYFIRST_STRICT_COMPLIANCE
 
+  const [gearSpeciesFilter, setGearSpeciesFilter] = useState<string | undefined>(undefined)
+  const [locale, setLocale] = useState<Locale>('fr')
+  const [weatherRegion, setWeatherRegion] = useState<WeatherRegion | undefined>(undefined)
+  const [cartCount, setCartCount] = useState(0)
+  const [cartOpen, setCartOpen] = useState(false)
+
   // Lenis smooth scroll
+  const lenisRef = useRef<Lenis | null>(null)
   useEffect(() => {
     const lenis = new Lenis({
       lerp: 0.08,
@@ -64,6 +71,7 @@ function App() {
       syncTouch: false,
       wheelMultiplier: 0.9,
     })
+    lenisRef.current = lenis
     function raf(time: number) {
       lenis.raf(time)
       requestAnimationFrame(raf)
@@ -72,14 +80,23 @@ function App() {
     return () => {
       cancelAnimationFrame(rafId)
       lenis.destroy()
+      lenisRef.current = null
     }
   }, [])
 
-  const [gearSpeciesFilter, setGearSpeciesFilter] = useState<string | undefined>(undefined)
-  const [locale, setLocale] = useState<Locale>('fr')
-  const [weatherRegion, setWeatherRegion] = useState<WeatherRegion | undefined>(undefined)
-  const [cartCount, setCartCount] = useState(0)
-  const [cartOpen, setCartOpen] = useState(false)
+  // Pause/resume Lenis when cart drawer is open (prevents scroll-through on mobile)
+  useEffect(() => {
+    if (cartOpen) {
+      lenisRef.current?.stop()
+      document.body.style.overflow = 'hidden'
+    } else {
+      lenisRef.current?.start()
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [cartOpen])
   const [activeSpecies, setActiveSpecies] = useState<string | undefined>(undefined)
   const [activeSection, setActiveSection] = useState<string>('especes')
   const [route, setRoute] = useState<'home' | 'boutique'>(() => window.location.pathname === '/boutique' ? 'boutique' : 'home')
