@@ -306,7 +306,7 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
         >
           {/* Background: muskie hero photo as empty state */}
           <img
-            src="/images/hero/fishing-hero.jpg"
+            src="/images/species-placeholder.jpg"
             alt=""
             aria-hidden="true"
             style={{
