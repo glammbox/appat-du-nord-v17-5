@@ -221,16 +221,17 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
             ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
           }}
         >›</button>
+        {/* FIX 4: Tab bar — dark blue bg, active = cyan */}
         <div
           ref={tabStripRef}
           className="species-tab-strip"
           style={{
-            background: 'var(--bg-raised)',
-            border: '1px solid var(--border)',
+            background: '#050810',
+            border: '1px solid rgba(0,207,255,0.18)',
             borderRadius: 'var(--radius-sm)',
-            padding: '0.25rem 2rem',
+            padding: '0.3rem 2rem',
             display: 'flex',
-            gap: '0.2rem',
+            gap: '0.25rem',
             overflowX: 'auto',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -248,19 +249,18 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
               transition={{ duration: 0.4, delay: 0.04 + idx * 0.015, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 flexShrink: 0,
-                padding: '0.4rem 0.7rem',
+                padding: '0.42rem 0.8rem',
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                gap: '0.25rem',
+                justifyContent: 'center',
                 cursor: 'pointer',
-                background: isActive ? 'rgba(0,180,216,0.15)' : 'transparent',
-                border: '1px solid ' + (isActive ? 'var(--border-active)' : 'transparent'),
-                borderRadius: '8px',
-                color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                background: isActive ? '#00CFFF' : 'transparent',
+                border: '1px solid ' + (isActive ? '#00CFFF' : 'rgba(0,207,255,0.12)'),
+                borderRadius: '6px',
+                color: isActive ? '#050810' : 'var(--text-muted)',
                 fontFamily: 'var(--font-condensed)',
                 fontSize: '0.72rem',
-                fontWeight: 700,
+                fontWeight: isActive ? 800 : 600,
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 transition: 'all 0.18s ease',
@@ -268,13 +268,15 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
               }}
               onMouseEnter={e => {
                 if (!isActive) {
-                  (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
-                  ;(e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'
+                  (e.currentTarget as HTMLElement).style.color = '#00CFFF'
+                  ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,207,255,0.4)'
+                  ;(e.currentTarget as HTMLElement).style.background = 'rgba(0,207,255,0.08)'
                 }
               }}
               onMouseLeave={e => {
                 if (!isActive) {
                   (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'
+                  ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,207,255,0.12)'
                   ;(e.currentTarget as HTMLElement).style.background = 'transparent'
                 }
               }}
@@ -347,9 +349,9 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
           className="species-detail-grid"
-          style={{ display: activeSpecies ? 'grid' : 'none', gap: '2.5rem', alignItems: 'flex-start', position: 'relative' }}
+          style={{ display: activeSpecies ? 'flex' : 'none', flexDirection: 'column', gap: '1.5rem', alignItems: 'stretch', position: 'relative' }}
         >
-          {/* Fix 5 — Close button top-right of detail panel */}
+          {/* FIX 3: Close button */}
           {activeSpecies && (
             <button
               onClick={() => setActiveSpecies(null)}
@@ -385,196 +387,368 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
               ✕
             </button>
           )}
-          {/* ── LEFT: Fish portrait + quick stats ─── */}
-          <div>
-            {/* Fish portrait — IMAGE CROPPING LAW: always contain */}
+
+          {/* FIX 3: COMPACT TOP ROW — 200x200 image LEFT + name/info RIGHT */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '200px 1fr',
+            gap: '1.5rem',
+            alignItems: 'flex-start',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-card)',
+            padding: '1.25rem',
+          }}
+          className="species-top-row"
+          >
+            {/* Fish image — 200x200 compact */}
             <div style={{
-              width: '100%',
-              aspectRatio: '4/5',
-              background: 'var(--surface)',
+              width: '200px',
+              height: '200px',
+              background: 'var(--bg-raised)',
               border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-card)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '1.5rem',
+              borderRadius: '10px',
               overflow: 'hidden',
+              flexShrink: 0,
               position: 'relative',
-              transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,207,255,0.35)'
-              ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 1px rgba(0,207,255,0.15), 0 24px 60px rgba(0,207,255,0.10)'
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
-              ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
-            }}
-            >
+            }}>
               <img
                 src={speciesImage}
                 alt={displayName}
-                className="fish-portrait"
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
-                  objectPosition: 'center center',
-                  padding: '1rem',
+                  objectPosition: 'center',
+                  padding: '0.5rem',
                 }}
-                onError={(e) => {
-                  const el = e.target as HTMLImageElement
-                  el.style.display = 'none'
-                }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
-              {/* Species label overlay */}
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                padding: '0.75rem 1rem',
-                background: 'linear-gradient(to top, rgba(10,14,26,0.9) 0%, transparent 100%)',
-              }}>
-                <div style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.65rem',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
-                  letterSpacing: '0.15em',
-                  textTransform: 'uppercase',
-                  fontStyle: 'italic',
-                }}>
-                  {species.scientificName}
-                </div>
-              </div>
             </div>
 
-            {/* Quick stats */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              {[
-                { label: locale === 'fr' ? 'Taille moyenne' : 'Avg size',    value: species.avgSize },
-                { label: locale === 'fr' ? 'Taille max'     : 'Max size',    value: species.maxSize },
-                { label: locale === 'fr' ? 'Temp. optimale' : 'Optimal temp.',value: species.waterTemp },
-                { label: locale === 'fr' ? 'Meilleurs mois' : 'Best months', value: bestMonths },
-                { label: locale === 'fr' ? 'Saison Québec'  : 'Quebec season', value: species.quebecSeason },
-              ].map(stat => (
-                <div
-                  key={stat.label}
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '6px',
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '0.5rem',
-                    alignItems: 'center',
-                  }}
-                >
+            {/* Right info: name, description, badges */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: 0 }}>
+              {/* Name */}
+              <h3 style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(1.5rem, 3vw, 2.2rem)',
+                color: 'var(--text-primary)',
+                letterSpacing: '0.04em',
+                lineHeight: 1,
+                margin: 0,
+              }}>
+                {displayName}
+              </h3>
+              {/* Scientific name */}
+              <div style={{
+                fontFamily: 'var(--font-condensed)',
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                fontStyle: 'italic',
+              }}>
+                {species.scientificName}
+              </div>
+              {/* Tagline */}
+              <p style={{
+                fontFamily: 'var(--font-body)',
+                color: 'var(--accent)',
+                fontSize: '0.85rem',
+                fontStyle: 'italic',
+                lineHeight: 1.5,
+                margin: 0,
+              }}>
+                {tagline}
+              </p>
+              {/* Season / Habitat badges (inline) */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <span style={{
+                  padding: '0.25rem 0.6rem',
+                  background: 'rgba(0,207,255,0.1)',
+                  border: '1px solid rgba(0,207,255,0.25)',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-condensed)',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  color: '#00CFFF',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}>
+                  {locale === 'fr' ? 'Saison:' : 'Season:'} {species.quebecSeason}
+                </span>
+                <span style={{
+                  padding: '0.25rem 0.6rem',
+                  background: 'rgba(123,228,149,0.1)',
+                  border: '1px solid rgba(123,228,149,0.25)',
+                  borderRadius: '4px',
+                  fontFamily: 'var(--font-condensed)',
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  color: '#7BE495',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}>
+                  {locale === 'fr' ? 'Mois:' : 'Months:'} {bestMonths}
+                </span>
+                {species.waterTemp && (
                   <span style={{
+                    padding: '0.25rem 0.6rem',
+                    background: 'rgba(244,160,28,0.1)',
+                    border: '1px solid rgba(244,160,28,0.25)',
+                    borderRadius: '4px',
                     fontFamily: 'var(--font-condensed)',
                     fontSize: '0.65rem',
-                    fontWeight: 600,
-                    color: 'var(--text-muted)',
-                    letterSpacing: '0.12em',
+                    fontWeight: 700,
+                    color: '#F4A01C',
+                    letterSpacing: '0.1em',
                     textTransform: 'uppercase',
                   }}>
+                    {species.waterTemp}
+                  </span>
+                )}
+                {/* FIX 7: Réglementation badge for species with size/catch limits */}
+                {legalSize && (
+                  <a
+                    href="https://www.sepaq.com/peche/permis/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      padding: '0.25rem 0.6rem',
+                      background: 'rgba(230,57,70,0.15)',
+                      border: '1px solid rgba(230,57,70,0.4)',
+                      borderRadius: '4px',
+                      fontFamily: 'var(--font-condensed)',
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      color: '#E63946',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ⚠ {locale === 'fr' ? 'Réglementation' : 'Regulations'}
+                  </a>
+                )}
+                {species.catchRelease && (
+                  <span style={{
+                    padding: '0.25rem 0.6rem',
+                    background: 'rgba(123,228,149,0.08)',
+                    border: '1px solid rgba(123,228,149,0.3)',
+                    borderRadius: '4px',
+                    fontFamily: 'var(--font-condensed)',
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    color: '#7BE495',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                  }}>
+                    {locale === 'fr' ? 'C&R requis' : 'C&R required'}
+                  </span>
+                )}
+              </div>
+              {/* Quick stats row */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+                {[
+                  { label: locale === 'fr' ? 'Taille moy.' : 'Avg size', value: species.avgSize },
+                  { label: locale === 'fr' ? 'Taille max' : 'Max size', value: species.maxSize },
+                ].filter(s => s.value).map(stat => (
+                  <div key={stat.label} style={{
+                    padding: '0.25rem 0.6rem',
+                    background: 'var(--bg-raised)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    gap: '0.35rem',
+                    alignItems: 'center',
+                  }}>
+                    <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '0.62rem', color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                      {stat.label}:
+                    </span>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                      {stat.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* FIX 3: Compact chips row — Lakes + Gear + Permit */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            padding: '1rem 1.25rem',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-card)',
+          }}>
+            {/* Lakes chip list */}
+            {species.bestLakes && species.bestLakes.length > 0 && (
+              <div>
+                <div style={{ fontFamily: 'var(--font-condensed)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                  {locale === 'fr' ? "Meilleurs plans d'eau" : 'Best Waters'}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                  {species.bestLakes.map((lake, i) => {
+                    const waterId = LAKE_TO_WATER_ID[lake]
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => waterId && onScrollToWater && onScrollToWater(waterId)}
+                        style={{
+                          padding: '0.2rem 0.55rem',
+                          background: 'rgba(0,180,216,0.07)',
+                          border: '1px solid rgba(0,207,255,0.2)',
+                          color: waterId ? 'var(--accent)' : 'var(--text-secondary)',
+                          fontFamily: 'var(--font-condensed)',
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          letterSpacing: '0.06em',
+                          cursor: waterId ? 'pointer' : 'default',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        {lake}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Gear/lures compact chip list */}
+            {species.gear && species.gear.length > 0 && (
+              <div>
+                <div style={{ fontFamily: 'var(--font-condensed)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                  {locale === 'fr' ? 'Équipement' : 'Gear'}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                  {species.gear.map((g, i) => (
+                    <span key={i} style={{
+                      padding: '0.2rem 0.55rem',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-secondary)',
+                      fontFamily: 'var(--font-condensed)',
+                      fontSize: '0.68rem',
+                      fontWeight: 500,
+                      borderRadius: '4px',
+                    }}>
+                      {g}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Permit badge */}
+            {legalSize && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <a
+                  href="https://www.sepaq.com/peche/permis/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    padding: '0.35rem 0.75rem',
+                    background: '#E63946',
+                    color: '#fff',
+                    borderRadius: '4px',
+                    fontFamily: 'var(--font-condensed)',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    textDecoration: 'none',
+                  }}
+                >
+                  ⚠ {locale === 'fr' ? 'Permis requis' : 'Permit required'}
+                </a>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  {legalSize}
+                </span>
+              </div>
+            )}
+
+            {/* Arsenal CTA */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                {species.bestLures.slice(0, 4).join(' · ')}{species.bestLures.length > 4 && ` +${species.bestLures.length - 4}`}
+              </div>
+              <button
+                onClick={() => onScrollToArsenal(species.id)}
+                style={{
+                  padding: '0.5rem 1.25rem',
+                  background: 'var(--accent)',
+                  color: '#0A0E1A',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontFamily: 'var(--font-condensed)',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {locale === 'fr' ? "Voir l'arsenal →" : 'View Arsenal →'}
+              </button>
+            </div>
+          </div>
+
+          {/* Expanded detail section — full species dossier below chips */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem',
+            padding: '1.25rem',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-card)',
+          }}>
+          {/* ── LEFT: Quick stats (now inline below) ─── */}
+          <div>
+            {/* Quick stats — kept as compact grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.4rem', marginBottom: '1rem' }}>
+              {[
+                { label: locale === 'fr' ? 'Taille moyenne' : 'Avg size', value: species.avgSize },
+                { label: locale === 'fr' ? 'Taille max' : 'Max size', value: species.maxSize },
+                { label: locale === 'fr' ? 'Temp. optimale' : 'Optimal temp.', value: species.waterTemp },
+                { label: locale === 'fr' ? 'Meilleurs mois' : 'Best months', value: bestMonths },
+                { label: locale === 'fr' ? 'Saison Québec' : 'Quebec season', value: species.quebecSeason },
+              ].map(stat => (
+                <div key={stat.label} style={{
+                  padding: '0.4rem 0.65rem',
+                  background: 'var(--bg-raised)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.15rem',
+                }}>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                     {stat.label}
                   </span>
-                  <span style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '0.82rem',
-                    color: 'var(--text-primary)',
-                    fontWeight: 500,
-                  }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 500 }}>
                     {stat.value}
                   </span>
                 </div>
               ))}
             </div>
 
-            {/* Regulations block with real links (Fix #10) */}
-            {legalSize && (
-              <div style={{
-                marginTop: '1rem',
-                padding: '0.85rem 1rem',
-                background: 'rgba(255,107,87,0.08)',
-                border: '1px solid rgba(255,107,87,0.3)',
-                borderRadius: '8px',
-              }}>
-                <p style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  color: 'var(--danger)',
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  marginBottom: '0.4rem',
-                }}>
-                  {locale === 'fr' ? '⚠ Permis requis' : '⚠ Permit required'}
-                </p>
-                <p style={{ fontFamily: 'var(--font-body)', color: 'var(--text-secondary)', fontSize: '0.82rem', marginBottom: '0.4rem', lineHeight: 1.5 }}>
-                  {legalSize}
-                </p>
-                {possessionNote && (
-                  <p style={{ fontFamily: 'var(--font-body)', color: 'var(--text-muted)', fontSize: '0.78rem', fontStyle: 'italic', marginBottom: '0.6rem', lineHeight: 1.4 }}>
-                    {possessionNote}
-                  </p>
-                )}
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <a
-                    href="https://www.quebec.ca/tourisme-loisirs-sport/activites-sportives-et-de-plein-air/peche-sportive/permis"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0.65rem 0.95rem',
-                      background: '#E63946',
-                      color: '#fff',
-                      border: '1px solid #E63946',
-                      fontFamily: 'var(--font-condensed)',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.1em',
-                      textDecoration: 'none',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    {locale === 'fr' ? 'Permis requis' : 'Permit required'}
-                  </a>
-                  <a
-                    href="https://peche.faune.gouv.qc.ca/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0.65rem 0.95rem',
-                      background: 'transparent',
-                      color: 'var(--text-primary)',
-                      border: '1px solid var(--border-active)',
-                      fontFamily: 'var(--font-condensed)',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.1em',
-                      textDecoration: 'none',
-                      borderRadius: '8px',
-                    }}
-                  >
-                    {locale === 'fr' ? 'Règlement' : 'Regulations'}
-                  </a>
-                </div>
-              </div>
-            )}
-
+            {/* Catch & release badge */}
             {species.catchRelease && (
               <div style={{
-                marginTop: '0.75rem',
-                padding: '0.7rem 0.9rem',
+                marginBottom: '0.75rem',
+                padding: '0.6rem 0.9rem',
                 background: 'rgba(123,228,149,0.08)',
                 border: '1px solid rgba(123,228,149,0.3)',
                 borderRadius: '6px',
@@ -582,46 +756,16 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
                 alignItems: 'center',
                 gap: '0.55rem',
               }}>
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
-                <span style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  color: 'var(--success)',
-                  letterSpacing: '0.15em',
-                  textTransform: 'uppercase',
-                }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', flexShrink: 0 }} />
+                <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '0.68rem', fontWeight: 700, color: 'var(--success)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                   {locale === 'fr' ? "Remise à l'eau obligatoire" : 'Catch & release required'}
                 </span>
               </div>
             )}
           </div>
 
-          {/* ── RIGHT: Full species dossier ──────────────────────────── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-
-            {/* Name + tagline */}
-            <div>
-              <h3 style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 'clamp(1.8rem, 3.5vw, 3rem)',
-                color: 'var(--text-primary)',
-                letterSpacing: '0.04em',
-                marginBottom: '0.5rem',
-              }}>
-                {displayName}
-              </h3>
-              <p style={{
-                fontFamily: 'var(--font-body)',
-                color: 'var(--accent)',
-                fontSize: '0.95rem',
-                fontStyle: 'italic',
-                lineHeight: 1.5,
-                marginBottom: '0',
-              }}>
-                {tagline}
-              </p>
-            </div>
+          {/* Full species dossier — expanded detail */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
             {/* Appearance */}
             <Section label={locale === 'fr' ? 'Identification' : 'Identification'}>
@@ -783,104 +927,21 @@ export function SpeciesSection({ onScrollToArsenal, locale, initialSpecies, onSc
               </ol>
             </Section>
 
-            {/* Arsenal CTA — ONE button (Fix #7) */}
-            <div style={{
-              padding: '1.25rem',
-              background: 'rgba(0,180,216,0.06)',
-              border: '1px solid var(--border-active)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1rem',
-              flexWrap: 'wrap',
-            }}>
-              <div>
-                <div style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  color: 'var(--text-muted)',
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  marginBottom: '0.25rem',
-                }}>
-                  {locale === 'fr' ? `Leurres & équipement (${species.bestLures.length} options)` : `Lures & gear (${species.bestLures.length} options)`}
-                </div>
-                <div style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '0.82rem',
-                  color: 'var(--text-muted)',
-                }}>
-                  {species.bestLures.slice(0, 4).join(' · ')}
-                  {species.bestLures.length > 4 && ` +${species.bestLures.length - 4}...`}
-                </div>
-              </div>
-              <button
-                onClick={() => onScrollToArsenal(species.id)}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: 'var(--accent)',
-                  color: '#0A0E1A',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  transition: 'background 0.18s',
-                  whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--accent-hover)'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--accent)'}
-              >
-                {locale === 'fr' ? "Voir l'arsenal →" : 'View Arsenal →'}
-              </button>
-            </div>
-
-            {/* Best Lakes with navigation links (Fix #8) */}
-            {species.bestLakes && species.bestLakes.length > 0 && (
-              <Section label={locale === 'fr' ? "Meilleurs plans d'eau" : 'Best Waters'}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                  {species.bestLakes.map((lake, i) => {
-                    const waterId = LAKE_TO_WATER_ID[lake]
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => waterId && onScrollToWater && onScrollToWater(waterId)}
-                        style={{
-                          padding: '0.42rem 0.75rem',
-                          background: 'rgba(0,180,216,0.08)',
-                          border: '1px solid var(--border-active)',
-                          color: waterId ? 'var(--accent)' : 'var(--text-secondary)',
-                          fontFamily: 'var(--font-condensed)',
-                          fontSize: '0.72rem',
-                          fontWeight: 600,
-                          letterSpacing: '0.08em',
-                          cursor: waterId ? 'pointer' : 'default',
-                          borderRadius: '8px',
-                          transition: 'background 0.18s',
-                        }}
-                        onMouseEnter={e => {
-                          if (waterId) (e.currentTarget as HTMLElement).style.background = 'rgba(0,180,216,0.18)'
-                        }}
-                        onMouseLeave={e => {
-                          (e.currentTarget as HTMLElement).style.background = 'rgba(0,180,216,0.08)'
-                        }}
-                      >
-                        {lake}
-                      </button>
-                    )
-                  })}
-                </div>
-              </Section>
-            )}
           </div>
+          </div>{/* end Expanded detail section */}
         </motion.div>
       </AnimatePresence>
+      <style>{`
+        @media (max-width: 640px) {
+          .species-top-row {
+            grid-template-columns: 1fr !important;
+          }
+          .species-top-row > div:first-child {
+            width: 140px !important;
+            height: 140px !important;
+          }
+        }
+      `}</style>
     </motion.div>
   )
 }

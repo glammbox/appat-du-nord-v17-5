@@ -77,38 +77,47 @@ export function WaterDetailPanel({ water, onClose, onViewGear, locale, onViewSpe
       className="rounded-xl overflow-hidden mt-4"
       style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
     >
-      {/* Header — Fix 6: OSM terrain view for each lake with correct coords */}
-      <div className="relative">
-        {/* OpenStreetMap terrain embed specific to this lake's coordinates */}
-        {water.coords && water.coords[0] && (
-          <div style={{ width: '100%', height: '220px', overflow: 'hidden', position: 'relative' }}>
-            <iframe
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${water.coords[1] - 0.08}%2C${water.coords[0] - 0.06}%2C${water.coords[1] + 0.08}%2C${water.coords[0] + 0.06}&layer=mapnik&marker=${water.coords[0]}%2C${water.coords[1]}`}
-              width="100%"
-              height="220"
-              style={{ display: 'block', border: 'none' }}
-              loading="lazy"
-              title={`Carte — ${water.nameFr ?? water.name}`}
-            />
-          </div>
-        )}
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(6,14,24,0.95))' }}
-        />
-        <div className="absolute bottom-0 left-0 p-4">
+      {/* FIX 5: Header — NO iframe here (map is in WatersMap overlay above). Water name + close. */}
+      <div className="relative" style={{ padding: '1rem 1.25rem 0.75rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+        <div>
           <h3
             className="text-2xl font-bold"
-            style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)', fontSize: '1.4rem', letterSpacing: '0.04em' }}
           >
             {water.name}
           </h3>
-          <p className="text-sm" style={{ color: 'var(--accent-gold)' }}>{water.region}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+            <p className="text-sm" style={{ color: 'var(--accent-gold)' }}>{water.region}</p>
+            {/* FIX 7: Permit badge on lake detail */}
+            <a
+              href="https://www.sepaq.com/peche/permis/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                padding: '0.18rem 0.55rem',
+                background: 'rgba(230,57,70,0.15)',
+                border: '1px solid rgba(230,57,70,0.4)',
+                borderRadius: '4px',
+                fontFamily: 'var(--font-condensed)',
+                fontSize: '0.62rem',
+                fontWeight: 700,
+                color: '#E63946',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                textDecoration: 'none',
+              }}
+            >
+              ⚠ {locale === 'fr' ? 'Permis requis' : 'Permit required'}
+            </a>
+          </div>
         </div>
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-          style={{ background: 'rgba(6,14,24,0.8)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+          className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+          style={{ background: 'rgba(6,14,24,0.8)', color: 'var(--text-primary)', border: '1px solid var(--border)', flexShrink: 0 }}
         >
           ×
         </button>

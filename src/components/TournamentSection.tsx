@@ -187,10 +187,13 @@ const SPECIES_FILTERS = [
   { id: 'dore',       labelFr: 'Doré',        labelEn: 'Walleye',   color: '#C8A84B' },
 ]
 
+const DEFAULT_VISIBLE = 4
+
 export function TournamentSection({ locale }: TournamentSectionProps) {
   const sectionRef = useRef(null)
   const inView = useInView(sectionRef, { once: true, amount: 0.05 })
   const [activeFilter, setActiveFilter] = useState<string>('all')
+  const [showAll, setShowAll] = useState(false)
 
   return (
     <motion.div
@@ -257,7 +260,7 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
           return (
             <button
               key={f.id}
-              onClick={() => setActiveFilter(f.id)}
+              onClick={() => { setActiveFilter(f.id); setShowAll(false) }}
               style={{
                 padding: '0.45rem 1rem',
                 background: isActive ? f.color : 'var(--surface)',
@@ -334,25 +337,55 @@ export function TournamentSection({ locale }: TournamentSectionProps) {
           )
         }
 
+        // FIX 6: Show only DEFAULT_VISIBLE by default, "Voir plus" to expand
+        const visibleCards = showAll ? allCards : allCards.slice(0, DEFAULT_VISIBLE)
+
         return (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(1, 1fr)',
-            gap: '1rem',
-          }}
-          className="tournament-grid"
-          >
-            {allCards.map(({ tournament, group }, idx) => (
-              <TournamentCard
-                key={`${group.id}-${idx}`}
-                tournament={tournament}
-                locale={locale}
-                accentColor={group.color}
-                delay={0.1 + idx * 0.05}
-                inView={inView}
-              />
-            ))}
-          </div>
+          <>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(1, 1fr)',
+              gap: '1rem',
+            }}
+            className="tournament-grid"
+            >
+              {visibleCards.map(({ tournament, group }, idx) => (
+                <TournamentCard
+                  key={`${group.id}-${idx}`}
+                  tournament={tournament}
+                  locale={locale}
+                  accentColor={group.color}
+                  delay={0.1 + idx * 0.05}
+                  inView={inView}
+                />
+              ))}
+            </div>
+            {allCards.length > DEFAULT_VISIBLE && (
+              <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                <button
+                  onClick={() => setShowAll(s => !s)}
+                  style={{
+                    padding: '0.65rem 1.75rem',
+                    background: showAll ? 'var(--surface)' : 'var(--accent)',
+                    color: showAll ? 'var(--text-secondary)' : '#050810',
+                    border: '1px solid ' + (showAll ? 'var(--border)' : 'var(--accent)'),
+                    borderRadius: '6px',
+                    fontFamily: 'var(--font-condensed)',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    transition: 'all 0.18s',
+                  }}
+                >
+                  {showAll
+                    ? (locale === 'fr' ? 'Voir moins ↑' : 'Show less ↑')
+                    : (locale === 'fr' ? `Voir plus (${allCards.length - DEFAULT_VISIBLE} autres) ↓` : `Show more (${allCards.length - DEFAULT_VISIBLE} more) ↓`)}
+                </button>
+              </div>
+            )}
+          </>
         )
       })()}
 

@@ -347,10 +347,23 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
         </motion.div>
 
         <style>{`
-          @media (max-width: 768px) {
+          /* FIX 2: Hero mobile — show fisherman/lure clearly */
+          @media (max-width: 640px) {
             .hero-image-panel {
               width: 100% !important;
-              opacity: 0.2 !important;
+              opacity: 0.55 !important;
+              left: 0 !important;
+              right: 0 !important;
+            }
+            .hero-image-panel img {
+              object-fit: cover !important;
+              object-position: 60% center !important;
+            }
+          }
+          @media (min-width: 641px) and (max-width: 768px) {
+            .hero-image-panel {
+              width: 100% !important;
+              opacity: 0.35 !important;
             }
           }
         `}</style>
