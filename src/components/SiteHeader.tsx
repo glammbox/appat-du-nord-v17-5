@@ -5,6 +5,7 @@ interface SiteHeaderProps {
   locale: 'fr' | 'en'
   onLocaleToggle: () => void
   cartCount?: number
+  onCartClick?: () => void
   onSectionSelect?: (s: string) => void
   activeSection?: string
 }
@@ -48,6 +49,7 @@ export function SiteHeader({
   locale,
   onLocaleToggle,
   cartCount = 0,
+  onCartClick,
   onSectionSelect,
   activeSection,
 }: SiteHeaderProps) {
@@ -177,20 +179,49 @@ export function SiteHeader({
             {/* Right controls */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.5rem', flexShrink: 0 }}>
               {/* Cart */}
-              <div style={{ position: 'relative', color: '#F5F7FA', fontSize: '1rem', cursor: 'pointer', padding: '0 0.3rem' }}>
+              <button
+                onClick={onCartClick}
+                style={{
+                  position: 'relative',
+                  color: '#F5F7FA',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  padding: '0.3rem 0.5rem',
+                  background: cartCount > 0 ? 'rgba(0,207,255,0.12)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${cartCount > 0 ? 'rgba(0,207,255,0.35)' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  transition: 'all 0.18s',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(0,207,255,0.18)'
+                  ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,207,255,0.5)'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.background = cartCount > 0 ? 'rgba(0,207,255,0.12)' : 'rgba(255,255,255,0.04)'
+                  ;(e.currentTarget as HTMLElement).style.borderColor = cartCount > 0 ? 'rgba(0,207,255,0.35)' : 'rgba(255,255,255,0.1)'
+                }}
+              >
                 🛒
                 {cartCount > 0 && (
                   <span style={{
-                    position: 'absolute', top: '-6px', right: '-4px',
-                    background: '#FF2B2B', color: '#fff',
-                    borderRadius: '50%', width: '15px', height: '15px',
-                    fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: '#FF2B2B',
+                    color: '#fff',
+                    borderRadius: '10px',
+                    padding: '0 5px',
+                    fontSize: '9px',
                     fontWeight: 700,
+                    lineHeight: '15px',
+                    display: 'inline-block',
+                    minWidth: '15px',
+                    textAlign: 'center',
                   }}>
                     {cartCount}
                   </span>
                 )}
-              </div>
+              </button>
 
               {/* Locale toggle */}
               <button

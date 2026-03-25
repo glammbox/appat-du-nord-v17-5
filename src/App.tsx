@@ -7,6 +7,7 @@ import { HomeDescription } from './components/HomeDescription'
 import { SiteFooter } from './components/SiteFooter'
 import { useToast } from './components/Toast'
 import { BoutiqueTeaser } from './components/BoutiqueTeaser'
+import { CartDrawer } from './components/CartDrawer'
 import { TWENTYFIRST_COMPONENT_MAP, TWENTYFIRST_STRICT_COMPLIANCE } from './lib/twentyfirst'
 
 const GuidesSection = lazy(() => import('./components/GuidesSection').then(m => ({ default: m.GuidesSection })))
@@ -78,6 +79,7 @@ function App() {
   const [locale, setLocale] = useState<Locale>('fr')
   const [weatherRegion, setWeatherRegion] = useState<WeatherRegion | undefined>(undefined)
   const [cartCount, setCartCount] = useState(0)
+  const [cartOpen, setCartOpen] = useState(false)
   const [activeSpecies, setActiveSpecies] = useState<string | undefined>(undefined)
   const [activeSection, setActiveSection] = useState<string>('especes')
   const [route, setRoute] = useState<'home' | 'boutique'>(() => window.location.pathname === '/boutique' ? 'boutique' : 'home')
@@ -158,6 +160,11 @@ function App() {
     showToast(locale === 'fr' ? `"${product.name}" ajouté au panier!` : `"${product.name}" added to cart!`)
   }
 
+  const syncCartCount = () => {
+    const cart = JSON.parse(localStorage.getItem('appat-cart') || '[]')
+    setCartCount(cart.reduce((sum: number, item: { qty: number }) => sum + item.qty, 0))
+  }
+
   const handleLocaleToggle = () => {
     setLocale(l => (l === 'fr' ? 'en' : 'fr'))
   }
@@ -165,11 +172,20 @@ function App() {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text-primary)' }}>
 
+      {/* Cart Drawer — slides from right */}
+      <CartDrawer
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+        locale={locale}
+        onCartChange={syncCartCount}
+      />
+
       {/* Fix 1: Brand left-side logo is in Hero.tsx — only ONE instance */}
       <SiteHeader
         locale={locale}
         onLocaleToggle={handleLocaleToggle}
         cartCount={cartCount}
+        onCartClick={() => setCartOpen(true)}
         onSectionSelect={handleSectionSelect}
         activeSection={activeSection}
       />

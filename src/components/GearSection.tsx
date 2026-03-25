@@ -1,48 +1,23 @@
-import { useState, useRef, useEffect } from 'react'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { useState, useRef } from 'react'
+import { motion, useInView } from 'motion/react'
 import { products, SpeciesTag, LureType, Product } from '../lib/products'
+import { WobbleCard } from './ui/wobble-card'
+import { AnimatedModal } from './ui/animated-modal'
+import { BoutiqueTabs } from './ui/boutique-tabs'
+import { ShimmerButton } from './ui/ShimmerButton'
+import { Button as MovingBorderButton } from './ui/moving-border'
 
-// 22 Arsenal cards: 21 species (with Trout as 1 grouped card) + 1 Équipement Général
-// Per brief item 16-17: 22 total, Trout = one card for all trout sub-species
-const ARSENAL_CARDS: {
-  id: SpeciesTag | 'all'
-  labelFr: string
-  labelEn: string
-  subFr?: string
-  subEn?: string
-  color: string
-  image: string
-}[] = [
-  // Row 1 — Big 5
-  { id: 'maskinonge', labelFr: 'Maskinongé', labelEn: 'Muskellunge', color: '#D4261C', image: '/images/fish/muskellunge.png' }, // Fix 16: underwater
-  { id: 'brochet',    labelFr: 'Grand Brochet', labelEn: 'Northern Pike', color: '#2E7D32', image: '/images/fish/northern-pike.png' },
-  { id: 'achigan',    labelFr: 'Achigan', labelEn: 'Bass', subFr: 'Grande & Petite Bouche', subEn: 'LM & SM Bass', color: '#1565C0', image: '/images/fish/achigan-grande-bouche.png' },
-  { id: 'dore',       labelFr: 'Doré Jaune', labelEn: 'Walleye', color: '#C8A84B', image: '/images/fish/walleye.png' },
-  { id: 'truite',     labelFr: 'Truite', labelEn: 'Trout', subFr: 'Mouchetée · Arc-en-ciel · Touladi · Brune · Omble', subEn: 'Brook · Rainbow · Lake · Brown · Char', color: '#6A1B9A', image: '/images/fish/brook-trout.png' },
-  // Row 2 — Other species
-  { id: 'maskinonge', labelFr: 'Maskinongé-Tigrée', labelEn: 'Tiger Muskie', subFr: 'Hybride Maskinongé × Brochet', subEn: 'Muskie × Pike hybrid', color: '#B71C1C', image: '/images/fish/tiger-muskie.png' },
-  { id: 'dore',       labelFr: 'Doré Noir (Sauger)', labelEn: 'Sauger', subFr: 'Cousin du Doré Jaune', subEn: 'Walleye cousin', color: '#A07B20', image: '/images/fish/dore-noir.png' },
-  { id: 'achigan',    labelFr: 'Achigan Petite Bouche', labelEn: 'Smallmouth Bass', subFr: 'Rivières & lacs rocheux', subEn: 'Rocky rivers & lakes', color: '#0D47A1', image: '/images/fish/achigan-petite-bouche.png' },
-  { id: 'truite',     labelFr: 'Saumon Atlantique', labelEn: 'Atlantic Salmon', subFr: 'Ouananiche & saumon de mer', subEn: 'Ouananiche & sea-run', color: '#4A1080', image: '/images/fish/atlantic-salmon.png' },
-  { id: 'truite',     labelFr: 'Omble Chevalier', labelEn: 'Arctic Char', subFr: 'Eaux froides du nord', subEn: 'Northern cold waters', color: '#512DA8', image: '/images/fish/arctic-char.png' },
-  // Row 3 — Secondary species
-  { id: 'maskinonge', labelFr: 'Esturgeon des Lacs', labelEn: 'Lake Sturgeon', subFr: 'Grand migrateur du Saint-Laurent', subEn: 'St. Lawrence giant', color: '#4E342E', image: '/images/fish/lake-sturgeon.png' },
-  { id: 'dore',       labelFr: 'Perchaude', labelEn: 'Yellow Perch', subFr: 'Pêche blanche & été', subEn: 'Ice fishing & summer', color: '#F57F17', image: '/images/fish/perch.png' },
-  { id: 'brochet',    labelFr: 'Cisco / Ménomini', labelEn: 'Cisco / Whitefish', subFr: 'Appât vivant & hameçon', subEn: 'Live bait & hook', color: '#1B5E20', image: '/images/fish/cisco.png' },
-  { id: 'brochet',    labelFr: 'Lotte (Burbot)', labelEn: 'Burbot', subFr: 'Prédateur des profondeurs', subEn: 'Deep water predator', color: '#33691E', image: '/images/fish/burbot.png' },
-  { id: 'brochet',    labelFr: 'Carpe Commune', labelEn: 'Common Carp', subFr: 'Pêche à la mouche & feeder', subEn: 'Fly & feeder fishing', color: '#558B2F', image: '/images/fish/carpe-commune.png' },
-  // Row 4 — Less common
-  { id: 'brochet',    labelFr: 'Barbotte / Barbue', labelEn: 'Catfish / Bullhead', subFr: 'Pêche de fond', subEn: 'Bottom fishing', color: '#37474F', image: '/images/fish/barbotte-brune.png' },
-  { id: 'truite',     labelFr: 'Truite Splake', labelEn: 'Splake Trout', subFr: 'Hybride Touladi × Mouchetée', subEn: 'Lake × Brook trout hybrid', color: '#7B1FA2', image: '/images/fish/splake.png' },
-  { id: 'dore',       labelFr: 'Grand Corégone', labelEn: 'Lake Whitefish', subFr: 'Pêche hivernale', subEn: 'Winter fishing', color: '#E65100', image: '/images/fish/whitefish.png' },
-  { id: 'achigan',    labelFr: 'Achigan Grande Bouche', labelEn: 'Largemouth Bass', subFr: 'Herbiers & eau chaude', subEn: 'Weeds & warm water', color: '#1A237E', image: '/images/fish/achigan-grande-bouche.png' },
-  { id: 'truite',     labelFr: 'Truite Arc-en-ciel', labelEn: 'Rainbow Trout', subFr: 'Rivières & réservoirs', subEn: 'Rivers & reservoirs', color: '#9C27B0', image: '/images/fish/rainbow-trout.png' },
-  { id: 'truite',     labelFr: 'Truite Mouchetée', labelEn: 'Brook Trout', subFr: "L'espèce emblématique du Québec", subEn: "Quebec's iconic species", color: '#6A1B9A', image: '/images/fish/brook-trout.png' },
-  // Card 22 — Équipement Général (LAST — Fix 15)
-  { id: 'all',        labelFr: 'Équipement Général', labelEn: 'General Gear', subFr: 'Cannes · Moulinets · Lignes · Filets · Boîtes à leurres · Waders · Accessoires', subEn: 'Rods · Reels · Lines · Nets · Tackle Boxes · Waders · Accessories', color: '#455A64', image: '/images/lures/bucktail.jpg' },
+// ─── Species filter tabs ───────────────────────────────────────────────────
+const SPECIES_TABS = [
+  { id: 'all',        labelFr: 'Tous',       labelEn: 'All',        color: '#F5F7FA' },
+  { id: 'maskinonge', labelFr: 'Maskinongé', labelEn: 'Muskie',     color: '#F97316' },
+  { id: 'brochet',    labelFr: 'Brochet',    labelEn: 'Pike',       color: '#14B8A6' },
+  { id: 'dore',       labelFr: 'Doré',       labelEn: 'Walleye',    color: '#EAB308' },
+  { id: 'achigan',    labelFr: 'Achigan',    labelEn: 'Bass',       color: '#22C55E' },
+  { id: 'truite',     labelFr: 'Truite',     labelEn: 'Trout',      color: '#3B82F6' },
 ]
 
-// Lure type tabs
+// ─── Lure type filter ─────────────────────────────────────────────────────
 const LURE_TYPES: { id: LureType | 'tous'; labelFr: string; labelEn: string }[] = [
   { id: 'tous',       labelFr: 'Tous',        labelEn: 'All' },
   { id: 'bucktail',   labelFr: 'Bucktails',   labelEn: 'Bucktails' },
@@ -56,6 +31,19 @@ const LURE_TYPES: { id: LureType | 'tous'; labelFr: string; labelEn: string }[] 
   { id: 'cuillere',   labelFr: 'Cuillères',   labelEn: 'Spoons' },
   { id: 'equipement', labelFr: 'Équipement',  labelEn: 'Gear' },
 ]
+
+const CATEGORY_PLACEHOLDERS: Record<string, string> = {
+  bucktail:   '/images/lures/bucktail.jpg',
+  crankbait:  '/images/lures/crankbait.jpg',
+  jig:        '/images/lures/jig.jpg',
+  topwater:   '/images/lures/topwater.jpg',
+  spinner:    '/images/lures/spinner.jpg',
+  swimbait:   '/images/lures/swimbait.jpg',
+  'glide-bait': '/images/lures/glide-bait.jpg',
+  softbait:   '/images/lures/softbait.jpg',
+  cuillere:   '/images/lures/cuillere.jpg',
+  equipement: '/images/lures/rod.jpg',
+}
 
 // Map species ID strings from SpeciesSection to SpeciesTag
 const SPECIES_ID_TO_TAG: Record<string, SpeciesTag | 'all'> = {
@@ -75,6 +63,15 @@ const SPECIES_ID_TO_TAG: Record<string, SpeciesTag | 'all'> = {
   'splake':         'truite',
 }
 
+function getProductImage(product: Product): string {
+  if (product.imageFile) return `/images/lures/${product.imageFile}`
+  return CATEGORY_PLACEHOLDERS[product.type] || '/images/lures/bucktail.jpg'
+}
+
+function getSpeciesColor(speciesId: string): string {
+  return SPECIES_TABS.find(t => t.id === speciesId)?.color || '#00CFFF'
+}
+
 interface GearSectionProps {
   initialSpeciesFilter?: string
   onAddToCart: (product: { id: string; name: string; price: number }) => void
@@ -83,48 +80,62 @@ interface GearSectionProps {
   onNavigateBoutique?: () => void
 }
 
-export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBoutiquePage = false, onNavigateBoutique }: GearSectionProps) {
+export function GearSection({
+  initialSpeciesFilter,
+  onAddToCart,
+  locale,
+  isBoutiquePage = false,
+  onNavigateBoutique,
+}: GearSectionProps) {
   const resolvedInitial = initialSpeciesFilter
     ? (SPECIES_ID_TO_TAG[initialSpeciesFilter] || (initialSpeciesFilter as SpeciesTag))
-    : null
+    : 'all'
 
-  const [modalOpen, setModalOpen] = useState<SpeciesTag | 'all' | null>(resolvedInitial)
+  const [speciesFilter, setSpeciesFilter] = useState<SpeciesTag | 'all'>(
+    (resolvedInitial as SpeciesTag | 'all') || 'all'
+  )
   const [lureFilter, setLureFilter] = useState<LureType | 'tous'>('tous')
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [modalQty, setModalQty] = useState(1)
+  const [modalAdded, setModalAdded] = useState(false)
 
   const sectionRef = useRef(null)
   const inView = useInView(sectionRef, { once: true, amount: 0.05 })
 
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (modalOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => { document.body.style.overflow = '' }
-  }, [modalOpen])
+  const activeSpeciesTab = SPECIES_TABS.find(t => t.id === speciesFilter) || SPECIES_TABS[0]
 
-  const activeCard = ARSENAL_CARDS.find(c => c.id === modalOpen)
+  const filteredProducts = products.filter(p => {
+    const matchSpecies = speciesFilter === 'all' ? true : p.species.includes(speciesFilter as SpeciesTag)
+    const matchLure = lureFilter === 'tous' ? true : p.type === lureFilter
+    return matchSpecies && matchLure
+  })
 
-  const filteredProducts = modalOpen
-    ? products.filter(p => {
-        const matchSpecies = modalOpen === 'all'
-          ? true
-          : p.species.includes(modalOpen as SpeciesTag)
-        const matchLure = lureFilter === 'tous' || p.type === lureFilter
-        return matchSpecies && matchLure
-      })
-    : []
-
-  const countForCard = (id: SpeciesTag | 'all') =>
-    id === 'all'
-      ? products.length
-      : products.filter(p => p.species.includes(id as SpeciesTag)).length
-
-  const openModal = (id: SpeciesTag | 'all') => {
-    setModalOpen(id)
-    setLureFilter('tous')
+  const openProductModal = (product: Product) => {
+    setSelectedProduct(product)
+    setModalQty(1)
+    setModalAdded(false)
   }
+
+  const handleModalAddToCart = () => {
+    if (!selectedProduct) return
+    for (let i = 0; i < modalQty; i++) {
+      onAddToCart({ id: selectedProduct.id, name: selectedProduct.name, price: selectedProduct.price })
+    }
+    setModalAdded(true)
+    setTimeout(() => setModalAdded(false), 2000)
+  }
+
+  const speciesTabItems = SPECIES_TABS.map(t => ({
+    id: t.id,
+    label: locale === 'fr' ? t.labelFr : t.labelEn,
+    color: t.color,
+  }))
+
+  const lureTabItems = [{ id: 'tous', label: locale === 'fr' ? 'Tous' : 'All', color: '#8899AA' }, ...LURE_TYPES.slice(1).map(lt => ({
+    id: lt.id,
+    label: locale === 'fr' ? lt.labelFr : lt.labelEn,
+    color: activeSpeciesTab.color,
+  }))]
 
   return (
     <motion.div
@@ -132,9 +143,14 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
       initial={{ opacity: 0, y: 60 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.72, ease: [0.16, 1, 0.3, 1] }}
-      style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--section-pad) 1.5rem' }}
+      style={{
+        maxWidth: 'var(--max-width)',
+        margin: '0 auto',
+        padding: 'var(--section-pad) 1.5rem',
+        background: '#050810',
+      }}
     >
-      {/* Section Header */}
+      {/* ─── Section Header ─────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -145,12 +161,12 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
           fontFamily: 'var(--font-condensed)',
           fontSize: '0.72rem',
           fontWeight: 600,
-          color: 'var(--accent)',
+          color: '#00CFFF',
           letterSpacing: '0.28em',
           textTransform: 'uppercase',
           marginBottom: '0.6rem',
         }}>
-          {locale === 'fr' ? '⚡ Boutique · Équipement par espèce' : '⚡ Shop · Gear by Species'}
+          {locale === 'fr' ? '⚡ Boutique · Équipement de pêche' : '⚡ Shop · Fishing Gear'}
         </p>
         <h2 style={{
           fontFamily: 'var(--font-display)',
@@ -160,9 +176,7 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
           lineHeight: 0.95,
           marginBottom: '1rem',
         }}>
-          {isBoutiquePage
-            ? (locale === 'fr' ? 'BOUTIQUE' : 'BOUTIQUE')
-            : (locale === 'fr' ? 'BOUTIQUE' : 'BOUTIQUE')}
+          BOUTIQUE
         </h2>
         <p style={{
           fontFamily: 'var(--font-body)',
@@ -172,8 +186,8 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
           maxWidth: '600px',
         }}>
           {locale === 'fr'
-            ? "Équipement sélectionné par espèce cible. Cliquez sur une espèce pour voir les leurres et l'équipement recommandés. Panier persistant et sélection par espèce."
-            : "Gear selected by target species. Click a species to see recommended lures and equipment. Persistent cart and species-driven selection."}
+            ? 'Équipement sélectionné par espèce. Filtrez par espèce cible, explorez nos leurres recommandés.'
+            : 'Gear curated by target species. Filter by fish, browse recommended lures.'}
         </p>
         {!isBoutiquePage && (
           <motion.button
@@ -200,470 +214,534 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
         )}
       </motion.div>
 
-      {/* 22 Species Cards Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-          gap: '0.85rem',
-        }}
-        className="arsenal-grid"
+      {/* ─── Species Tabs ───────────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.45, delay: 0.12 }}
+        style={{ marginBottom: '1.25rem' }}
       >
-        {ARSENAL_CARDS.map((card, idx) => {
-          const count = countForCard(card.id)
-          const label = locale === 'fr' ? card.labelFr : card.labelEn
-          const sub = locale === 'fr' ? card.subFr : card.subEn
+        <BoutiqueTabs
+          tabs={speciesTabItems}
+          activeId={speciesFilter}
+          onChange={(id) => {
+            setSpeciesFilter(id as SpeciesTag | 'all')
+            setLureFilter('tous')
+          }}
+        />
+      </motion.div>
 
-          return (
-            <motion.button
-              key={card.id + idx}
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: 0.08 + idx * 0.04 }}
-              onClick={() => openModal(card.id)}
-              className={card.id === 'all' ? 'arsenal-card-equipement-general' : ''}
-              style={{
-                position: 'relative',
-                overflow: 'hidden',
-                background: 'var(--surface)',
-                border: `1px solid var(--border)`,
-                borderTop: `3px solid ${card.color}`,
-                borderRadius: 'var(--radius-sm)',
-                padding: 0,
-                cursor: 'pointer',
-                textAlign: 'left',
-                display: 'flex',
-                flexDirection: card.id === 'all' ? 'row' : 'column',
-              }}
-              whileHover={{
-                y: -4,
-                boxShadow: `0 12px 32px rgba(0,0,0,0.3), 0 0 0 1px ${card.color}`,
-                transition: { duration: 0.2 }
-              }}
+      {/* ─── Lure Type Sub-tabs ─────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={inView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.35, delay: 0.2 }}
+        style={{ marginBottom: '2rem' }}
+      >
+        <BoutiqueTabs
+          tabs={lureTabItems}
+          activeId={lureFilter}
+          onChange={(id) => setLureFilter(id as LureType | 'tous')}
+        />
+      </motion.div>
+
+      {/* ─── Results count ──────────────────────────────────────────────── */}
+      <motion.div
+        key={`${speciesFilter}-${lureFilter}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.25 }}
+        style={{
+          marginBottom: '1.5rem',
+          fontFamily: 'var(--font-condensed)',
+          fontSize: '0.68rem',
+          color: '#5B6F85',
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+        }}
+      >
+        {filteredProducts.length} {locale === 'fr' ? 'produit(s)' : 'product(s)'}
+        {speciesFilter !== 'all' && (
+          <span style={{ color: activeSpeciesTab.color, marginLeft: '0.5rem' }}>
+            · {locale === 'fr' ? activeSpeciesTab.labelFr : activeSpeciesTab.labelEn}
+          </span>
+        )}
+      </motion.div>
+
+      {/* ─── Product Grid — WobbleCard ──────────────────────────────────── */}
+      {filteredProducts.length === 0 ? (
+        <div style={{
+          padding: '3rem',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-body)',
+          fontSize: '0.88rem',
+        }}>
+          {locale === 'fr' ? 'Aucun produit pour ce filtre' : 'No products for this filter'}
+        </div>
+      ) : (
+        <div
+          className="boutique-product-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+            gap: '1rem',
+          }}
+        >
+          {filteredProducts.map((product, idx) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, delay: Math.min(idx * 0.04, 0.6) }}
             >
-              {/* Fish image */}
-              <div style={{
-                width: '100%',
-                aspectRatio: '4/3',
-                overflow: 'hidden',
-                background: '#0A1020',
+              <WobbleCard
+                containerClassName="boutique-wobble-card"
+              >
+                {/* Product card inner */}
+                <div
+                  onClick={() => openProductModal(product)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0,
+                    cursor: 'pointer',
+                    height: '100%',
+                    padding: 0,
+                  }}
+                >
+                  {/* Product image */}
+                  <div style={{
+                    width: '100%',
+                    aspectRatio: '4/3',
+                    overflow: 'hidden',
+                    background: '#0A1220',
+                    borderRadius: '10px 10px 0 0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderBottom: `2px solid ${activeSpeciesTab.color}22`,
+                  }}>
+                    <img
+                      src={getProductImage(product)}
+                      alt={product.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        transition: 'transform 0.4s ease',
+                      }}
+                      onError={(e) => {
+                        const pl = CATEGORY_PLACEHOLDERS[product.type] || '/images/lures/bucktail.jpg'
+                        if ((e.target as HTMLImageElement).src !== pl) {
+                          (e.target as HTMLImageElement).src = pl
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Card content */}
+                  <div style={{
+                    padding: '0.85rem 1rem 0.75rem',
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.35rem',
+                  }}>
+                    {/* Category badge */}
+                    <div style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontSize: '0.6rem',
+                      fontWeight: 700,
+                      color: activeSpeciesTab.color,
+                      letterSpacing: '0.18em',
+                      textTransform: 'uppercase',
+                    }}>
+                      {locale === 'fr' ? product.typeFR : product.type}
+                    </div>
+
+                    {/* Product name */}
+                    <div style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 700,
+                      fontSize: '0.95rem',
+                      color: '#F5F7FA',
+                      lineHeight: 1.2,
+                      letterSpacing: '0.02em',
+                    }}>
+                      {product.name}
+                    </div>
+
+                    {/* Price */}
+                    <div style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 800,
+                      fontSize: '1.15rem',
+                      color: '#00CFFF',
+                      letterSpacing: '0.04em',
+                      marginTop: 'auto',
+                      paddingTop: '0.35rem',
+                    }}>
+                      ${product.price}
+                    </div>
+                  </div>
+
+                  {/* Add to cart button */}
+                  <div
+                    style={{ padding: '0 0.85rem 0.85rem' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ShimmerButton
+                      shimmerColor="#00CFFF"
+                      background="rgba(0,207,255,0.1)"
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 0',
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 700,
+                        fontSize: '0.72rem',
+                        letterSpacing: '0.18em',
+                        textTransform: 'uppercase',
+                        color: '#00CFFF',
+                      }}
+                      onClick={() => {
+                        onAddToCart({ id: product.id, name: product.name, price: product.price })
+                      }}
+                    >
+                      {locale === 'fr' ? 'Ajouter au panier' : 'Add to Cart'}
+                    </ShimmerButton>
+                  </div>
+                </div>
+              </WobbleCard>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* ─── Product Detail Modal — AnimatedModal ──────────────────────── */}
+      <AnimatedModal
+        open={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      >
+        {selectedProduct && (
+          <div>
+            {/* Close button */}
+            <button
+              onClick={() => setSelectedProduct(null)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                color: '#8899AA',
+                borderRadius: '8px',
+                width: '34px',
+                height: '34px',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}>
+                zIndex: 10,
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.background = 'rgba(0,207,255,0.12)'
+                ;(e.currentTarget as HTMLElement).style.color = '#00CFFF'
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'
+                ;(e.currentTarget as HTMLElement).style.color = '#8899AA'
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Modal layout: image left (desktop), top (mobile) */}
+            <div className="modal-layout" style={{
+              display: 'flex',
+              gap: '1.5rem',
+            }}>
+              {/* Image */}
+              <div style={{
+                flexShrink: 0,
+                width: '260px',
+                minHeight: '260px',
+                background: '#0A1220',
+                borderRadius: '12px 0 0 12px',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              className="modal-image-panel"
+              >
                 <img
-                  src={card.image}
-                  alt={label}
+                  src={getProductImage(selectedProduct)}
+                  alt={selectedProduct.name}
                   style={{
                     width: '100%',
                     height: '100%',
-                    objectFit: 'contain',
-                    padding: '0.5rem',
+                    objectFit: 'cover',
                     display: 'block',
-                    transition: 'transform 0.3s ease',
                   }}
                   onError={(e) => {
-                    const el = e.target as HTMLImageElement
-                    el.style.display = 'none'
+                    const pl = CATEGORY_PLACEHOLDERS[selectedProduct.type] || '/images/lures/bucktail.jpg'
+                    if ((e.target as HTMLImageElement).src !== pl) {
+                      (e.target as HTMLImageElement).src = pl
+                    }
                   }}
                 />
               </div>
-              {/* Card content */}
-              <div style={{ padding: '0.7rem 0.75rem', flex: 1 }}>
-                <div style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '0.9rem',
-                  color: 'var(--text-primary)',
-                  letterSpacing: '0.04em',
-                  lineHeight: 1.2,
-                  marginBottom: '0.2rem',
-                }}>
-                  {label}
-                </div>
-                {sub && (
-                  <div style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '0.68rem',
-                    color: 'var(--text-muted)',
-                    lineHeight: 1.4,
-                    marginBottom: '0.3rem',
-                  }}>
-                    {sub}
-                  </div>
-                )}
-                <div style={{
-                  fontFamily: 'var(--font-condensed)',
-                  fontSize: '0.65rem',
-                  fontWeight: 700,
-                  color: card.color,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                }}>
-                  {count} {locale === 'fr' ? 'produit(s) →' : 'product(s) →'}
-                </div>
-              </div>
-            </motion.button>
-          )
-        })}
-      </div>
 
-      {/* Arsenal Overlay Modal */}
-      <AnimatePresence>
-        {modalOpen && activeCard && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22 }}
-              onClick={() => setModalOpen(null)}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(10,14,26,0.88)',
-                zIndex: 200,
-                backdropFilter: 'blur(6px)',
-              }}
-            />
-
-            {/* Fix 14 — Full-page view for fish species in boutique */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                width: '100vw',
-                height: '100vh',
-                background: 'var(--bg)',
-                zIndex: 201,
-                display: 'flex',
-                flexDirection: 'column',
-                overflowY: 'auto',
-              }}
-              className="arsenal-modal-panel"
-            >
-              {/* Modal header */}
-              <div style={{
-                padding: '1.25rem 1.5rem',
-                borderBottom: '1px solid var(--border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem',
-                flexShrink: 0,
-                borderTop: `3px solid ${activeCard.color}`,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <div style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    background: '#0A1020',
-                    border: '1px solid var(--border)',
-                    flexShrink: 0,
-                  }}>
-                    <img src={activeCard.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }} />
-                  </div>
-                  <div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: 'var(--text-primary)', letterSpacing: '0.04em' }}>
-                      {locale === 'fr' ? activeCard.labelFr : activeCard.labelEn}
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-condensed)', fontSize: '0.65rem', color: activeCard.color, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-                      {filteredProducts.length} {locale === 'fr' ? 'produit(s)' : 'product(s)'}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setModalOpen(null)}
-                  style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--text-muted)',
-                    borderRadius: '6px',
-                    padding: '0.4rem 0.8rem',
-                    cursor: 'pointer',
-                    fontSize: '0.72rem',
-                    fontFamily: 'var(--font-condensed)',
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    fontWeight: 600,
-                    transition: 'all 0.15s',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.background = 'var(--surface-2)'
-                    ;(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.background = 'var(--surface)'
-                    ;(e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'
-                  }}
-                >
-                  ✕ {locale === 'fr' ? 'Fermer' : 'Close'}
-                </button>
-              </div>
-
-              {/* Lure type filter tabs */}
-              <div style={{
-                padding: '0.75rem 1.5rem',
-                borderBottom: '1px solid var(--border)',
-                display: 'flex',
-                gap: '0.35rem',
-                overflowX: 'auto',
-                scrollbarWidth: 'none',
-                flexShrink: 0,
-              }}>
-                {LURE_TYPES.map(lt => {
-                  const isActive = lureFilter === lt.id
-                  return (
-                    <button
-                      key={lt.id}
-                      onClick={() => setLureFilter(lt.id)}
-                      style={{
-                        flexShrink: 0,
-                        padding: '0.3rem 0.65rem',
-                        background: isActive ? activeCard.color : 'var(--surface)',
-                        border: `1px solid ${isActive ? activeCard.color : 'var(--border)'}`,
-                        color: isActive ? '#fff' : 'var(--text-muted)',
-                        fontFamily: 'var(--font-condensed)',
-                        fontSize: '0.68rem',
-                        fontWeight: 600,
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        cursor: 'pointer',
-                        borderRadius: '4px',
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      {locale === 'fr' ? lt.labelFr : lt.labelEn}
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Product list */}
+              {/* Info */}
               <div style={{
                 flex: 1,
-                overflowY: 'auto',
-                padding: '1rem 1.5rem',
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#00CFFF var(--surface)',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                padding: '1.75rem 1.75rem 1.75rem 0',
+                display: 'flex',
+                flexDirection: 'column',
                 gap: '0.75rem',
-                alignContent: 'start',
-              }}>
-                {filteredProducts.length === 0 ? (
-                  <div style={{
-                    padding: '2rem',
-                    textAlign: 'center',
-                    color: 'var(--text-muted)',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '0.88rem',
-                  }}>
-                    {locale === 'fr' ? "Aucun produit pour ce filtre" : "No products for this filter"}
-                  </div>
-                ) : filteredProducts.map(product => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    locale={locale}
-                    onAddToCart={() => onAddToCart({ id: product.id, name: product.name, price: product.price })}
-                    accentColor={activeCard.color}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+              }}
+              className="modal-info-panel"
+              >
+                {/* Category + species */}
+                <div style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: '0.62rem',
+                  fontWeight: 700,
+                  color: activeSpeciesTab.color,
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                }}>
+                  {locale === 'fr' ? selectedProduct.typeFR : selectedProduct.type}
+                </div>
 
-      {/* Mobile responsive style — Fix 15: équipement général card spans 2 columns */}
+                {/* Name */}
+                <div style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: '1.5rem',
+                  color: '#F5F7FA',
+                  letterSpacing: '0.04em',
+                  lineHeight: 1.1,
+                }}>
+                  {selectedProduct.name}
+                </div>
+
+                {/* Price */}
+                <div style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: '2rem',
+                  color: '#00CFFF',
+                  letterSpacing: '0.04em',
+                }}>
+                  ${selectedProduct.price}
+                </div>
+
+                {/* Description */}
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '0.85rem',
+                  color: '#8899AA',
+                  lineHeight: 1.7,
+                  margin: 0,
+                }}>
+                  {selectedProduct.description}
+                </p>
+
+                {/* Technique */}
+                <div style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '0.78rem',
+                  color: '#00CFFF',
+                  fontStyle: 'italic',
+                  padding: '0.6rem 0.9rem',
+                  background: 'rgba(0,207,255,0.06)',
+                  borderRadius: '8px',
+                  borderLeft: '2px solid rgba(0,207,255,0.4)',
+                }}>
+                  → {selectedProduct.technique}
+                </div>
+
+                {/* Quantity selector */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginTop: '0.25rem',
+                }}>
+                  <span style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: '#5B6F85',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                  }}>
+                    {locale === 'fr' ? 'Qté' : 'Qty'}
+                  </span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '0.2rem 0.4rem',
+                  }}>
+                    <button
+                      onClick={() => setModalQty(q => Math.max(1, q - 1))}
+                      style={{
+                        width: '28px', height: '28px',
+                        background: 'rgba(255,255,255,0.06)',
+                        border: 'none',
+                        color: '#F5F7FA',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '1.1rem',
+                        lineHeight: 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >
+                      −
+                    </button>
+                    <span style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 800,
+                      fontSize: '1.1rem',
+                      color: '#F5F7FA',
+                      minWidth: '28px',
+                      textAlign: 'center',
+                    }}>
+                      {modalQty}
+                    </span>
+                    <button
+                      onClick={() => setModalQty(q => q + 1)}
+                      style={{
+                        width: '28px', height: '28px',
+                        background: 'rgba(0,207,255,0.12)',
+                        border: 'none',
+                        color: '#00CFFF',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '1.1rem',
+                        lineHeight: 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+                  <span style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    color: '#5B6F85',
+                  }}>
+                    = ${(selectedProduct.price * modalQty).toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Add to cart — MovingBorder */}
+                <div style={{ marginTop: '0.25rem' }}>
+                  <MovingBorderButton
+                    borderRadius="10px"
+                    containerClassName=""
+                    className={modalAdded ? '' : ''}
+                    borderClassName=""
+                    duration={2000}
+                    onClick={handleModalAddToCart}
+                    style={{
+                      width: '100%',
+                      height: '52px',
+                      background: modalAdded ? 'rgba(34,197,94,0.15)' : 'rgba(0,207,255,0.08)',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      letterSpacing: '0.2em',
+                      textTransform: 'uppercase',
+                      color: modalAdded ? '#22C55E' : '#00CFFF',
+                      transition: 'all 0.25s',
+                    }}
+                  >
+                    {modalAdded
+                      ? (locale === 'fr' ? '✓ Ajouté!' : '✓ Added!')
+                      : (locale === 'fr' ? 'Ajouter au panier' : 'Add to Cart')}
+                  </MovingBorderButton>
+                </div>
+
+                {/* Amazon link */}
+                <a
+                  href={selectedProduct.affiliateLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: '0.75rem',
+                    color: '#5B6F85',
+                    textDecoration: 'none',
+                    textAlign: 'center',
+                    transition: 'color 0.15s',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#00CFFF' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#5B6F85' }}
+                >
+                  Voir sur Amazon.ca →
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatedModal>
+
+      {/* ─── Responsive styles ──────────────────────────────────────────── */}
       <style>{`
-        @media (max-width: 480px) {
-          .arsenal-grid { grid-template-columns: repeat(3, 1fr) !important; }
-          .arsenal-modal-panel { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; }
+        .boutique-wobble-card {
+          background: #0D1525 !important;
+          border: 1px solid rgba(0,207,255,0.12) !important;
+          border-radius: 14px !important;
+          overflow: hidden !important;
+          height: 100% !important;
+          padding: 0 !important;
+          transition: border-color 0.2s;
         }
-        @media (min-width: 481px) and (max-width: 768px) {
-          .arsenal-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        .boutique-wobble-card:hover {
+          border-color: rgba(0,207,255,0.3) !important;
         }
-        .arsenal-card-equipement-general {
-          grid-column: span 2;
-          min-height: 120px;
+        .boutique-wobble-card > div {
+          padding: 0 !important;
+          height: 100% !important;
         }
-        @media (max-width: 480px) {
-          .arsenal-card-equipement-general { grid-column: span 1; }
+        .boutique-wobble-card > div > div {
+          height: 100% !important;
+        }
+        @media (max-width: 640px) {
+          .boutique-product-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .modal-layout {
+            flex-direction: column !important;
+          }
+          .modal-image-panel {
+            width: 100% !important;
+            min-height: 200px !important;
+            border-radius: 12px 12px 0 0 !important;
+          }
+          .modal-info-panel {
+            padding: 1rem 1.25rem 1.25rem !important;
+          }
+        }
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .boutique-product-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+          }
         }
       `}</style>
     </motion.div>
-  )
-}
-
-// Category placeholder images for products with no specific image (v17.2)
-const CATEGORY_PLACEHOLDERS: Record<string, string> = {
-  bucktail:   '/images/lures/bucktail.jpg',
-  crankbait:  '/images/lures/crankbait.jpg',
-  jig:        '/images/lures/jig.jpg',
-  topwater:   '/images/lures/topwater.jpg',
-  spinner:    '/images/lures/spinner.jpg',
-  swimbait:   '/images/lures/swimbait.jpg',
-  'glide-bait': '/images/lures/glide-bait.jpg',
-  softbait:   '/images/lures/softbait.jpg',
-  cuillere:   '/images/lures/cuillere.jpg',
-  equipement: '/images/lures/rod.jpg',
-}
-
-function ProductCard({
-  product,
-  locale,
-  onAddToCart,
-  accentColor,
-}: {
-  product: Product
-  locale: 'fr' | 'en'
-  onAddToCart: () => void
-  accentColor: string
-}) {
-  const [added, setAdded] = useState(false)
-  const [imgError, setImgError] = useState(false)
-
-  const handleAdd = () => {
-    onAddToCart()
-    setAdded(true)
-    setTimeout(() => setAdded(false), 1800)
-  }
-
-  // If product has no image or image fails to load → use category placeholder
-  const productImgSrc = product.imageFile ? `/images/lures/${product.imageFile}` : null
-  const placeholderSrc = CATEGORY_PLACEHOLDERS[product.type] || '/images/lures/bucktail.jpg'
-  const imgSrc = (!productImgSrc || imgError) ? placeholderSrc : productImgSrc
-
-  return (
-    <div style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
-      borderRadius: '8px',
-      padding: '0.85rem 1rem',
-      display: 'flex',
-      gap: '0.75rem',
-      alignItems: 'flex-start',
-      transition: 'border-color 0.15s',
-    }}>
-      {/* Product thumbnail */}
-      <div style={{ flexShrink: 0, width: '56px', height: '56px', borderRadius: '6px', overflow: 'hidden', background: '#0A1020', border: '1px solid var(--border)' }}>
-        <img
-          src={imgSrc}
-          alt={product.name}
-          onError={() => setImgError(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-        />
-      </div>
-      {/* Product info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontFamily: 'var(--font-condensed)',
-          fontSize: '0.6rem',
-          fontWeight: 700,
-          color: accentColor,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          marginBottom: '0.2rem',
-        }}>
-          {product.typeFR}
-        </div>
-        <div style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: '0.9rem',
-          fontWeight: 600,
-          color: 'var(--text-primary)',
-          marginBottom: '0.25rem',
-          lineHeight: 1.3,
-        }}>
-          {product.name}
-        </div>
-        <div style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: '0.78rem',
-          color: 'var(--text-muted)',
-          lineHeight: 1.5,
-          marginBottom: '0.5rem',
-        }}>
-          {locale === 'fr' ? product.description : product.description}
-        </div>
-        <div style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: '0.75rem',
-          color: 'var(--accent)',
-          fontStyle: 'italic',
-          marginBottom: '0.5rem',
-        }}>
-          → {product.technique}
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <span style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '1.1rem',
-            color: 'var(--amber)',
-            letterSpacing: '0.04em',
-          }}>
-            ${product.price}
-          </span>
-          <button
-            onClick={handleAdd}
-            style={{
-              padding: '0.35rem 0.85rem',
-              background: added ? '#7BE495' : accentColor,
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              fontFamily: 'var(--font-condensed)',
-              fontSize: '0.68rem',
-              fontWeight: 700,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              transition: 'background 0.25s',
-            }}
-          >
-            {added ? (locale === 'fr' ? '✓ Ajouté' : '✓ Added') : (locale === 'fr' ? '+ Panier' : '+ Cart')}
-          </button>
-          <a
-            href={product.affiliateLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              padding: '0.35rem 0.75rem',
-              border: '1px solid var(--border)',
-              color: 'var(--text-muted)',
-              borderRadius: '4px',
-              fontFamily: 'var(--font-condensed)',
-              fontSize: '0.65rem',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              transition: 'color 0.15s, border-color 0.15s',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.color = 'var(--accent)'
-              ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)'
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'
-              ;(e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'
-            }}
-          >
-            Amazon.ca →
-          </a>
-        </div>
-      </div>
-    </div>
   )
 }
