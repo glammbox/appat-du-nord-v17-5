@@ -148,10 +148,12 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
       </div>
 
       {/* Water selector grid — searchable, capped to ~3 rows */}
-      <div className="waters-scroll-list grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4" style={{
+      <div className="waters-scroll-list" style={{
         gap: '0.5rem',
         marginBottom: '1.5rem',
-        maxHeight: '480px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+        maxHeight: '380px',
         overflowY: 'auto',
         paddingRight: '0.25rem',
         scrollbarWidth: 'thin',
@@ -280,7 +282,22 @@ export function WatersMap({ onViewGear, locale, onRegionChange, onViewSpecies, o
       <style>{`
         .waters-scroll-list::-webkit-scrollbar { width: 6px; }
           @media (max-width: 640px) {
-            .waters-scroll-list { grid-template-columns: repeat(2, 1fr) !important; max-height: 320px; }
+            .waters-scroll-list { 
+              display: flex !important; 
+              flex-direction: row !important; 
+              overflow-x: auto !important;
+              overflow-y: hidden !important;
+              max-height: none !important;
+              flex-wrap: nowrap !important;
+              padding-bottom: 8px;
+              -webkit-overflow-scrolling: touch;
+              scroll-snap-type: x mandatory;
+            }
+            .waters-scroll-list > * {
+              flex-shrink: 0;
+              width: 140px;
+              scroll-snap-align: start;
+            }
           }
         .waters-scroll-list::-webkit-scrollbar-track { background: #1a1a1a; min-height: 44px; border-radius: 3px; }
         .waters-scroll-list::-webkit-scrollbar-thumb { background: #00CFFF; border-radius: 3px; }

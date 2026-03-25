@@ -100,7 +100,7 @@ const SPONSORS = [
   },
   {
     name: 'Thomas Marine',
-    url: 'https://www.thomasmarine.ca',
+    url: 'https://www.groupethomasmarine.com',
     color: '#0066CC',
     svg: (
       <svg width="130" height="32" viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-label="Thomas Marine">

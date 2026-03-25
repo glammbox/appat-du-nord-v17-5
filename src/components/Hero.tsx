@@ -118,7 +118,7 @@ export function Hero({ locale, onSectionSelect }: HeroProps) {
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                objectPosition: '30% center',
+                objectPosition: '65% center',
                 display: 'block',
               }}
             />

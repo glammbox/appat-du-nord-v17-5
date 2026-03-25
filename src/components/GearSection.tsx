@@ -204,7 +204,7 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
           gap: '0.85rem',
         }}
         className="arsenal-grid"
@@ -487,7 +487,7 @@ export function GearSection({ initialSpeciesFilter, onAddToCart, locale, isBouti
       {/* Mobile responsive style — Fix 15: équipement général card spans 2 columns */}
       <style>{`
         @media (max-width: 480px) {
-          .arsenal-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .arsenal-grid { grid-template-columns: repeat(3, 1fr) !important; }
           .arsenal-modal-panel { width: 100vw !important; height: 100vh !important; border-radius: 0 !important; }
         }
         @media (min-width: 481px) and (max-width: 768px) {
